@@ -1,0 +1,234 @@
+#!/bin/sh
+# @Author: Shawn Schwartz - Stanford Memory Lab
+# @Date: January 30, 2025
+# @Description: Prepare bold/fmap data for fmriprep.
+# @Params: subject_id (positional argument #1) - id number (e.g., 1234) without "sub-"
+
+umask 002  # modify permissions so fslroi inherits correct permissions
+
+source ./../settings.sh
+
+# TEST: method to validate volume counts
+validate_volumes() {
+    local file=$1
+    local expected=$2
+    local desc=$3
+    local actual=$(fslnvols ${file})
+    
+    if [ ${actual} -ne ${expected} ]; then
+        echo "($(date)) [ERROR] Unexpected number of volumes in ${desc}" | tee -a ${log_file}
+        echo "($(date)) [ERROR] Expected ${expected} volumes but found ${actual}" | tee -a ${log_file}
+        exit 1
+    else
+        echo "($(date)) [INFO] Volume validation passed for ${desc}: ${actual} volumes" | tee -a ${log_file}
+    fi
+}
+
+# UTIL: check whether given run is the first one using its fieldmap
+is_first_run_for_fieldmap() {
+    local current_run=$1
+    local current_fmap=${fmap_mapping[$current_run]}
+    
+    # search all runs to find first one that uses this fieldmap
+    for run in "${!fmap_mapping[@]}"; do
+        if [ "${fmap_mapping[$run]}" = "${current_fmap}" ]; then
+            # if found a run using this fieldmap, check if it's the current run
+            if [ "$run" = "$current_run" ]; then
+                return 0  # true, this is the first run for this fieldmap
+            else
+                return 1  # false, we found an earlier run using this fieldmap
+            fi
+        fi
+    done
+    return 1
+}
+
+# set memory limit
+ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
+
+# get current subject ID from list
+subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" subjects.txt)
+subject="sub-${subject_id}"
+
+# logging setup
+mkdir -p "${SLURM_LOG_DIR}/subjects"
+log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
+processed_file="${SLURM_LOG_DIR}/processed_subjects.txt"
+
+# start logging
+echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a ${log_file}
+
+# check if this subject was already processed
+if [ -f "${processed_file}" ]; then
+    if grep -q "^${subject_id}$" ${processed_file}; then
+		echo "($(date)) [INFO] Subject ${subject_id} already processed, skipping" | tee -a ${log_file}
+        exit 0
+    fi
+fi
+
+echo "($(date)) [INFO] Processing subject ${subject_id}" | tee -a ${log_file}
+
+module load python/3.9.0
+module load biology
+module load fsl/5.0.10
+
+# set permissions
+echo "($(date)) [INFO] Setting directory permissions"
+for dir in func fmap anat; do
+    chmod ${DIR_PERMISSIONS} ${RAW_DIR}/${subject}/${dir}
+    chmod ${DIR_PERMISSIONS} ${RAW_DIR}/${subject}/${dir}/*
+done
+
+echo "($(date)) [INFO] Making new bids_trimmed subject directories"
+for dir in anat fmap func; do
+    mkdir -p ${TRIM_DIR}/${subject}/${dir}
+done
+
+# copy scans metadata
+cp ${RAW_DIR}/${subject}/${subject}_scans.tsv ${TRIM_DIR}/${subject}/
+
+# copy anatomical (T1w) images
+cp ${RAW_DIR}/${subject}/anat/${subject}_T1w.nii.gz ${TRIM_DIR}/${subject}/anat/
+cp ${RAW_DIR}/${subject}/anat/${subject}_T1w.json ${TRIM_DIR}/${subject}/anat/
+
+for run_bold in "${run_numbers[@]}"
+do
+    echo "($(date)) [INFO] Processing run ${run_bold}" | tee -a ${log_file}
+
+	#===========================================
+	# (1) TRIM DUMMY SCANS FROM TASK BOLD
+	#===========================================
+	echo "($(date)) [INFO] Trimming first ${n_dummy} dummy TRs from BOLD run ${run_bold}"
+
+	old_bold="${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.nii.gz"
+	new_bold="${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.nii.gz"
+
+	# validate initial BOLD volumes
+    echo "($(date)) [INFO] Validating BOLD volumes for run ${run_bold}"
+    validate_volumes ${old_bold} ${EXPECTED_BOLD_VOLS} "BOLD run ${run_bold}"
+
+	# calculate remaining volumes after dummy removal
+	remain_bold_vols=$((EXPECTED_BOLD_VOLS - n_dummy))
+	echo "($(date)) [INFO] Retaining ${remain_bold_vols} volumes after removing ${n_dummy} dummy scans" | tee -a ${log_file}
+
+	# remove dummy scans from task BOLD image
+	fslroi ${old_bold} ${new_bold} ${n_dummy} ${remain_bold_vols}
+	if [ $? -ne 0 ]; then
+        echo "($(date)) [ERROR] Failed to trim BOLD run ${run_bold}" | tee -a ${log_file}
+        exit 1
+    fi
+
+	# validate trimmed BOLD volumes
+	validate_volumes ${new_bold} ${remain_bold_vols} "trimmed BOLD run ${run_bold}"
+
+	# copy and update JSON sidecar files
+	cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
+       ${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.json
+
+
+	#===========================================
+	# (2) PROCESS FIELDMAP
+	#===========================================
+    echo "($(date)) [INFO] Processing fieldmap for run ${run_bold}"
+
+	# look up correct fmap <-> bold mapping from config.sh
+	run_fmap=${fmap_mapping[$run_bold]}
+
+	# first, trim dummy scans from fieldmap epi
+	fieldmap_input="${RAW_DIR}/${subject}/fmap/${subject}_run-${run_fmap}_dir-AP_epi.nii.gz"
+    fieldmap_output="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-AP_epi.nii.gz"
+
+	# get fieldmap volumes
+	fmap_total_vols=$(fslnvols ${fieldmap_input})
+	fmap_remain_vols=$((fmap_total_vols - n_dummy))
+	echo "($(date)) [INFO] total fmap volumes detected: ${fmap_total_vols}"
+	echo "($(date)) [INFO] total fmap volumes remaining: ${fmap_remain_vols}"
+
+	fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${fmap_remain_vols}
+	if [ $? -ne 0 ]; then
+        echo "($(date)) [ERROR] Failed to trim fieldmap for run ${run_fmap}" | tee -a ${log_file}
+        exit 1
+    fi
+
+	if is_first_run_for_fieldmap ${run_bold}; then
+	    echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a ${log_file}
+
+		# validate untrimmed fieldmap volumes
+		echo "($(date)) [INFO] Validating fieldmap volumes for run ${run_fmap}"
+        validate_volumes ${fieldmap_input} ${EXPECTED_FMAP_VOLS} "fieldmap run ${run_fmap}"
+		
+		# calculate number of remaining volumes for fieldmap
+		remain_fmap_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
+        echo "($(date)) [INFO] Will retain ${remain_fmap_vols} volumes after removing ${n_dummy} dummy scans" | tee -a ${log_file}
+
+		# trim off dummy scans from fieldmap
+        fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${remain_fmap_vols}
+        if [ $? -ne 0 ]; then
+            echo "($(date)) [ERROR] Failed to trim fieldmap for run ${run_fmap}" | tee -a ${log_file}
+            exit 1
+        fi
+
+		# validate trimmed fieldmap volumes
+        validate_volumes ${fieldmap_output} ${remain_fmap_vols} "trimmed fieldmap run ${run_fmap}"
+
+		# create synthetic opposite-phase encoding image from task BOLD
+        echo "($(date)) [INFO] Creating synthetic PA image from BOLD run ${run_bold}"
+		new_epi="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.nii.gz"
+
+		# extract volumes after dummy removal, matching fieldmap volume count
+        fslroi ${old_bold} ${new_epi} ${n_dummy} ${remain_fmap_vols}
+		if [ $? -ne 0 ]; then
+            echo "[ERROR] Failed to create synthetic PA image for run ${run_bold}" | tee -a ${log_file}
+            exit 1
+        fi
+
+		# validate synthetic PA volumes
+		validate_volumes ${new_epi} ${remain_fmap_vols} "synthetic PA image for run ${run_fmap}"
+		echo "($(date)) [INFO] Volume validation complete for fieldmap set ${run_fmap}" | tee -a ${log_file}
+
+		# copy json file for fmap
+		cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
+		${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.json
+    fi
+	
+	# set permissions
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.nii.gz
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.json
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_bold}_dir-PA_epi.nii.gz
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_bold}_dir-PA_epi.json
+done
+
+echo "($(date)) [INFO] Final volume summary:" | tee -a ${log_file}
+echo "  Original BOLD volumes: ${EXPECTED_BOLD_VOLS}" | tee -a ${log_file}
+echo "  Retained BOLD volumes: ${remain_bold_vols}" | tee -a ${log_file}
+echo "  Original fieldmap volumes: ${EXPECTED_FMAP_VOLS}" | tee -a ${log_file}
+echo "  Retained fieldmap volumes: ${remain_fmap_vols}" | tee -a ${log_file}
+echo "  Dummy volumes removed: ${n_dummy}" | tee -a ${log_file}
+
+
+#===========================================
+# (3) UPDATE FIELDMAP JSON METADATA
+#===========================================
+
+# convert fmap_mapping associative array to JSON string
+fmap_mapping_json=$(declare -p fmap_mapping | sed -e "s/declare -A fmap_mapping=//" | python3 -c "
+import sys, json
+print(json.dumps(eval(input())))
+")
+
+# modify run numbers array format to a comma separated string
+run_numbers_csv=$(IFS=,; echo "${run_numbers[*]}")
+
+echo "($(date)) [INFO] - Starting metadata update" | tee -a ${log_file}
+python3 update_fmap_metadata.py \
+    --subid "${subject_id}" \
+    --bids-dir "${TRIM_DIR}" \
+    --task-id "${task_id}" \
+    --new-task-id "${new_task_id}" \
+    --fmap-mapping "${fmap_mapping_json}" \
+    --runs "${run_numbers_csv}"
+echo "($(date)) [INFO] - Metadata update complete" | tee -a ${log_file}
+
+echo ${subject_id} >> ${processed_file}
+echo "($(date)) [INFO] Successfully completed processing for subject ${subject_id}" | tee -a ${log_file}
+echo "($(date)) [INFO] -> DOUBLE CHECK FILES AND THEN PROCEED TO FMRIPREP!" | tee -a ${log_file}
