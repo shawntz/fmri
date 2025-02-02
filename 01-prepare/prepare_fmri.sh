@@ -10,8 +10,8 @@ source ./settings.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then
-    echo "Error: Pipeline step name not provided"
-    echo "Usage: $0 <step-name>"
+    echo "Error: Pipeline step name not provided" | tee -a ${log_file}
+    echo "Usage: $0 <step-name>" | tee -a ${log_file}
     exit 1
 fi
 
@@ -59,17 +59,17 @@ ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
     # use step-specific subjects file from the mapping defined in settings.sh
     SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-    echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}"
+    echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
 else
     # fall back to default all-subjects.txt
     SUBJECTS_FILE="all-subjects.txt"
-    echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}"
+    echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a ${log_file}
 fi
 
 # get current subject ID from list
 subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
 if [ -z "${subject_id}" ]; then
-    echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}"
+    echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a ${log_file}
     exit 1
 fi
 subject="sub-${subject_id}"
