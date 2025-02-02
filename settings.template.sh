@@ -33,6 +33,10 @@ BASE_DIR="/my/project/dir"           # ROOT DIR FOR THE STUDY
 SCRIPTS_DIR="${BASE_DIR}/scripts"    # PATH OF CLONED FMRI REPO
 RAW_DIR="${BASE_DIR}/bids"           # RAW BIDS-COMPLIANT DATA LOCATION
 TRIM_DIR="${BASE_DIR}/bids_trimmed"  # DESIRED DESTINATION FOR PROCESSED DATA
+WORKFLOW_LOG_DIR="${BASE_DIR}/workflows/log"
+TEMPLATEFLOW_HOST_HOME="${HOME}/.cache/templateflow"
+FMRIPREP_HOST_CACHE="${HOME}/.cache/fmriprep"
+FREESURFER_LICENSE="${HOME}/freesurfer.txt"
 #
 # ============================================================================
 # (2) USER EMAIL (for slurm report updates)
@@ -76,7 +80,7 @@ DIR_PERMISSIONS=775   # DIRECTORY LEVEL
 FILE_PERMISSIONS=775  # FILE LEVEL
 #
 # ============================================================================
-# (7) SLURM JOB HEADER CONFIGURATOR
+# (7) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
 # count number of subjects
 num_subjects=$(wc -l < subjects.txt)
@@ -93,4 +97,36 @@ export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
 export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
 export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings file
 export SLURM_PARTITION="hns,normal"  # compute resource preferences order
+#
+# ============================================================================
+# (8) PIPELINE SETTINGS
+# ============================================================================
+FMRIPREP_VERSION="24.0.1"
+DERIVS_DIR="${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}"
+SINGULARITY_IMAGE_DIR="${BASE_DIR}/singularity_images"
+SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
+#
+# ============================================================================
+# (9) FMRIPREP SPECIFIC SLURM SETTINGS
+# ============================================================================
+FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
+FMRIPREP_SLURM_ARRAY_SIZE=1
+FMRIPREP_SLURM_TIME="48:00:00"
+FMRIPREP_SLURM_CPUS_PER_TASK=16
+FMRIPREP_SLURM_MEM_PER_CPU=4
+#
+# ============================================================================
+# (10) FMRIPREP SETTINGS 
+# ============================================================================
+FMRIPREP_OMP_THREADS=8
+FMRIPREP_NTHREADS=12
+FMRIPREP_MEM_MB=30000
+FMRIPREP_FD_SPIKE_THRESHOLD=0.9
+FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
+FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+# ============================================================================
+# (11) MISC SETTINGS 
+# ============================================================================
+# Debug mode (0=off, 1=on)
+DEBUG=0
 #
