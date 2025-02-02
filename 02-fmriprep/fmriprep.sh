@@ -16,11 +16,15 @@ fi
 
 ANAT_ONLY_FLAG=$2
 
-# get correct subjects file for this step
-SUBJECTS_FILE=$(get_subjects_file "${JOB_NAME}")
-if [ ! -f "${SUBJECTS_FILE}" ]; then
-    echo "Error: Subjects file '${SUBJECTS_FILE}' not found"
-    exit 1
+# determine which subjects file to use
+if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+    # use step-specific subjects file from the mapping defined in settings.sh
+    SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
+    echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}"
+else
+    # fall back to default all-subjects.txt
+    SUBJECTS_FILE="all-subjects.txt"
+    echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}"
 fi
 
 # get current subject ID from list
