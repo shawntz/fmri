@@ -9,10 +9,10 @@ mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
 
 # check if running in debug mode
 if [ "$DEBUG" = "1" ]; then
-    echo "Running in DEBUG mode with single subject"
+    echo "($(date)) [INFO] Running in DEBUG mode with single subject"
     array_opt="--array=0"
 else
-    echo "Running full array: ${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+    echo "($(date)) [INFO] Running full array: ${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
     array_opt="--array=${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
 fi
 
