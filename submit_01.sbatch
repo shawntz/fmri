@@ -34,8 +34,8 @@ sbatch \
     --time=${SLURM_TIME} \
     --mem-per-cpu=${SLURM_MEM} \
     --cpus-per-task=${SLURM_CPUS} \
-    --output=${SLURM_LOG_DIR}/%x_%A_%a.out \
-    --error=${SLURM_LOG_DIR}/%x_%A_%a.err \
+    --output=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out \
+    --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
     ./${JOB_NAME}/prepare_fmri.sh
