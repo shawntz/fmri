@@ -227,8 +227,8 @@ echo "($(date)) [INFO] JSON mapping: $fmap_to_json"
 # modify run numbers array format to a comma separated string
 run_numbers_csv=$(IFS=,; echo "${run_numbers[*]}")
 
-echo "($(date)) [INFO] - Starting metadata update" | tee -a ${log_file}
-python3 ${SCRIPT_DIR}/${JOB_NAME}/update_fmap_metadata.py \
+echo "($(date)) [INFO] Starting metadata update" | tee -a ${log_file}
+
     --subid "${subject_id}" \
     --bids-dir "${TRIM_DIR}" \
     --task-id "${task_id}" \
