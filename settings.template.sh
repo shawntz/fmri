@@ -29,7 +29,8 @@
 # ============================================================================
 # (1) SETUP DIRECTORIES
 # ============================================================================
-BASE_DIR='/my/project/dir'           # ROOT DIR FOR THE STUDY
+BASE_DIR="/my/project/dir"           # ROOT DIR FOR THE STUDY
+SCRIPTS_DIR="${BASE_DIR}/scripts"    # PATH OF CLONED FMRI REPO
 RAW_DIR="${BASE_DIR}/bids"           # RAW BIDS-COMPLIANT DATA LOCATION
 TRIM_DIR="${BASE_DIR}/bids_trimmed"  # DESIRED DESTINATION FOR PROCESSED DATA
 #
@@ -50,7 +51,7 @@ run_numbers=("01" "02" "03" "04" "05" "06" "07" "08")  # ALL TASK BOLD RUN NUMBE
 # (4) DATA VALIDATION VALUES FOR UNIT TESTS
 # ============================================================================
 EXPECTED_FMAP_VOLS=12   # EXPECTED NUMBER OF VOLUMES IN ORIGINAL FIELDMAP SCANS
-EXPECTED_BOLD_VOLS=440  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
+EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
 #
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
@@ -86,9 +87,10 @@ array_range="0-$((num_subjects-1))"
 #
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
-export SLURM_MEM="16GB"
-export SLURM_CPUS="1"
+export SLURM_MEM="8G"  # memory alloc per cpu
+export SLURM_CPUS="8"
 export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
 export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
-export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm/"  # use BASE_DIR from main settings file
+export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings file
+export SLURM_PARTITION="hns,normal"  # compute resource preferences order
 #
