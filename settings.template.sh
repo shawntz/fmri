@@ -74,21 +74,34 @@ declare -A fmap_mapping=(
 )
 #
 # ============================================================================
-# (6) DEFAULT PERMISSIONS
+# (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING
+# ============================================================================
+# by default, subjects will be pulled from the master `all-subjects.txt` file
+# however, if you want to specify different subject lists per pipeline step,
+# you may do so here by following this general template:
+#
+# declare -A subjects_mapping=(
+#     ["01-prepare"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
+#     ["02-fmriprep"]="02-subjects.txt"
+# )
+#
+# note: keep in mind that we've built in checks at the beginning of each pipeline
+# step that skip a subject if there's already a record of them being preprocessed;
+# thus, you shouldn't necessarily need separate 0x-subjects.txt files per step
+# unless this extra layer of control is useful for your needs.
+#
+# ============================================================================
+# (7) DEFAULT PERMISSIONS
 # ============================================================================
 DIR_PERMISSIONS=775   # DIRECTORY LEVEL
 FILE_PERMISSIONS=775  # FILE LEVEL
 #
 # ============================================================================
-# (7) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
+# (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
-# count number of subjects
-num_subjects=$(wc -l < "01-subjects.txt")
-echo "($(date)) [INFO] Found ${num_subjects} subjects"
-#
-# compute array size (0 to num_subjects-1 since array indices start at 0)
-array_range="0-$((num_subjects-1))"
-#
+num_subjects=$(wc -l < "all-subjects.txt")  # count number of subjects
+echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
+array_range="0-$((num_subjects-1))"  # compute array size (0 to num_subjects-1 since array indices start at 0)
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
 export SLURM_MEM="8G"  # memory alloc per cpu
@@ -99,7 +112,7 @@ export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings
 export SLURM_PARTITION="hns,normal"  # compute resource preferences order
 #
 # ============================================================================
-# (8) PIPELINE SETTINGS
+# (9) PIPELINE SETTINGS
 # ============================================================================
 FMRIPREP_VERSION="24.0.1"
 DERIVS_DIR="${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}"
@@ -107,7 +120,7 @@ SINGULARITY_IMAGE_DIR="${BASE_DIR}/singularity_images"
 SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
 #
 # ============================================================================
-# (9) FMRIPREP SPECIFIC SLURM SETTINGS
+# (10) FMRIPREP SPECIFIC SLURM SETTINGS
 # ============================================================================
 FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
 FMRIPREP_SLURM_ARRAY_SIZE=1
@@ -116,7 +129,7 @@ FMRIPREP_SLURM_CPUS_PER_TASK="16"
 FMRIPREP_SLURM_MEM_PER_CPU="4G"
 #
 # ============================================================================
-# (10) FMRIPREP SETTINGS 
+# (11) FMRIPREP SETTINGS 
 # ============================================================================
 FMRIPREP_OMP_THREADS=8
 FMRIPREP_NTHREADS=12
@@ -124,8 +137,9 @@ FMRIPREP_MEM_MB=30000
 FMRIPREP_FD_SPIKE_THRESHOLD=0.9
 FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
 FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+#
 # ============================================================================
-# (11) MISC SETTINGS 
+# (12) MISC SETTINGS 
 # ============================================================================
 # Debug mode (0=off, 1=on)
 DEBUG=0
