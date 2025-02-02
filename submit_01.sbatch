@@ -36,6 +36,7 @@ sbatch \
     --cpus-per-task=${SLURM_CPUS} \
     --output=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
+    --partition=${SLURM_PARTITION} \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
     ./${JOB_NAME}/prepare_fmri.sh
