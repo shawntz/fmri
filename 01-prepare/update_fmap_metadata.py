@@ -90,7 +90,8 @@ def update_json_metadata(
                 'B0FieldIdentifier': fmap_identifier,
                 'IntendedFor': intended_files,
                 'PhaseEncodingDirection': phasedir,
-                'PhaseEncodingPolarityGE': polarity
+                'PhaseEncodingPolarityGE': polarity,
+                'TaskName': new_task_id 
             })
             
             metadata = dict(sorted(metadata.items()))
@@ -119,7 +120,8 @@ def update_json_metadata(
         metadata.update({
             'B0FieldSource': fmap_identifier,
             'PhaseEncodingDirection': 'j',
-            'PhaseEncodingPolarityGE': '0-normal'
+            'PhaseEncodingPolarityGE': '0-normal',
+            'TaskName': new_task_id 
         })
         
         metadata = dict(sorted(metadata.items()))
