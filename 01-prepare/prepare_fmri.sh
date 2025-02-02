@@ -49,13 +49,13 @@ is_first_run_for_fieldmap() {
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
 # get current subject ID from list
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" subjects.txt)
+subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" 01-subjects.txt)
 subject="sub-${subject_id}"
 
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/01-processed_subjects.txt"
 
 # start logging
 echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a ${log_file}
