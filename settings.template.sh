@@ -83,7 +83,7 @@ FILE_PERMISSIONS=775  # FILE LEVEL
 # (7) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
 # count number of subjects
-num_subjects=$(wc -l < subjects.txt)
+num_subjects=$(wc -l < "01-subjects.txt")
 echo "($(date)) [INFO] Found ${num_subjects} subjects"
 #
 # compute array size (0 to num_subjects-1 since array indices start at 0)
