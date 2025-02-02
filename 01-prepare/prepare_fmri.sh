@@ -20,9 +20,11 @@ validate_volumes() {
     if [ ${actual} -ne ${expected} ]; then
         echo "($(date)) [ERROR] Unexpected number of volumes in ${desc}" | tee -a ${log_file}
         echo "($(date)) [ERROR] Expected ${expected} volumes but found ${actual}" | tee -a ${log_file}
-        exit 1
+        echo "($(date)) [INFO] Skipping to next BOLD run..." | tee -a ${log_file}
+        return 1
     else
         echo "($(date)) [INFO] Volume validation passed for ${desc}: ${actual} volumes" | tee -a ${log_file}
+        return 0
     fi
 }
 
@@ -107,21 +109,24 @@ do
 
 	# validate initial BOLD volumes
     echo "($(date)) [INFO] Validating BOLD volumes for run ${run_bold}"
-    validate_volumes ${old_bold} ${EXPECTED_BOLD_VOLS} "BOLD run ${run_bold}"
+    if ! validate_volumes ${old_bold} ${EXPECTED_BOLD_VOLS} "BOLD run ${run_bold}"; then
+        continue
+    fi
 
 	# calculate remaining volumes after dummy removal
 	remain_bold_vols=$((EXPECTED_BOLD_VOLS - n_dummy))
 	echo "($(date)) [INFO] Retaining ${remain_bold_vols} volumes after removing ${n_dummy} dummy scans" | tee -a ${log_file}
 
 	# remove dummy scans from task BOLD image
-	fslroi ${old_bold} ${new_bold} ${n_dummy} ${remain_bold_vols}
-	if [ $? -ne 0 ]; then
+	if ! fslroi ${old_bold} ${new_bold} ${n_dummy} ${remain_bold_vols}; then
         echo "($(date)) [ERROR] Failed to trim BOLD run ${run_bold}" | tee -a ${log_file}
-        exit 1
+        continue
     fi
 
 	# validate trimmed BOLD volumes
-	validate_volumes ${new_bold} ${remain_bold_vols} "trimmed BOLD run ${run_bold}"
+	if ! validate_volumes ${new_bold} ${remain_bold_vols} "trimmed BOLD run ${run_bold}"; then
+        continue
+    fi
 
 	# copy and update JSON sidecar files
 	cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
@@ -144,27 +149,27 @@ do
 	fmap_total_vols=$(fslnvols ${fieldmap_input})
 	fmap_remain_vols=$((fmap_total_vols - n_dummy))
 
-	fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${fmap_remain_vols}
-	if [ $? -ne 0 ]; then
+	if ! fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${fmap_remain_vols}; then
         echo "($(date)) [ERROR] Failed to trim fieldmap for run ${run_fmap}" | tee -a ${log_file}
-        exit 1
+        continue
     fi
 
     echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a ${log_file}
 	if is_first_run_for_fieldmap ${run_bold}; then
 		# validate untrimmed fieldmap volumes
 		echo "($(date)) [INFO] Validating fieldmap volumes for run ${run_fmap}"
-        validate_volumes ${fieldmap_input} ${EXPECTED_FMAP_VOLS} "fieldmap run ${run_fmap}"
+        if ! validate_volumes ${fieldmap_input} ${EXPECTED_FMAP_VOLS} "fieldmap run ${run_fmap}"; then
+            continue
+        fi
 		
 		# calculate number of remaining volumes for fieldmap
 		remain_fmap_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
         echo "($(date)) [INFO] Will retain ${remain_fmap_vols} volumes after removing ${n_dummy} dummy scans" | tee -a ${log_file}
 
 		# trim off dummy scans from fieldmap
-        fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${remain_fmap_vols}
-        if [ $? -ne 0 ]; then
+        if ! fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${remain_fmap_vols}; then
             echo "($(date)) [ERROR] Failed to trim fieldmap for run ${run_fmap}" | tee -a ${log_file}
-            exit 1
+            continue
         fi
 
 		# validate trimmed fieldmap volumes
@@ -175,15 +180,15 @@ do
 		new_epi="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.nii.gz"
 
 		# extract volumes after dummy removal, matching fieldmap volume count
-        fslroi ${old_bold} ${new_epi} ${n_dummy} ${remain_fmap_vols}
-		if [ $? -ne 0 ]; then
+        if ! fslroi ${old_bold} ${new_epi} ${n_dummy} ${remain_fmap_vols}; then
             echo "[ERROR] Failed to create synthetic PA image for run ${run_bold}" | tee -a ${log_file}
-            exit 1
+            continue
         fi
 
 		# validate synthetic PA volumes
-		validate_volumes ${new_epi} ${remain_fmap_vols} "synthetic PA image for run ${run_fmap}"
-		echo "($(date)) [INFO] Volume validation complete for fieldmap set ${run_fmap}" | tee -a ${log_file}
+		if ! validate_volumes ${new_epi} ${remain_fmap_vols} "synthetic PA image for run ${run_fmap}"; then
+		    echo "($(date)) [INFO] Volume validation complete for fieldmap set ${run_fmap}" | tee -a ${log_file}
+        fi
 
 		# copy json files for fmap
 		cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
