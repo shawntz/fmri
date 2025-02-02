@@ -41,7 +41,7 @@ cmd="sbatch \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/fmriprep.sh"
+    ./${JOB_NAME}/fmriprep.sh" ${JOB_NAME}
 
 # add anat-only flag if specified
 if [ ! -z "${ANAT_ONLY_FLAG}" ]; then
