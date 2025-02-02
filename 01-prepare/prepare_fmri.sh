@@ -2,13 +2,18 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: January 30, 2025
 # @Description: Prepare bold/fmap data for fmriprep.
-# @Params: subject_id (positional argument #1) - id number (e.g., 1234) without "sub-"
+# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-fmriprep")
 
 umask 002  # modify permissions so fslroi inherits correct permissions
 
 source ./settings.sh
 
 JOB_NAME=$1
+if [ -z "${JOB_NAME}" ]; then
+    echo "Error: Pipeline step name not provided"
+    echo "Usage: $0 <step-name>"
+    exit 1
+fi
 
 # TEST: method to validate volume counts
 validate_volumes() {
@@ -50,8 +55,19 @@ is_first_run_for_fieldmap() {
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
+# get correct subjects file for this step
+SUBJECTS_FILE=$(get_subjects_file "${JOB_NAME}")
+if [ ! -f "${SUBJECTS_FILE}" ]; then
+    echo "Error: Subjects file '${SUBJECTS_FILE}' not found"
+    exit 1
+fi
+
 # get current subject ID from list
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" 01-subjects.txt)
+subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
+if [ -z "${subject_id}" ]; then
+    echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}"
+    exit 1
+fi
 subject="sub-${subject_id}"
 
 # logging setup

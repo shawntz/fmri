@@ -2,14 +2,33 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: February 1, 2025
 # @Description: Trigger fMRIPrep workflow.
-# @Params: ANAT_ONLY_FLAG (positional argument #1) - optional setting to speed up freesurfer before manual surface editing
+# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-fmriprep")
+# @Param: ANAT_ONLY_FLAG (positional argument #2) - optional setting to speed up freesurfer before manual surface editing
 
 source ./settings.sh
 
-ANAT_ONLY_FLAG=$1
+JOB_NAME=$1
+if [ -z "${JOB_NAME}" ]; then
+    echo "Error: Pipeline step name not provided"
+    echo "Usage: $0 <step-name>"
+    exit 1
+fi
 
-# get subject ID from array task ID
-subject_id=$(sed -n "${SLURM_ARRAY_TASK_ID}p" 02-subjects.txt)
+ANAT_ONLY_FLAG=$2
+
+# get correct subjects file for this step
+SUBJECTS_FILE=$(get_subjects_file "${JOB_NAME}")
+if [ ! -f "${SUBJECTS_FILE}" ]; then
+    echo "Error: Subjects file '${SUBJECTS_FILE}' not found"
+    exit 1
+fi
+
+# get current subject ID from list
+subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
+if [ -z "${subject_id}" ]; then
+    echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}"
+    exit 1
+fi
 subject="sub-${subject_id}"
 
 # logging setup
