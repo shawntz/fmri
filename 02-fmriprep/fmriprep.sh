@@ -45,7 +45,7 @@ echo "($(date)) [INFO] Triggering fMRIPrep for subject ${subject_id}" | tee -a $
 SINGULARITY_CMD="singularity run --cleanenv \
     -B ${TRIM_DIR}:/data \
     -B ${TEMPLATEFLOW_HOST_HOME}:${APPTAINERENV_TEMPLATEFLOW_HOME} \
-    -B ${L_SCRATCH}:/work \
+    -B ${SCRATCH}:/work \
     ${SINGULARITY_IMAGE_DIR}/${SINGULARITY_IMAGE}"
 
 # base fMRIPrep command
