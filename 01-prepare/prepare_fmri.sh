@@ -8,6 +8,8 @@ umask 002  # modify permissions so fslroi inherits correct permissions
 
 source ./settings.sh
 
+JOB_NAME=$1
+
 # TEST: method to validate volume counts
 validate_volumes() {
     local file=$1
