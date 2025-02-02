@@ -53,9 +53,9 @@ def update_json_metadata(
     Update JSON metadata for fieldmaps and BOLD data
     """
     fmap_id = fmap_mapping.get(run_id)
-    
+
     # check if BOLD file exists
-    bold_file = bids_dir / f'sub-{subject_id}/func/sub-{subject_id}_task-{new_task_id}_run-{run_id}_bold.nii.gz'
+    bold_file = bids_dir / f'sub-{subject_id}/func/sub-{subject_id}_task-{new_task_id}_run-{run_id}_dir-PA_bold.nii.gz'
     if not bold_file.exists():
         logger.warning(f"BOLD file not found: {bold_file}")
         return
@@ -69,7 +69,7 @@ def update_json_metadata(
 
     # generate IntendedFor file list
     intended_files = [
-        f'bids::sub-{subject_id}/func/sub-{subject_id}_task-{new_task_id}_run-{run}_bold.nii.gz'
+        f'bids::sub-{subject_id}/func/sub-{subject_id}_task-{new_task_id}_run-{run}_dir-PA_bold.nii.gz'
         for run in paired_runs
     ]
     
@@ -78,6 +78,7 @@ def update_json_metadata(
     # update fieldmap JSONs
     for direction in ['AP', 'PA']:
         polarity = '1-flipped' if direction == 'AP' else '0-normal'
+        phasedir = 'j-' if direction == 'AP' else 'j'
         json_path = bids_dir / f'sub-{subject_id}/fmap/sub-{subject_id}_acq-{new_task_id}_run-{fmap_id}_dir-{direction}_epi.json'
         
         try:
@@ -88,6 +89,7 @@ def update_json_metadata(
             metadata.update({
                 'B0FieldIdentifier': fmap_identifier,
                 'IntendedFor': intended_files,
+                'PhaseEncodingDirection': phasedir,
                 'PhaseEncodingPolarityGE': polarity
             })
             
@@ -102,7 +104,13 @@ def update_json_metadata(
     
     # update BOLD JSON
     try:
-        bold_json = bold_file.with_suffix('.json')
+        bold_path = Path(bold_file)
+
+        if bold_path.name.endswith('.nii.gz'):
+            bold_json = bold_path.with_name(bold_path.name[:-7] + '.json')
+        else:
+            print("Error: file doesn't end with .nii.gz")
+    
         bold_json.chmod(0o775)
         
         with bold_json.open() as f:
@@ -110,6 +118,7 @@ def update_json_metadata(
         
         metadata.update({
             'B0FieldSource': fmap_identifier,
+            'PhaseEncodingDirection': 'j',
             'PhaseEncodingPolarityGE': '0-normal'
         })
         
