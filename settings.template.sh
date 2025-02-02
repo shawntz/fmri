@@ -111,9 +111,9 @@ SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
 # ============================================================================
 FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
 FMRIPREP_SLURM_ARRAY_SIZE=1
-FMRIPREP_SLURM_TIME="48:00:00"
-FMRIPREP_SLURM_CPUS_PER_TASK=16
-FMRIPREP_SLURM_MEM_PER_CPU=4
+FMRIPREP_SLURM_TIME="12:00:00"
+FMRIPREP_SLURM_CPUS_PER_TASK="16"
+FMRIPREP_SLURM_MEM_PER_CPU="4G"
 #
 # ============================================================================
 # (10) FMRIPREP SETTINGS 
