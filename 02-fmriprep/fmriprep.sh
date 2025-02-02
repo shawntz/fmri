@@ -78,5 +78,6 @@ exitcode=$?
 echo -e "${subject}\t${SLURM_ARRAY_TASK_ID}\t${exitcode}" \
     >> ${WORKFLOW_LOG_DIR}/${SLURM_JOB_NAME}.${SLURM_ARRAY_JOB_ID}.tsv
 
+echo ${subject_id} >> ${processed_file}
 echo "($(date)) [INFO] Finished task ${SLURM_ARRAY_TASK_ID} with exit code ${exitcode}" | tee -a ${log_file}
 exit ${exitcode}
