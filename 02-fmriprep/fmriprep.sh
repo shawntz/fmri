@@ -17,15 +17,15 @@ mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
 processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
+# first clean up caches
+rm -rf ${TEMPLATEFLOW_HOST_HOME}
+rm -rf ${FMRIPREP_HOST_CACHE}
+
 # setup dirs (if needed)
 mkdir -p ${DERIVS_DIR}
 mkdir -p ${TEMPLATEFLOW_HOST_HOME}
 mkdir -p ${FMRIPREP_HOST_CACHE}
 mkdir -p ${WORKFLOW_LOG_DIR}
-
-# clean up caches
-rm -rf ${TEMPLATEFLOW_HOST_HOME}
-rm -rf ${FMRIPREP_HOST_CACHE}
 
 # set environment vars
 export FS_LICENSE=${FREESURFER_LICENSE}
