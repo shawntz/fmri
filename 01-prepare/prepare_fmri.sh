@@ -215,10 +215,14 @@ echo "  Dummy volumes removed: ${n_dummy}" | tee -a ${log_file}
 #===========================================
 
 # convert fmap_mapping associative array to JSON string
-fmap_mapping_json=$(declare -p fmap_mapping | sed -e "s/declare -A fmap_mapping=//" | python3 -c "
-import sys, json
-print(json.dumps(eval(input())))
-")
+fmap_to_json="{"
+for key in "${!fmap_mapping[@]}"; do
+    json+="\"$key\":\"${fmap_mapping[$key]}\","
+done
+# Remove the trailing comma and close the JSON object
+fmap_to_json="${json%,}}"
+
+echo "($(date)) [INFO] JSON mapping: $fmap_to_json"
 
 # modify run numbers array format to a comma separated string
 run_numbers_csv=$(IFS=,; echo "${run_numbers[*]}")
