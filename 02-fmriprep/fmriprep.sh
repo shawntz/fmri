@@ -21,6 +21,7 @@ processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 mkdir -p ${DERIVS_DIR}
 mkdir -p ${TEMPLATEFLOW_HOST_HOME}
 mkdir -p ${FMRIPREP_HOST_CACHE}
+mkdir -p ${WORKFLOW_LOG_DIR}
 
 # clean up caches
 rm -rf ${TEMPLATEFLOW_HOST_HOME}
