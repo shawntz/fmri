@@ -229,13 +229,14 @@ run_numbers_csv=$(IFS=,; echo "${run_numbers[*]}")
 
 echo "($(date)) [INFO] Starting metadata update" | tee -a ${log_file}
 
+python3 ${SCRIPTS_DIR}/${JOB_NAME}/update_fmap_metadata.py \
     --subid "${subject_id}" \
     --bids-dir "${TRIM_DIR}" \
     --task-id "${task_id}" \
     --new-task-id "${new_task_id}" \
-    --fmap-mapping "${fmap_mapping_json}" \
+    --fmap-mapping "${fmap_to_json}" \
     --runs "${run_numbers_csv}"
-echo "($(date)) [INFO] - Metadata update complete" | tee -a ${log_file}
+echo "($(date)) [INFO] Metadata update complete" | tee -a ${log_file}
 
 echo ${subject_id} >> ${processed_file}
 echo "($(date)) [INFO] Successfully completed processing for subject ${subject_id}" | tee -a ${log_file}
