@@ -141,8 +141,6 @@ do
 	# get fieldmap volumes
 	fmap_total_vols=$(fslnvols ${fieldmap_input})
 	fmap_remain_vols=$((fmap_total_vols - n_dummy))
-	echo "($(date)) [INFO] total fmap volumes detected: ${fmap_total_vols}"
-	echo "($(date)) [INFO] total fmap volumes remaining: ${fmap_remain_vols}"
 
 	fslroi ${fieldmap_input} ${fieldmap_output} ${n_dummy} ${fmap_remain_vols}
 	if [ $? -ne 0 ]; then
@@ -150,9 +148,8 @@ do
         exit 1
     fi
 
+    echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a ${log_file}
 	if is_first_run_for_fieldmap ${run_bold}; then
-	    echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a ${log_file}
-
 		# validate untrimmed fieldmap volumes
 		echo "($(date)) [INFO] Validating fieldmap volumes for run ${run_fmap}"
         validate_volumes ${fieldmap_input} ${EXPECTED_FMAP_VOLS} "fieldmap run ${run_fmap}"
@@ -186,16 +183,21 @@ do
 		validate_volumes ${new_epi} ${remain_fmap_vols} "synthetic PA image for run ${run_fmap}"
 		echo "($(date)) [INFO] Volume validation complete for fieldmap set ${run_fmap}" | tee -a ${log_file}
 
-		# copy json file for fmap
+		# copy json files for fmap
 		cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
 		${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.json
+
+        cp ${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.json \
+		${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-AP_epi.json
     fi
 	
 	# set permissions
     chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.nii.gz
     chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.json
-    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_bold}_dir-PA_epi.nii.gz
-    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_bold}_dir-PA_epi.json
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.nii.gz
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-PA_epi.json
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-AP_epi.nii.gz
+    chmod ${FILE_PERMISSIONS} ${TRIM_DIR}/${subject}/fmap/${subject}_acq-${new_task_id}_run-${run_fmap}_dir-AP_epi.json
 done
 
 echo "($(date)) [INFO] Final volume summary:" | tee -a ${log_file}
@@ -220,7 +222,7 @@ print(json.dumps(eval(input())))
 run_numbers_csv=$(IFS=,; echo "${run_numbers[*]}")
 
 echo "($(date)) [INFO] - Starting metadata update" | tee -a ${log_file}
-python3 update_fmap_metadata.py \
+python3 ${SCRIPT_DIR}/${JOB_NAME}/update_fmap_metadata.py \
     --subid "${subject_id}" \
     --bids-dir "${TRIM_DIR}" \
     --task-id "${task_id}" \
