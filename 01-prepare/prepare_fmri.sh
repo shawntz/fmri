@@ -222,10 +222,10 @@ echo "  Dummy volumes removed: ${n_dummy}" | tee -a ${log_file}
 # convert fmap_mapping associative array to JSON string
 fmap_to_json="{"
 for key in "${!fmap_mapping[@]}"; do
-    json+="\"$key\":\"${fmap_mapping[$key]}\","
+    fmap_to_json+="\"$key\":\"${fmap_mapping[$key]}\","
 done
 # Remove the trailing comma and close the JSON object
-fmap_to_json="${json%,}}"
+fmap_to_json="${fmap_to_json%,}}"
 
 echo "($(date)) [INFO] JSON mapping: $fmap_to_json"
 
