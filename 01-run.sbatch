@@ -41,4 +41,4 @@ sbatch \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/prepare_fmri.sh
+    ./${JOB_NAME}/prepare_fmri.sh ${JOB_NAME}
