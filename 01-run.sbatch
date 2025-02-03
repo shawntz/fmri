@@ -1,8 +1,8 @@
 #!/bin/sh
 
-JOB_NAME="01-prepare"
-
 source ./settings.sh
+
+JOB_NAME="01-prepare"
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
