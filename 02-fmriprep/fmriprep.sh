@@ -41,8 +41,8 @@ log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
 processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
 # first clean up caches
-rm -rf ${TEMPLATEFLOW_HOST_HOME}
-rm -rf ${FMRIPREP_HOST_CACHE}
+# rm -rf ${TEMPLATEFLOW_HOST_HOME}
+# rm -rf ${FMRIPREP_HOST_CACHE}
 
 # setup dirs (if needed)
 mkdir -p ${DERIVS_DIR}
