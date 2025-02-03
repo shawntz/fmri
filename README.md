@@ -45,13 +45,13 @@ The template provides a standardized structure and validated scripts that you ca
 After creating your repository from this template:
 
 1. Clone your new repository
-2. Copy `prepare.template.sh` to `prepare.sh` and customize parameters
+2. Copy `settings.template.sh` to `settings.sh` and customize parameters
 3. Modify paths and scan parameters for your study
 4. Follow the `configuration guide` in the detailed documentation below
 
 ---
 
-# Configuration Guide
+# SML fMRI Configuration Guide
 
 ## Overview
 The preprocessing pipeline requires proper configuration of several parameters to handle your study's specific requirements. This guide explains how to set up the `settings.sh` file that controls the pipeline's behavior.
@@ -59,11 +59,15 @@ The preprocessing pipeline requires proper configuration of several parameters t
 > [!IMPORTANT]  
 > ## Submitting Jobs to Slurm Workload Manager
 >
-> Each core step directory (e.g., `01-prepare`) contains an executable `submit_job.sbatch` script.
+> Each core step directory (e.g., `01-prepare`) has an associated sidecar executable (e.g., `01-run.sbatch`).
 > Thus, from the root of your project scripts directory, you can call:
 
 ```bash
-./01-prepare/submit_job.sbatch
+# example: running step 1
+./01-run.sbatch
+
+# example: running step 2
+./02-run.sbatch --anat-only
 ```
 
 ## Configuration Steps
@@ -77,6 +81,10 @@ cp settings.template.sh settings.sh
 - Set `BASE_DIR` to your study's root directory
 - Ensure `RAW_DIR` points to your BIDS-formatted data
 - Verify `TRIM_DIR` location for trimmed BIDS-compliant outputs that will later be used for fmriprep
+- Set `WORKFLOW_LOG_DIR` for fMRIPrep workflow logs
+- Set `TEMPLATEFLOW_HOST_HOME` for templateflow local cache
+- Set `FMRIPREP_HOST_CACHE` for fmriprep local cache
+- Set `FREESURFER_LICENSE` to the location of your `freesurfer` license
 
 ### 3. Set Study Parameters
 - Update `task_id` to match your BIDS task name
@@ -92,8 +100,22 @@ cp settings.template.sh settings.sh
 - Update `fmap_mapping` to reflect your fieldmap/BOLD correspondence
 - Ensure each BOLD run has a corresponding fieldmap entry
 
-### 6. Set Permissions
+### 6. Specify Subject IDs
+- Copy `all-subjects.template.txt` to `all-subjects.txt` and list all subject ids (just the numbers, not the "sub-" part)
+
+### 7. Set Permissions
 - Adjust `DIR_PERMISSIONS` and `FILE_PERMISSIONS` based on your system requirements
+
+### 8. Setup General Slurm Job Manager Parameters
+
+### 9. Setup `fMRIPrep` Pipeline Paths
+
+### 10. Setup fMRIPrep-specific Slurm Parameters
+
+### 11. Setup `fMRIPrep` Command Prompt
+
+### 12. Miscellaneous Settings
+- Enable `DEBUG` mode (for testing)
 
 ---
 
@@ -104,9 +126,14 @@ cp settings.template.sh settings.sh
 # ============================================================================
 # (1) SETUP DIRECTORIES
 # ============================================================================
-BASE_DIR='/my/project/dir'           # ROOT DIR FOR THE STUDY
+BASE_DIR="/my/project/dir"           # ROOT DIR FOR THE STUDY
+SCRIPTS_DIR="${BASE_DIR}/scripts"    # PATH OF CLONED FMRI REPO
 RAW_DIR="${BASE_DIR}/bids"           # RAW BIDS-COMPLIANT DATA LOCATION
 TRIM_DIR="${BASE_DIR}/bids_trimmed"  # DESIRED DESTINATION FOR PROCESSED DATA
+WORKFLOW_LOG_DIR="${BASE_DIR}/logs/workflows"
+TEMPLATEFLOW_HOST_HOME="${HOME}/.cache/templateflow"
+FMRIPREP_HOST_CACHE="${HOME}/.cache/fmriprep"
+FREESURFER_LICENSE="${HOME}/freesurfer.txt"
 ```
 
 ### Email Update Preference
@@ -134,7 +161,7 @@ run_numbers=("01" "02" "03" "04" "05" "06" "07" "08")  # ALL TASK BOLD RUN NUMBE
 # (4) DATA VALIDATION VALUES FOR UNIT TESTS
 # ============================================================================
 EXPECTED_FMAP_VOLS=12   # EXPECTED NUMBER OF VOLUMES IN ORIGINAL FIELDMAP SCANS
-EXPECTED_BOLD_VOLS=440  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
+EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
 ```
 
 ### Fieldmap (fmap) Mapping
@@ -156,10 +183,30 @@ declare -A fmap_mapping=(
 )
 ```
 
+### Specifying Subject IDs
+```bash
+# ============================================================================
+# (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING
+# ============================================================================
+# by default, subjects will be pulled from the master `all-subjects.txt` file
+# however, if you want to specify different subject lists per pipeline step,
+# you may do so here by following this general template:
+#
+# declare -A subjects_mapping=(
+#     ["01-prepare"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
+#     ["02-fmriprep"]="02-subjects.txt"
+# )
+#
+# note: keep in mind that we've built in checks at the beginning of each pipeline
+# step that skip a subject if there's already a record of them being preprocessed;
+# thus, you shouldn't necessarily need separate 0x-subjects.txt files per step
+# unless this extra layer of control is useful for your needs.
+```
+
 ### Permissions
 ```bash
 # ============================================================================
-# (6) DEFAULT PERMISSIONS
+# (7) DEFAULT PERMISSIONS
 # ============================================================================
 DIR_PERMISSIONS=775   # DIRECTORY LEVEL
 FILE_PERMISSIONS=775  # FILE LEVEL
@@ -168,23 +215,59 @@ FILE_PERMISSIONS=775  # FILE LEVEL
 ### Slurm Job Header Configurator
 ```bash
 # ============================================================================
-# (7) SLURM JOB HEADER CONFIGURATOR
+# (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
-# count number of subjects
-num_subjects=$(wc -l < subjects.txt)
-echo "($(date)) [INFO] Found ${num_subjects} subjects"
-#
-# compute array size (0 to num_subjects-1 since array indices start at 0)
-array_range="0-$((num_subjects-1))"
-#
+num_subjects=$(wc -l < "all-subjects.txt")  # count number of subjects
+echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
+array_range="0-$((num_subjects-1))"  # compute array size (0 to num_subjects-1 since array indices start at 0)
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
-export SLURM_MEM="16GB"
-export SLURM_CPUS="1"
+export SLURM_MEM="8G"  # memory alloc per cpu
+export SLURM_CPUS="8"
 export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
 export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
-export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm/"  # use BASE_DIR from main settings file
+export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings file
+export SLURM_PARTITION="hns,normal"  # compute resource preferences order
+```
+
+### fMRIPrep Settings
+```bash
+# ============================================================================
+# (9) PIPELINE SETTINGS
+# ============================================================================
+FMRIPREP_VERSION="24.0.1"
+DERIVS_DIR="${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}"
+SINGULARITY_IMAGE_DIR="${BASE_DIR}/singularity_images"
+SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
 #
+# ============================================================================
+# (10) FMRIPREP SPECIFIC SLURM SETTINGS
+# ============================================================================
+FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
+FMRIPREP_SLURM_ARRAY_SIZE=1
+FMRIPREP_SLURM_TIME="12:00:00"
+FMRIPREP_SLURM_CPUS_PER_TASK="16"
+FMRIPREP_SLURM_MEM_PER_CPU="4G"
+#
+# ============================================================================
+# (11) FMRIPREP SETTINGS 
+# ============================================================================
+FMRIPREP_OMP_THREADS=8
+FMRIPREP_NTHREADS=12
+FMRIPREP_MEM_MB=30000
+FMRIPREP_FD_SPIKE_THRESHOLD=0.9
+FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
+FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+```
+
+### Miscellaneous
+
+```bash
+# ============================================================================
+# (12) MISC SETTINGS 
+# ============================================================================
+# Debug mode (0=off, 1=on)
+DEBUG=0
 ```
 
 ---
