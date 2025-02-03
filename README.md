@@ -67,7 +67,12 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ./01-run.sbatch
 
 # example: running step 2
+# here, --anat-only is an optional flag that is passed directly to fMRIPrep
+# use this if you only want to run anatomical workflows:
 ./02-run.sbatch --anat-only
+#
+# otherwise, to run both anatomical and functional workflows, use this:
+./02-run.sbatch
 ```
 
 ## Configuration Steps
