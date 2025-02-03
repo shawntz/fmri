@@ -1,9 +1,9 @@
 #!/bin/sh
 
+source ./settings.sh
+
 JOB_NAME="02-fmriprep"
 ANAT_ONLY_FLAG=$1  # optional setting for anat-only processing
-
-source ./settings.sh
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
