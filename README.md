@@ -4,11 +4,16 @@ This repo is a work in progress intended to transform the [Stanford Memory Lab's
 
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
 
-- [x] 1. dummy scan removal,
-- [x] 2. fieldmap-based susceptibility distortion correction,
-- [x] 3. fMRIPrep,
-- [ ] 4. mask generation, and
-- [ ] 5. model spec generation (level 1, level 2, and single trial GLM)
+- [ ] 1. automated transfer of scanner acquisitions from FlyWheel -> BIDS format + `dcm2niix` DICOM to NIfTI converter,
+- [x] 2. dummy scan removal,
+- [x] 3. fieldmap-based susceptibility distortion correction,
+- [x] 4. fMRIPrep,
+- [ ] 5. spatial smoothing (SUSAN) post-fMRIPrep processing,
+- [ ] 6. plug-and-play fMRIQC reports,
+- [ ] 7. mask generation,
+- [ ] 8. model spec generation (level 1, level 2, and single trial GLM), and
+- [ ] 9. automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage) 
+
 
 > [!NOTE]
 > - [x] indicates workflows that have been finished and validated
