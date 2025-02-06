@@ -226,12 +226,15 @@ for run_bold in "${run_numbers[@]}"; do
   chmod "${FILE_PERMISSIONS}" "${TRIM_DIR}"/"${subject}"/fmap/"${subject}"_acq-"${new_task_id}"_run-"${run_fmap}"_dir-AP_epi.nii.gz
   chmod "${FILE_PERMISSIONS}" "${TRIM_DIR}"/"${subject}"/fmap/"${subject}"_acq-"${new_task_id}"_run-"${run_fmap}"_dir-AP_epi.json
 
-echo "($(date)) [INFO] Final volume summary:" | tee -a ${log_file}
-echo "  Original BOLD volumes: ${EXPECTED_BOLD_VOLS}" | tee -a ${log_file}
-echo "  Retained BOLD volumes: ${remain_bold_vols}" | tee -a ${log_file}
-echo "  Original fieldmap volumes: ${EXPECTED_FMAP_VOLS}" | tee -a ${log_file}
-echo "  Retained fieldmap volumes: ${remain_fmap_vols}" | tee -a ${log_file}
-echo "  Dummy volumes removed: ${n_dummy}" | tee -a ${log_file}
+  # summary
+  echo "......................................" | tee -a "${log_file}"
+  echo "($(date)) [INFO] Final volume summary:" | tee -a "${log_file}"
+  echo "  Original BOLD volumes: ${EXPECTED_BOLD_VOLS}" | tee -a "${log_file}"
+  echo "  Retained BOLD volumes: ${remain_bold_vols}" | tee -a "${log_file}"
+  echo "  Original fieldmap volumes: ${EXPECTED_FMAP_VOLS}" | tee -a "${log_file}"
+  echo "  Retained fieldmap volumes: ${remain_fmap_vols}" | tee -a "${log_file}"
+  echo "  Dummy volumes removed: ${n_dummy}" | tee -a "${log_file}"
+  echo "......................................" | tee -a "${log_file}"
 done
 
 
