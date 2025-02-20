@@ -12,7 +12,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [ ] 6. plug-and-play fMRIQC reports,
 - [ ] 7. mask generation,
 - [ ] 8. model spec generation (level 1, level 2, and single trial GLM), and
-- [ ] 9. automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage) 
+- [ ] 9. automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 
 > [!NOTE]
@@ -22,7 +22,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 ## Using this Template
 
 1. Click the "Use this template" button at the top of this repository
-2. Select "Create a new repository" 
+2. Select "Create a new repository"
 3. Choose a name for your repository
 4. Select whether you want it to be public or private
 5. Click "Create repository from template"
@@ -30,7 +30,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 This will create a new repository with all the files from this template, allowing you to customize it for your specific preprocessing needs while maintaining the core functionality for handling:
 
 - Fieldmap-based distortion correction
-- Dummy scan removal 
+- Dummy scan removal
 - BIDS-compliance
 - JSON metadata management
 - Quality control checks
@@ -44,6 +44,7 @@ The template provides a standardized structure and validated scripts that you ca
 - Documentation and usage guides
 - Quality control utilities
 - BIDS metadata management tools
+- An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started
 
@@ -61,12 +62,36 @@ After creating your repository from this template:
 ## Overview
 The preprocessing pipeline requires proper configuration of several parameters to handle your study's specific requirements. This guide explains how to set up the `settings.sh` file that controls the pipeline's behavior.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > ## Submitting Jobs to Slurm Workload Manager
 >
-> Each core step directory (e.g., `01-prepare`) has an associated sidecar executable (e.g., `01-run.sbatch`).
-> Thus, from the root of your project scripts directory, you can call:
+> There are two approaches you can take to trigger each preprocessing step following proper configuration in the `settings.sh` file:
+>
+> 1) Use the provided TUI `launcher` executable, which provides an interactive popup window with more context and explanations + interactive parameter setting (as needed) for any given step.
+>
+> 2) Manually running each step's sidecar executable, which for each core step directory (e.g., `01-prepare`), there exists an associated sidecar executable (e.g., `01-run.sbatch`).
+>
+> Note: The provided `launcher` mentioned in point 1 above simply calls upon these sidecar executables; the added context and interactivity of this method may be more comfortable for users less familiar with running commands in the terminal.
+>
+> Thus, from the root of your project scripts directory, you can either call:
 
+### graphical TUI `launcher` executable approach
+```bash
+./launcher
+```
+
+#### `launcher` welcome screen:
+![TUI Welcome Screen](screenshots/welcome_screen.png)
+
+#### `launcher` workflow selector:
+![TUI Workflow Selector](screenshots/workflow_selector.png)
+
+#### `launcher` example parameter selector for the `fmriprep` step
+![TUI Example Parameter Selector Screen](screenshots/example_param.png)
+
+##### or
+
+### manually calling upon each sidecar executable
 ```bash
 # example: running step 1
 ./01-run.sbatch
@@ -154,7 +179,7 @@ FREESURFER_LICENSE="${HOME}/freesurfer.txt"
 USER_EMAIL="hello@stanford.edu"
 ```
 
-### Study Parameters 
+### Study Parameters
 ```bash
 # ============================================================================
 # (3) TASK/SCAN PARAMETERS
@@ -179,7 +204,7 @@ EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
 # ============================================================================
-# example: here, each fmap covers two runs, 
+# example: here, each fmap covers two runs,
 #  so define the mapping as such:
 declare -A fmap_mapping=(
     ["01"]="01"  # TASK BOLD RUN 01 USES FMAP 01
@@ -260,7 +285,7 @@ FMRIPREP_SLURM_CPUS_PER_TASK="16"
 FMRIPREP_SLURM_MEM_PER_CPU="4G"
 #
 # ============================================================================
-# (11) FMRIPREP SETTINGS 
+# (11) FMRIPREP SETTINGS
 # ============================================================================
 FMRIPREP_OMP_THREADS=8
 FMRIPREP_NTHREADS=12
@@ -274,7 +299,7 @@ FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
 
 ```bash
 # ============================================================================
-# (12) MISC SETTINGS 
+# (12) MISC SETTINGS
 # ============================================================================
 # Debug mode (0=off, 1=on)
 DEBUG=0
@@ -298,12 +323,12 @@ DEBUG=0
 > - Permission issues
 
 
-> [!NOTE]  
+> [!NOTE]
 > ### Comments, suggestions, questions, issues?
 >
 > Please use the issues tab (<https://github.com/shawntz/fmri/issues>) to make note of any bugs, comments, suggestions, feedback, etc… all are welcomed and appreciated, thanks!
-> 
-> cheers, 
+>
+> cheers,
 > shawn
 
 ---
@@ -311,17 +336,17 @@ DEBUG=0
 <div align="center">
 
 ## SML fMRI Dev Team
-    
+
 |    | Team Member | Role |
 | :----------: |  :-------------: | :-------------: |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/shawn_sf_ggb_2022_square_0.jpg?h=a11293b4&itok=XexnOeUL" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/shawn-schwartz-ms-ma" target="_blank">Shawn Schwartz, M.S., M.A.</a> <br> (Ph.D. Candidate) | `Lead Developer` <br> `Maintainer` <br> `Project Conception` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/jintao_photo_0.jpg?h=5d522a5b&itok=hihL4GJO" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/jintao-sheng-phd" target="_blank">Jintao Sheng, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/mostrecent_0.jpg?h=f926125a&itok=fiqkxKMx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/haopei-yang-phd" target="_blank">Haopei Yang, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/douglas_photo_3.jpg?h=816b21b2&itok=52F62G61" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/douglas-miller" target="_blank">Douglas Miller, B.A.</a> <br> (Ph.D. Candidate) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/subbu_photo_0.jpeg?h=2a9f3bd2&itok=eukzENYx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/subbulakshmi-s-phd" target="_blank">Subbulakshmi S, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/img_1581_0.jpg?h=1f7c1d57&itok=V666sxOZ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/mingjian-he-phd" target="_blank">Mingjian (Alex) He, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/thumbnail_atrelle_0.jpg?h=8234d0a0&itok=lg9VP9wQ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/ali-trelle-phd" target="_blank">Ali Trelle, Ph.D.</a> <br> (Instructor, SoM) | `Core Contributor` | 
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/screen_shot_2019-07-23_at_9.19.36_pm_copy.png?h=5fbe367e&itok=N4uE8LH4" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/anthony-d-wagner-phd" target="_blank">Anthony Wagner, Ph.D.</a> <br> (PI) | `Lab Director` <br> `Conceptual Reviewer` | 
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/shawn_sf_ggb_2022_square_0.jpg?h=a11293b4&itok=XexnOeUL" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/shawn-schwartz-ms-ma" target="_blank">Shawn Schwartz, M.S., M.A.</a> <br> (Ph.D. Candidate) | `Lead Developer` <br> `Maintainer` <br> `Project Conception` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/jintao_photo_0.jpg?h=5d522a5b&itok=hihL4GJO" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/jintao-sheng-phd" target="_blank">Jintao Sheng, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/mostrecent_0.jpg?h=f926125a&itok=fiqkxKMx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/haopei-yang-phd" target="_blank">Haopei Yang, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/douglas_photo_3.jpg?h=816b21b2&itok=52F62G61" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/douglas-miller" target="_blank">Douglas Miller, B.A.</a> <br> (Ph.D. Candidate) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/subbu_photo_0.jpeg?h=2a9f3bd2&itok=eukzENYx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/subbulakshmi-s-phd" target="_blank">Subbulakshmi S, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/img_1581_0.jpg?h=1f7c1d57&itok=V666sxOZ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/mingjian-he-phd" target="_blank">Mingjian (Alex) He, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/thumbnail_atrelle_0.jpg?h=8234d0a0&itok=lg9VP9wQ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/ali-trelle-phd" target="_blank">Ali Trelle, Ph.D.</a> <br> (Instructor, SoM) | `Core Contributor` |
+| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/screen_shot_2019-07-23_at_9.19.36_pm_copy.png?h=5fbe367e&itok=N4uE8LH4" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/anthony-d-wagner-phd" target="_blank">Anthony Wagner, Ph.D.</a> <br> (PI) | `Lab Director` <br> `Conceptual Reviewer` |
 
 ### Want to Be Listed?
 Make significant contributions to the project and get listed here! <br> See our [Contributing Guidelines](CONTRIBUTING.md) for how to get involved.
