@@ -86,7 +86,7 @@ The preprocessing pipeline requires proper configuration of several parameters t
 #### `launcher` workflow selector:
 ![TUI Workflow Selector](screenshots/workflow_selector.png)
 
-#### `launcher` example parameter selector for the `fmriprep` step
+#### `launcher` example parameter selector for the `fmriprep` step:
 ![TUI Example Parameter Selector Screen](screenshots/example_param.png)
 
 ##### or
