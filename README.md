@@ -77,7 +77,7 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 ### graphical TUI `launcher` executable approach
 ```bash
-./launcher
+./launch
 ```
 
 #### `launcher` welcome screen:
