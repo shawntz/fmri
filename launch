@@ -1,0 +1,135 @@
+#!/bin/bash
+
+if ! command -v dialog &>/dev/null; then
+  echo "Error: 'dialog' is not installed. Please install it (e.g., brew install dialog for macOS, sudo apt install dialog for Ubuntu, etc.)."
+  exit 1
+fi
+
+# theming and fun stuff :)
+export DIALOGRC="$(dirname "$0")/.dialogrc"
+
+source ascii.sh
+
+dialog --colors --title "Welcome!" --msgbox "$ascii_art" 21 62
+clear
+
+###############################################################################
+# STEP CONFIGS:
+###############################################################################
+declare -a step0_param_keys=()
+declare -a step0_param_prompts=()
+
+declare -a step1_param_keys=()
+declare -a step1_param_prompts=()
+
+declare -a step2_param_keys=("anat_only")
+declare -a step2_param_prompts=("Only run anatomical workflows?")
+
+declare -a step3_param_keys=()
+declare -a step3_param_prompts=()
+
+###############################################################################
+# DIALOG MENU:
+###############################################################################
+menu_items=(
+  1 "Step 0: FlyWheel -> dcm2niix"
+  2 "Step 1: Prepare (remove dummy scans, config fmap SDC)"
+  3 "Step 2: Run fMRIPrep"
+  4 "Step 3: Postprocessing (spatial smoothing, group average volume)"
+)
+
+step_choice=$(dialog --clear --title "meta fmriprep interactive pipeline" \
+  --menu "Select the step you want to run:" 21 80 4 \
+  "${menu_items[@]}" \
+  3>&1 1>&2 2>&3)
+
+clear
+
+if [ -z "$step_choice" ]; then
+  echo "No step selected. Exiting."
+  exit 1
+fi
+
+case $step_choice in
+  1)
+    selected_script="00-run.sbatch"
+    param_keys=("${step0_param_keys[@]}")
+    param_prompts=("${step0_param_prompts[@]}")
+    ;;
+  2)
+    selected_script="01-run.sbatch"
+    param_keys=("${step1_param_keys[@]}")
+    param_prompts=("${step1_param_prompts[@]}")
+    ;;
+  3)
+    selected_script="02-run.sbatch"
+    param_keys=("${step2_param_keys[@]}")
+    param_prompts=("${step2_param_prompts[@]}")
+    ;;
+  4)
+    selected_script="03-run.sbatch"
+    param_keys=("${step3_param_keys[@]}")
+    param_prompts=("${step3_param_prompts[@]}")
+    ;;
+  *)
+    echo "Invalid selection."
+    exit 1
+    ;;
+esac
+
+###############################################################################
+# PROMPT FOR PARAMETERS
+###############################################################################
+declare -a user_inputs=()
+for i in "${!param_keys[@]}"; do
+  key="${param_keys[$i]}"
+  prompt="${param_prompts[$i]}"
+
+  # special case for anat-only yes/no dialog
+  if [ "$key" = "anat_only" ]; then
+    dialog --title "Parameter: $key" --yesno "$prompt" 8 60
+    if [ $? -eq 0 ]; then
+      user_inputs[$i]="--anat-only"
+    fi
+  else
+    input=$(dialog --clear --inputbox "$prompt" 8 60 3>&1 1>&2 2>&3)
+
+    # input validation
+    while [ -z "$input" ]; do
+      dialog --msgbox "Input for '$key' cannot be empty.\nExample: $prompt" 8 60
+      input=$(dialog --clear --inputbox "$prompt" 8 60 3>&1 1>&2 2>&3)
+    done
+
+    user_inputs[$i]="$input"
+  fi
+done
+
+###############################################################################
+# CONFIRMATION
+###############################################################################
+response=0
+
+if [ "${#user_inputs[@]}" -ne 0 ]; then
+  confirm_msg="You have entered the following parameters:\n"
+  for k in "${!user_inputs[@]}"; do
+    confirm_msg+="$k: ${user_inputs[$k]}\n"
+  done
+  confirm_msg+="\nProceed with execution?"
+
+  dialog --clear --title "Confirm Parameters" --yesno "$confirm_msg" 12 60
+  response=$?
+  clear
+
+  bash "$selected_script" "${user_inputs[@]}"
+else
+  bash "$selected_script"
+fi
+
+if [ $response -ne 0 ]; then
+  echo "Operation cancelled."
+  exit 0
+fi
+
+###############################################################################
+# EXECUTION
+###############################################################################
