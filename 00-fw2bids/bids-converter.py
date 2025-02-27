@@ -19,13 +19,14 @@ Arguments:
 """
 
 import argparse
+import json
 import logging
 import os
 import shutil
 import tarfile
 from glob import glob
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 
 
 class BIDSConverter:
@@ -41,4 +42,3 @@ class BIDSConverter:
         self.t1_series = t1_series
         self.t2_series = t2_series
         self.mt_series = mt_series
-        
