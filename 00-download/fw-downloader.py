@@ -51,7 +51,7 @@ class FlywheelDownloader:
         return logger
 
     def _get_api_key(self) -> str:
-        fw_api_key_path = f'/home/users/{self.user}/{self.fw_api_key_file}'
+        fw_api_key_path = f'{self.fw_api_key_file}'
 
         try:
             with open(fw_api_key_path, 'r') as fw_file:
