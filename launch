@@ -1,135 +1,235 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-if ! command -v dialog &>/dev/null; then
-  echo "Error: 'dialog' is not installed. Please install it (e.g., brew install dialog for macOS, sudo apt install dialog for Ubuntu, etc.)."
-  exit 1
-fi
+import os
+import sys
+import subprocess
+import shutil
+from pathlib import Path
 
-# theming and fun stuff :)
-export DIALOGRC="$(dirname "$0")/.dialogrc"
 
-source ascii.sh
+SCRIPT_DIR = Path(__file__).parent
 
-dialog --colors --title "Welcome!" --msgbox "$ascii_art" 21 62
-clear
+def load_ascii_art():
+    return """
+    ███████╗███╗   ███╗██████╗ ██╗
+    ██╔════╝████╗ ████║██╔══██╗██║
+    █████╗  ██╔████╔██║██████╔╝██║
+    ██╔══╝  ██║╚██╔╝██║██╔══██╗██║
+    ██║     ██║ ╚═╝ ██║██║  ██║██║
+    ╚═╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝
 
-###############################################################################
-# STEP CONFIGS:
-###############################################################################
-declare -a step0_param_keys=()
-declare -a step0_param_prompts=()
+    ██████╗ ██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗
+    ██╔══██╗██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝
+    ██████╔╝██║██████╔╝█████╗  ██║     ██║██╔██╗ ██║█████╗
+    ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║     ██║██║╚██╗██║██╔══╝
+    ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗
+    ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
+    """
 
-declare -a step1_param_keys=()
-declare -a step1_param_prompts=()
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
-declare -a step2_param_keys=("anat_only")
-declare -a step2_param_prompts=("Only run anatomical workflows?")
+def clear_screen():
+    os.system('clear' if os.name == 'posix' else 'cls')
 
-declare -a step3_param_keys=()
-declare -a step3_param_prompts=()
+def get_terminal_size():
+    try:
+        columns, rows = shutil.get_terminal_size()
+        return columns, rows
+    except:
+        return 80, 24  # default fallback
 
-###############################################################################
-# DIALOG MENU:
-###############################################################################
-menu_items=(
-  1 "Step 0: FlyWheel -> dcm2niix"
-  2 "Step 1: Prepare (remove dummy scans, config fmap SDC)"
-  3 "Step 2: Run fMRIPrep"
-  4 "Step 3: Postprocessing (spatial smoothing, group average volume)"
-)
+def print_centered(text, color=None):
+    columns, _ = get_terminal_size()
+    text = text.strip()
 
-step_choice=$(dialog --clear --title "meta fmriprep interactive pipeline" \
-  --menu "Select the step you want to run:" 21 80 4 \
-  "${menu_items[@]}" \
-  3>&1 1>&2 2>&3)
+    if color:
+        formatted_text = f"{color}{text}{Colors.ENDC}"
+    else:
+        formatted_text = text
 
-clear
+    print(formatted_text.center(columns))
 
-if [ -z "$step_choice" ]; then
-  echo "No step selected. Exiting."
-  exit 1
-fi
+def print_header():
+    columns, _ = get_terminal_size()
+    print('\n')
+    print('=' * columns)
+    print_centered("META-FMRIPREP INTERACTIVE PIPELINE: MENU", Colors.BOLD + Colors.BLUE)
+    print('=' * columns)
+    print('\n')
 
-case $step_choice in
-  1)
-    selected_script="00-run.sbatch"
-    param_keys=("${step0_param_keys[@]}")
-    param_prompts=("${step0_param_prompts[@]}")
-    ;;
-  2)
-    selected_script="01-run.sbatch"
-    param_keys=("${step1_param_keys[@]}")
-    param_prompts=("${step1_param_prompts[@]}")
-    ;;
-  3)
-    selected_script="02-run.sbatch"
-    param_keys=("${step2_param_keys[@]}")
-    param_prompts=("${step2_param_prompts[@]}")
-    ;;
-  4)
-    selected_script="03-run.sbatch"
-    param_keys=("${step3_param_keys[@]}")
-    param_prompts=("${step3_param_prompts[@]}")
-    ;;
-  *)
-    echo "Invalid selection."
-    exit 1
-    ;;
-esac
+def display_ascii_art():
+    ascii_art = load_ascii_art()
+    print(ascii_art)
+    input(f"\n{Colors.GREEN}Press Enter to continue...{Colors.ENDC}")
+    clear_screen()
 
-###############################################################################
-# PROMPT FOR PARAMETERS
-###############################################################################
-declare -a user_inputs=()
-for i in "${!param_keys[@]}"; do
-  key="${param_keys[$i]}"
-  prompt="${param_prompts[$i]}"
+def get_user_input(prompt, options=None, default=None, yes_no=False):
+    if yes_no:
+        while True:
+            if default is not None:
+                default_text = "Y/n" if default else "y/N"
+                user_input = input(f"{prompt} [{default_text}]: ").strip().lower()
+                if user_input == "":
+                    return default
+            else:
+                user_input = input(f"{prompt} [y/n]: ").strip().lower()
 
-  # special case for anat-only yes/no dialog
-  if [ "$key" = "anat_only" ]; then
-    dialog --title "Parameter: $key" --yesno "$prompt" 8 60
-    if [ $? -eq 0 ]; then
-      user_inputs[$i]="--anat-only"
-    fi
-  else
-    input=$(dialog --clear --inputbox "$prompt" 8 60 3>&1 1>&2 2>&3)
+            if user_input in ['y', 'yes']:
+                return True
+            elif user_input in ['n', 'no']:
+                return False
+            else:
+                print(f"{Colors.YELLOW}Please enter 'y' or 'n'.{Colors.ENDC}")
+    else:
+        while True:
+            if default is not None:
+                user_input = input(f"{prompt} [{default}]: ").strip()
+                if user_input == "":
+                    return default
+            else:
+                user_input = input(f"{prompt}: ").strip()
 
-    # input validation
-    while [ -z "$input" ]; do
-      dialog --msgbox "Input for '$key' cannot be empty.\nExample: $prompt" 8 60
-      input=$(dialog --clear --inputbox "$prompt" 8 60 3>&1 1>&2 2>&3)
-    done
+            if options is None:
+                if user_input:  # ensure non-empty input
+                    return user_input
+                else:
+                    print(f"{Colors.YELLOW}Input cannot be empty.{Colors.ENDC}")
+            elif user_input in [str(o) for o in options]:
+                return user_input
+            else:
+                print(f"{Colors.YELLOW}Invalid input. Please enter one of: {', '.join([str(o) for o in options])}{Colors.ENDC}")
 
-    user_inputs[$i]="$input"
-  fi
-done
+def display_menu():
+    print_header()
 
-###############################################################################
-# CONFIRMATION
-###############################################################################
-response=0
+    menu_items = [
+        ("1", "Step 0: Download from FlyWheel -> Server"),
+        ("2", "Step 1: Run dcm2niix"),
+        ("3", "Step 2: PREPare (remove dummy scans, config fmap SDC)"),
+        ("4", "Step 3: Run fMRIPrep"),
+        ("5", "Step 4: Postprocessing (spatial smoothing, group average volume)")
+    ]
 
-if [ "${#user_inputs[@]}" -ne 0 ]; then
-  confirm_msg="You have entered the following parameters:\n"
-  for k in "${!user_inputs[@]}"; do
-    confirm_msg+="$k: ${user_inputs[$k]}\n"
-  done
-  confirm_msg+="\nProceed with execution?"
+    print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
+    for key, description in menu_items:
+        print(f"{Colors.GREEN}{key}.{Colors.ENDC} {description}")
+    print()
 
-  dialog --clear --title "Confirm Parameters" --yesno "$confirm_msg" 12 60
-  response=$?
-  clear
+    options = [item[0] for item in menu_items]
+    step_choice = get_user_input("Enter your choice", options)
 
-  bash "$selected_script" "${user_inputs[@]}"
-else
-  bash "$selected_script"
-fi
+    return step_choice
 
-if [ $response -ne 0 ]; then
-  echo "Operation cancelled."
-  exit 0
-fi
+def get_parameters(step_choice):
+    step_params = {
+        "1": {  # Step 0 (Flywheel Downloader)
+            "keys": ["fw_subid", "fw_session_id", "new_bids_id_number"],
+            "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
+        },
+        "2": {  # Step 1 (dcm2niix)
+            "keys": [],
+            "prompts": []
+        },
+        "3": {  # Step 2 (PREPare)
+            "keys": [],
+            "prompts": []
+        },
+        "4": {  # Step 3 (fmriprep)
+            "keys": ["anat_only"],
+            "prompts": ["Only run anatomical workflows?"]
+        },
+        "5": {  # Step 4 (postproc)
+            "keys": [],
+            "prompts": []
+        }
+    }
 
-###############################################################################
-# EXECUTION
-###############################################################################
+    param_keys = step_params[step_choice]["keys"]
+    param_prompts = step_params[step_choice]["prompts"]
+
+    user_inputs = []
+
+    for i in range(len(param_keys)):
+        key = param_keys[i]
+        prompt = param_prompts[i]
+
+        # special case for anat-only yes/no
+        if key == "anat_only":
+            response = get_user_input(prompt, yes_no=True)
+            if response:
+                user_inputs.append("--anat-only")
+        else:
+            input_value = get_user_input(prompt)
+            user_inputs.append(input_value)
+
+    return user_inputs, param_keys
+
+def confirm_parameters(user_inputs, param_keys):
+    if not user_inputs:
+        return True
+
+    print(f"\n{Colors.BOLD}You have entered the following parameters:{Colors.ENDC}")
+
+    for i, value in enumerate(user_inputs):
+        if i < len(param_keys):
+            key = param_keys[i]
+            print(f"  {key}: {value}")
+        else:
+            print(f"  Parameter {i}: {value}")
+
+    print()
+    return get_user_input("Proceed with execution?", yes_no=True, default=True)
+
+def run_script(step_choice, user_inputs):
+    # map step choice to script name
+    scripts = {
+        "1": "00-run.sbatch",
+        "2": "01-run.sbatch",
+        "3": "01-run.sbatch",
+        "4": "02-run.sbatch",
+        "5": "03-run.sbatch"
+    }
+
+    selected_script = scripts[step_choice]
+
+    cmd = ["bash", selected_script] + user_inputs
+
+    print(f"\n{Colors.BOLD}Executing:{Colors.ENDC} {' '.join(cmd)}")
+
+    try:
+        subprocess.run(cmd)
+    except Exception as e:
+        print(f"{Colors.RED}Error running script: {e}{Colors.ENDC}")
+        return False
+
+    return True
+
+def main():
+    clear_screen()
+    display_ascii_art()
+
+    step_choice = display_menu()
+    clear_screen()
+
+    user_inputs, param_keys = get_parameters(step_choice)
+
+    if confirm_parameters(user_inputs, param_keys):
+        success = run_script(step_choice, user_inputs)
+
+        if success:
+            print(f"\n{Colors.GREEN}Script executed successfully.{Colors.ENDC}")
+        else:
+            print(f"\n{Colors.RED}Script execution failed.{Colors.ENDC}")
+    else:
+        print(f"\n{Colors.YELLOW}Operation cancelled.{Colors.ENDC}")
+
+if __name__ == "__main__":
+    main()
