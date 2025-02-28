@@ -144,11 +144,9 @@ class FlywheelDownloader:
 
             _, dir_nifti, dir_dicom = self.make_directories()
 
-            if not self.download('nifti', dir_nifti):
-                return False
+            self.download('nifti', dir_nifti)
 
-            if not self.download('dicom', dir_dicom):
-                return False
+            self.download('dicom', dir_dicom)
 
             self.logger.info("Flywheel Downloader workflow completed successfully!")
             return True
