@@ -74,7 +74,7 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/fw-downloader.py \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
   --fw_instance_url "${FW_URL}" \
-  --fw_api_key_file "${FW_CLI_API_KEY_FILE}
+  --fw_api_key_file "${FW_CLI_API_KEY_FILE}"
 echo "($(date)) [INFO] Flywheel download complete" | tee -a "${log_file}"
 
 echo "${fw_subid}" >> "${processed_file}"
