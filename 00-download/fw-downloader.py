@@ -106,10 +106,13 @@ class FlywheelDownloader:
                 return False
 
             _, dir_nifti, dir_dicom = self.make_directories()
+            print("directories made")
 
+            print("now at nift")
             if not self.download('nifti', dir_nifti):
+                print("nifti err")
                 return False
-
+            print("made it out of nift")
             if not self.download('dicom', dir_dicom):
                 return False
 
