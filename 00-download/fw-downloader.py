@@ -21,6 +21,7 @@ Arguments:
 import argparse
 import os
 import logging
+import subprocess
 from typing import Tuple
 
 
@@ -92,13 +93,19 @@ class FlywheelDownloader:
             self.logger.info(f"Downloading {data_type} files...")
             self.logger.info(f"Executing: {cmd}")
 
-            return_code = os.system(cmd)
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
 
-            if return_code == 0:
+            if result.returncode == 0:
                 self.logger.info(f"{data_type} download completed successfully")
                 return True
             else:
-                self.logger.error(f"{data_type} download failed with return code {return_code}")
+                self.logger.error(f"{data_type} download failed with return code {result.returncode}")
+                self.logger.error(f"STDERR: {result.stderr}")
                 return False
 
         except Exception as e:
@@ -111,13 +118,10 @@ class FlywheelDownloader:
                 return False
 
             _, dir_nifti, dir_dicom = self.make_directories()
-            print("directories made")
 
-            print("now at nift")
             if not self.download('nifti', dir_nifti):
-                print("nifti err")
                 return False
-            print("made it out of nift")
+
             if not self.download('dicom', dir_dicom):
                 return False
 
