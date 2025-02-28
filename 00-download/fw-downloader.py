@@ -87,9 +87,9 @@ class FlywheelDownloader:
 
     def download(self, data_type: str, output_dir: str) -> bool:
         try:
-            cmd = ('$HOME/flywheel/cli/fw download ',
-                  f'"{self.fw_group_id}/{self.fw_project_id}/{self.fw_subject_id}/{self.fw_session_id}" ',
-                  f'-i {data_type} ',
+            cmd = ('$HOME/flywheel/cli/fw download '
+                  f'"{self.fw_group_id}/{self.fw_project_id}/{self.fw_subject_id}/{self.fw_session_id}" '
+                  f'-i {data_type} '
                   f'-o {output_dir}/{self.fw_session_id}.tar -y')
 
             self.logger.info(f"Downloading {data_type} files...")
