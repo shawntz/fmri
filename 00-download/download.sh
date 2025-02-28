@@ -69,6 +69,7 @@ module load python/3.9.0
 echo "($(date)) [INFO] Now starting MRI file download" | tee -a "${log_file}"
 
 python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/fw-downloader.py \
+  --user "${USER}" \
   --fw_subject_id "${fw_subid}" \
   --fw_session_id "${fw_seshid}" \
   --fw_group_id "${FW_GROUP_ID}" \
