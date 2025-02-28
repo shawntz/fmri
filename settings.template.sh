@@ -43,6 +43,8 @@ FREESURFER_LICENSE="${HOME}/freesurfer.txt"
 # ============================================================================
 USER_EMAIL="johndoe@stanford.edu"
 USER="johndoe"
+FW_GROUP_ID="pi"
+FW_PROJECT_ID="amass"
 #
 # ============================================================================
 # (3) TASK/SCAN PARAMETERS
