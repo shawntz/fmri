@@ -17,6 +17,10 @@ if [ -z "${JOB_NAME}" ]; then
   exit 1
 fi
 
+fw_subid=$2
+fw_seshid=$3
+new_subid=$4
+
 echo "=================================================="
 echo "Flywheel Download"
 echo "=================================================="

@@ -2,7 +2,10 @@
 
 source ./settings.sh
 
-JOB_NAME="00-prepare"
+JOB_NAME="00-download"
+FW_SUBID=$1
+FW_SESHID=$2
+NEW_SUBID=$3
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
@@ -41,4 +44,4 @@ sbatch \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/prepare_fmri.sh ${JOB_NAME}
+    ./${JOB_NAME}/download.sh ${JOB_NAME} ${FW_SUBID} ${FW_SESHID} ${NEW_SUBID}
