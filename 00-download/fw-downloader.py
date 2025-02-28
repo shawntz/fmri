@@ -113,23 +113,27 @@ class FlywheelDownloader:
             return False
 
     def run(self) -> bool:
-        try:
-            if not self.login_to_fw():
-                return False
+        self.login_to_fw()
+        _, dir_nifti, dir_dicom = self.make_directories()
+        self.download('nifti', dir_nifti)
+        return True
+        # try:
+        #     if not self.login_to_fw():
+        #         return False
 
-            _, dir_nifti, dir_dicom = self.make_directories()
+        #     _, dir_nifti, dir_dicom = self.make_directories()
 
-            if not self.download('nifti', dir_nifti):
-                return False
+        #     if not self.download('nifti', dir_nifti):
+        #         return False
 
-            if not self.download('dicom', dir_dicom):
-                return False
+        #     if not self.download('dicom', dir_dicom):
+        #         return False
 
-            self.logger.info("Flywheel Downloader workflow completed successfully!")
-            return True
-        except Exception as e:
-            self.logger.error(f"Flywheel Downloader workflow failed: {str(e)}")
-            return False
+        #     self.logger.info("Flywheel Downloader workflow completed successfully!")
+        #     return True
+        # except Exception as e:
+        #     self.logger.error(f"Flywheel Downloader workflow failed: {str(e)}")
+        #     return False
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Download zipped images from flywheel.')
