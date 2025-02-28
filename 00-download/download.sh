@@ -54,7 +54,7 @@ echo "($(date)) [INFO] Starting Flywheel data download for subject ${fw_subid}" 
 
 # check if this subject was already downloaded
 if [ -f "${processed_file}" ]; then
-  if grep -q "^${subject_id}$" "${processed_file}"; then
+  if grep -q "^${fw_subid}$" "${processed_file}"; then
 	echo "($(date)) [INFO] Subject ${fw_subid} already downloaded, skipping" | tee -a "${log_file}"
     exit 0
   fi
