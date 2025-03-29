@@ -26,8 +26,8 @@ class BIDSConverter:
     def __init__(
         self,
         user: str,
-        subid: str,
-        exam_num: str,
+        fw_subject_id: str,
+        fw_session_id: str,
         project_dir: str,
         fw_group_id: str,
         fw_project_id: str,
@@ -37,8 +37,8 @@ class BIDSConverter:
         series_overrides: Optional[Dict[str, List[int]]] = None,
     ):
         self.user = user
-        self.subid = subid
-        self.exam_num = exam_num
+        self.subid = fw_subject_id
+        self.exam_num = fw_session_id
         self.project_dir = project_dir
         self.fw_group_id = fw_group_id
         self.fw_project_id = fw_project_id
@@ -299,12 +299,6 @@ class BIDSConverter:
             self.logger.error(f"BIDS conversion failed: {str(e)}")
             return False
 
-"""
-project_dir: str,
-        fw_group_id: str,
-        fw_project_id: str,
-        task_id: str,
-"""
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Convert Flywheel data to BIDS format."
@@ -328,7 +322,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config", action="store", default=None, help="Path to configuration file"
     )
-
     # add overrides for individual sequence series numbers
     parser.add_argument(
         "--t1_series",
@@ -396,9 +389,12 @@ def main():
 
     converter = BIDSConverter(
         user=args.user,
-        subid=args.subid,
-        exam_num=args.exam_num,
-        age_type=args.age_type,
+        fw_subject_id=args.fw_subject_id,
+        fw_session_id=args.fw_session_id,
+        project_dir=args.project_dir,
+        fw_group_id=args.fw_group_id,
+        fw_project_id=args.fw_project_id,
+        task_id=args.task_id,
         experiment_type=args.experiment_type,
         config_file=args.config,
         series_overrides=series_overrides,

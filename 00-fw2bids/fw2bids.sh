@@ -1,7 +1,7 @@
 #!/bin/sh
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: February 27, 2025
-# @Description: Download data from Flywheel and bidsify.
+# @Description: Bidsify raw MRI acquisitions.
 # @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "00-fw2bids")
 
 umask 002  # modify permissions so fslroi inherits correct permissions
@@ -15,13 +15,19 @@ if [ -z "${JOB_NAME}" ]; then
   exit 1
 fi
 
+fw_subid=$2
+fw_seshid=$3
+new_subid=$4
+
 echo "=================================================="
-echo "Flywheel Download and BIDS Conversion"
+echo "Flywheel Download"
 echo "=================================================="
 echo "User: $USER"
-echo "Flywheel Subject ID: $FW_SUBJECT_ID"
-echo "Flywheel Session ID: $FW_SESSION_ID"
-echo "Subject ID: $SUBID"
+echo "Flywheel Group ID: $FW_GROUP_ID"
+echo "Flywheel Project ID: $FW_PROJECT_ID"
+echo "Flywheel Subject ID: $fw_subid"
+echo "Flywheel Session ID: $fw_seshid"
+echo "BIDS Subject ID: $new_subid"
 echo "Experiment Type: $EXPERIMENT_TYPE"
 echo "Config File: $CONFIG_FILE"
 echo "=================================================="
@@ -74,14 +80,15 @@ echo "($(date)) [INFO] Processing subject ${subject_id}" | tee -a "${log_file}"
 module load python/3.9.0
 
 #===========================================
-# (1) DOWNLOAD FILES VIA FLYWHEEL CLI
+# (2) BIDSIFY RAW DATA FROM FLYWHEEL
 #===========================================
 
 echo "($(date)) [INFO] Starting MRI file download" | tee -a "${log_file}"
 
 python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/fw-downloader.py \
-  --fw_subject_id "${subject_id}" \
-  --fw_session_id "${TRIM_DIR}" \
+  --user "${USER}" \
+  --subid "${subject_id}" \
+  --exam_num "${TRIM_DIR}" \
   --fw_project_id "${task_id}" \
   --fw_instance_url "${new_task_id}" \
   --fw_group_id "${fmap_to_json}" \
@@ -90,3 +97,17 @@ echo "($(date)) [INFO] Flywheel download complete" | tee -a "${log_file}"
 
 echo "${subject_id}" >> "${processed_file}"
 echo "($(date)) [INFO] Successfully completed processing for subject ${subject_id}" | tee -a "${log_file}"
+
+# user=args.user,
+#         subid=args.subid,
+#         exam_num=args.exam_num,
+#         age_type=args.age_type,
+#         experiment_type=args.experiment_type,
+#         config_file=args.config,
+#         series_overrides=series_overrides,
+#     )
+
+--fw_subject_id "${fw_subid}" \
+  --fw_session_id "${fw_seshid}" \
+  --fw_group_id "${FW_GROUP_ID}" \
+  --fw_project_id "${FW_PROJECT_ID}" \
