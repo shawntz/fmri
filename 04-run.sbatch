@@ -2,15 +2,19 @@
 
 source ./settings.sh
 
-JOB_NAME="00-download"
-FW_SUBID=$1
-FW_SESHID=$2
-NEW_SUBID=$3
+JOB_NAME="04-prep-fmriprep"
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
 
-array_opt="--array=0"
+# check if running in debug mode
+if [ "$DEBUG" = "1" ]; then
+    echo "($(date)) [INFO] Running in DEBUG mode with single subject"
+    array_opt="--array=0"
+else
+    echo "($(date)) [INFO] Running full array: ${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+    array_opt="--array=${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+fi
 
 # echo slurm job params for inline validation
 echo "($(date)) [INFO] - SLURM JOB PARAMETERS:"
@@ -37,4 +41,4 @@ sbatch \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/download.sh ${JOB_NAME} ${FW_SUBID} ${FW_SESHID} ${NEW_SUBID}
+    ./${JOB_NAME}/prepare_fmri.sh ${JOB_NAME}
