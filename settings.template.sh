@@ -2,8 +2,8 @@
 # ============================================================================
 # FMRI Preprocessing Configuration Settings
 # ============================================================================
-# 
-# This file contains all configurable parameters for the fMRI preprocessing 
+#
+# This file contains all configurable parameters for the fMRI preprocessing
 # pipeline, including paths, scan parameters, and data validation settings.
 #
 # USAGE:
@@ -41,11 +41,18 @@ FREESURFER_LICENSE="${HOME}/freesurfer.txt"
 # ============================================================================
 # (2) USER EMAIL (for slurm report updates)
 # ============================================================================
-USER_EMAIL="hello@stanford.edu"
+USER_EMAIL="johndoe@stanford.edu"
+USER="johndoe"
+FW_GROUP_ID="pi"
+FW_PROJECT_ID="amass"
 #
 # ============================================================================
 # (3) TASK/SCAN PARAMETERS
 # ============================================================================
+FW_CLI_API_KEY_FILE="path/to/flywheel_api_key.txt"
+FW_URL="cni.flywheel.io"
+CONFIG_FILE="scan-config.json"
+EXPERIMENT_TYPE="advanced" # CHOOSE BETWEEN 'basic' AND 'advanced' within `scan-config.json`
 task_id="SomeTaskName"   # ORIGINAL TASK NAME IN BIDS FORMAT
 new_task_id="cleanname"  # NEW TASK NAME (IF RENAMING IS NEEDED), OTHERWISE SET SAME VALUE AS $task_id
 n_dummy=5                # NUMBER OF "DUMMY" TRs to remove
@@ -60,7 +67,7 @@ EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
 # ============================================================================
-# example: here, each fmap covers two runs, 
+# example: here, each fmap covers two runs,
 #  so define the mapping as such:
 declare -A fmap_mapping=(
     ["01"]="01"  # TASK BOLD RUN 01 USES FMAP 01
@@ -129,7 +136,7 @@ FMRIPREP_SLURM_CPUS_PER_TASK="16"
 FMRIPREP_SLURM_MEM_PER_CPU="4G"
 #
 # ============================================================================
-# (11) FMRIPREP SETTINGS 
+# (11) FMRIPREP SETTINGS
 # ============================================================================
 FMRIPREP_OMP_THREADS=8
 FMRIPREP_NTHREADS=12
@@ -139,7 +146,7 @@ FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
 FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
 #
 # ============================================================================
-# (12) MISC SETTINGS 
+# (12) MISC SETTINGS
 # ============================================================================
 # Debug mode (0=off, 1=on)
 DEBUG=0

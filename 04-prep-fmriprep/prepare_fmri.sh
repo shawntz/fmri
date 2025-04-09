@@ -6,6 +6,16 @@
 
 umask 002  # modify permissions so fslroi inherits correct permissions
 
+# fslroi - extract region of interest (ROI) from an image. 
+# You can a) take a 3D ROI from a 3D data set (or if it is 4D, 
+# the same ROI is taken from each time point and a new 4D data set is created), 
+# b) extract just some time points from a 4D data set, 
+# or c) control time and space limits to the ROI. 
+# 
+# Note that the arguments are minimum index and size (not maximum index). 
+# So to extract voxels 10 to 12 inclusive you would specify 10 and 3 (not 10 and 12).
+#
+
 source ./settings.sh
 
 JOB_NAME=$1
@@ -132,12 +142,8 @@ for run_bold in "${run_numbers[@]}"; do
     continue
   fi
 
-	# calculate remaining volumes after dummy removal
-	remain_bold_vols=$((EXPECTED_BOLD_VOLS - n_dummy))
-	echo "($(date)) [INFO] Retaining ${remain_bold_vols} volumes after removing ${n_dummy} dummy scans" | tee -a "${log_file}"
-
 	# remove dummy scans from task BOLD image
-	if ! fslroi "${old_bold}" "${new_bold}" "${n_dummy}" "${remain_bold_vols}"; then
+	if ! fslroi "${old_bold}" "${new_bold}" "${n_dummy}" "${EXPECTED_BOLD_VOLS_AFTER_TRIMMING}"; then
     echo "($(date)) [ERROR] Failed to trim BOLD run ${run_bold}" | tee -a "${log_file}"
     continue
   fi
@@ -168,10 +174,8 @@ for run_bold in "${run_numbers[@]}"; do
 	fmap_total_vols=$(fslnvols "${fieldmap_input}")
 	fmap_remain_vols=$((fmap_total_vols - n_dummy))
 
-	if ! fslroi "${fieldmap_input}" "${fieldmap_output}" "${n_dummy}" "${fmap_remain_vols}"; then
-    echo "($(date)) [ERROR] Failed to trim fieldmap for run ${run_fmap}" | tee -a "${log_file}"
-    continue
-  fi
+  if $fmap_total_vols -ne $EXPECTED_FMAP_VOLS; then
+  ##throw error
 
   echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a "${log_file}"
 

@@ -1,0 +1,33 @@
+{
+  "default_sequences": {
+    "t1": {
+      "series_numbers": [2],
+      "required": true,
+      "description": "T1-weighted anatomical scan"
+    },
+    "t2": {
+      "series_numbers": [17],
+      "required": false,
+      "description": "T2-weighted anatomical scan"
+    },
+    "mt": {
+      "series_numbers": [16],
+      "required": false,
+      "description": "Magnetization transfer scan"
+    },
+    "test": {
+      "series_numbers": [5, 6, 8, 9, 11, 12, 14, 15],
+      "required": true,
+      "description": "Test functional scans"
+    },
+    "pe1": {
+      "series_numbers": [4, 7, 10, 13],
+      "required": false,
+      "description": "PE1 field map scans"
+    }
+  },
+  "experiment_types": {
+    "basic": ["t1", "t2", "test"],
+    "advanced": ["t1", "t2", "mt", "test", "pe1"]
+  }
+}
