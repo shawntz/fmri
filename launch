@@ -111,11 +111,18 @@ def display_menu():
     print_header()
 
     menu_items = [
-        ("1", "Step 0: Download from FlyWheel -> Server"),
-        ("2", "Step 1: Run dcm2niix"),
-        ("3", "Step 2: PREPare (remove dummy scans, config fmap SDC)"),
-        ("4", "Step 3: Run fMRIPrep"),
-        ("5", "Step 4: Postprocessing (spatial smoothing, group average volume)")
+        ("1", "Download from FlyWheel -> Server"),
+        ("2", "Convert raw MRI data directory to BIDS"),
+        ("3", "Run dcm2niix to extract MRI DICOM headers to JSON files"),
+        ("4", "Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
+        ("5", "Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)"),
+        ("6", "Download Freesurfer output for manual surface editing"),
+        ("7", "Reupload edited Freesurfer directories"),
+        ("8", "Run remaining fMRIPrep steps") # end at step of minimal preprocessing 
+        # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
+        # make any adjustments pre analysis modeling as necessary
+        # failure mode: verification that the edited file persisted through step 8 we need to somehow make sure the fmriprep is using the edited files (in the event theyre misnamed, after number 8 finishes, if it generated a new batch of fmri anatomical scans md5 checksum with manual edit vs. md5 of the anatomical file its using for the next step)
+        #("9", "Run postprocessing (spatial smoothing, group average volume)")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -130,23 +137,23 @@ def display_menu():
 
 def get_parameters(step_choice):
     step_params = {
-        "1": {  # Step 0 (Flywheel Downloader)
+        "1": {  # Step 1 (Flywheel Downloader)
             "keys": ["fw_subid", "fw_session_id", "new_bids_id_number"],
             "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
         },
-        "2": {  # Step 1 (dcm2niix)
+        "2": {  # Step 2 (dcm2niix)
             "keys": [],
             "prompts": []
         },
-        "3": {  # Step 2 (PREPare)
+        "3": {  # Step 3 (PREPare)
             "keys": [],
             "prompts": []
         },
-        "4": {  # Step 3 (fmriprep)
+        "4": {  # Step 4 (fmriprep)
             "keys": ["anat_only"],
             "prompts": ["Only run anatomical workflows?"]
         },
-        "5": {  # Step 4 (postproc)
+        "5": {  # Step 5 (postproc)
             "keys": [],
             "prompts": []
         }
