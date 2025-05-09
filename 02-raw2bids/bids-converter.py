@@ -26,7 +26,7 @@ class BIDSConverter:
     def __init__(
         self,
         user: str,
-        fw_subject_id: str,
+        subid: str,
         fw_session_id: str,
         project_dir: str,
         fw_group_id: str,
@@ -37,7 +37,7 @@ class BIDSConverter:
         series_overrides: Optional[Dict[str, List[int]]] = None,
     ):
         self.user = user
-        self.subid = fw_subject_id
+        self.subid = subid, # new (trimmed) id
         self.exam_num = fw_session_id
         self.project_dir = project_dir
         self.fw_group_id = fw_group_id
@@ -389,8 +389,8 @@ def main():
 
     converter = BIDSConverter(
         user=args.user,
-        fw_subject_id=args.fw_subject_id,
-        fw_session_id=args.fw_session_id,
+        subid=args.subid
+        fw_session_id=args.exam_num,
         project_dir=args.project_dir,
         fw_group_id=args.fw_group_id,
         fw_project_id=args.fw_project_id,
