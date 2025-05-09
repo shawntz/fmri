@@ -138,8 +138,8 @@ def display_menu():
 def get_parameters(step_choice):
     step_params = {
         "1": {  # Step 1 (Flywheel Downloader)
-            "keys": ["fw_subid", "fw_session_id", "new_bids_id_number"],
-            "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
+            "keys": ["fw_subid", "fw_session_id"],
+            "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?"]
         },
         "2": {  # Step 2 (Raw 2 BIDS)
             "keys": ["fw_session_id", "new_bids_id_number"],
