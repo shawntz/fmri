@@ -91,7 +91,9 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/bids-converter.py \
   --project_dir "${project_dir}" \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
-  --task_id "${new_task_id}"
+  --task_id "${new_task_id}" \
+  --experiment_type "${EXPERIMENT_TYPE}" \
+  --config "${CONFIG_FILE}"
 echo "($(date)) [INFO] Raw to BIDS directory conversion complete" | tee -a "${log_file}"
 
 echo "${subject_id}" >> "${processed_file}"
