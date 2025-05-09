@@ -80,7 +80,7 @@ class BIDSConverter:
             tar.extractall()
             tar.close()
 
-            scitran_path = f"untar_{self.exam_num}/scitran"
+            scitran_path = f"{self.scratch_dir}/untar_{self.exam_num}/scitran"
             self.mkdir(scitran_path)
 
             tar_source = "scitran/"
