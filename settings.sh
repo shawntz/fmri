@@ -88,10 +88,10 @@ declare -A fmap_mapping=(
 # however, if you want to specify different subject lists per pipeline step,
 # you may do so here by following this general template:
 #
-declare -A subjects_mapping=(
-    ["01-fw2server"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
-    ["02-raw2bids"]="02-subjects.txt"
-)
+# declare -A subjects_mapping=(
+#     ["01-fw2server"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
+#     ["02-raw2bids"]="02-subjects.txt"
+# )
 #
 # note: keep in mind that we've built in checks at the beginning of each pipeline
 # step that skip a subject if there's already a record of them being preprocessed;

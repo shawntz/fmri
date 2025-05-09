@@ -15,9 +15,8 @@ if [ -z "${JOB_NAME}" ]; then
   exit 1
 fi
 
-fw_subid=$2
-fw_seshid=$3
-new_subid=$4
+fw_seshid=$2
+new_subid=$3
 
 echo "=================================================="
 echo "Raw Data to BIDS"
@@ -25,7 +24,6 @@ echo "=================================================="
 echo "User: $USER"
 echo "Flywheel Group ID: $FW_GROUP_ID"
 echo "Flywheel Project ID: $FW_PROJECT_ID"
-echo "Flywheel Subject ID: $fw_subid"
 echo "Flywheel Session ID: $fw_seshid"
 echo "BIDS Subject ID: $new_subid"
 echo "Experiment Type: $EXPERIMENT_TYPE"
@@ -40,25 +38,25 @@ fi
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
-# determine which subjects file to use
-if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # use step-specific subjects file from the mapping defined in settings.sh
-  SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-  echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
-else
-  # fall back to default all-subjects.txt
-  #SUBJECTS_FILE="all-subjects.txt"
-  SUBJECTS_FILE="02-subjects.txt"
-  echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
-fi
+# # determine which subjects file to use
+# if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+#   # use step-specific subjects file from the mapping defined in settings.sh
+#   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
+#   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
+# else
+#   # fall back to default all-subjects.txt
+#   #SUBJECTS_FILE="all-subjects.txt"
+#   SUBJECTS_FILE="02-subjects.txt"
+#   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
+# fi
 
-# get current subject ID from list
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
-if [ -z "${subject_id}" ]; then
-  echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
-  exit 1
-fi
-subject="sub-${subject_id}"
+# # get current subject ID from list
+# subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
+# if [ -z "${subject_id}" ]; then
+#   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+#   exit 1
+# fi
+subject="sub-${new_subid}"
 
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
@@ -88,7 +86,7 @@ echo "($(date)) [INFO] Now BIDSifying raw MRI files" | tee -a "${log_file}"
 
 python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/bids-converter.py \
   --user "${USER}" \
-  --subid "${fw_subid}" \
+  --subid "${new_subid}" \
   --exam_num "${fw_seshid}" \
   --project_dir "${project_dir}" \
   --fw_group_id "${FW_GROUP_ID}" \
