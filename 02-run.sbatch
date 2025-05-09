@@ -3,9 +3,8 @@
 source ./settings.sh
 
 JOB_NAME="02-raw2bids"
-FW_SUBID=$1
-FW_SESHID=$2
-NEW_SUBID=$3
+FW_SESHID=$1
+NEW_SUBID=$2
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
@@ -37,4 +36,4 @@ sbatch \
     --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/raw2bids.sh ${JOB_NAME} ${FW_SUBID} ${FW_SESHID} ${NEW_SUBID}
+    ./${JOB_NAME}/raw2bids.sh ${JOB_NAME} ${FW_SESHID} ${NEW_SUBID}
