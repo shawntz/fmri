@@ -88,8 +88,8 @@ echo "($(date)) [INFO] Now BIDSifying raw MRI files" | tee -a "${log_file}"
 
 python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/bids-converter.py \
   --user "${USER}" \
-  --fw_subject_id "${fw_subid}" \
-  --fw_session_id "${fw_seshid}" \
+  --subid "${fw_subid}" \
+  --exam_num "${fw_seshid}" \
   --project_dir "${project_dir}" \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
