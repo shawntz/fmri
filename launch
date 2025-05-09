@@ -142,8 +142,8 @@ def get_parameters(step_choice):
             "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
         },
         "2": {  # Step 2 (Raw 2 BIDS)
-            "keys": ["fw_subid", "fw_session_id", "new_bids_id_number"],
-            "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
+            "keys": ["fw_session_id", "new_bids_id_number"],
+            "prompts": ["Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
         },
         # "2": {  # Step 2 (dcm2niix)
         #     "keys": [],
