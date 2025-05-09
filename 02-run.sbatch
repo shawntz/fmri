@@ -2,7 +2,7 @@
 
 source ./settings.sh
 
-JOB_NAME="02-raw2server"
+JOB_NAME="02-raw2bids"
 FW_SUBID=$1
 FW_SESHID=$2
 NEW_SUBID=$3
