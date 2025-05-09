@@ -130,18 +130,25 @@ class BIDSConverter:
         file_pattern: str,
         series_suffix: str = "",
     ) -> List[str]:
-        flywheel_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
+        flywheel_base_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
         series_numbers = self.config_manager.get_series_numbers(sequence_name)
         copied_files = []
 
-        if not series_numbers:
-            self.logger.info(f"No series numbers defined for {sequence_name}, skipping")
+        subject_dirs = glob(f"{flywheel_base_path}/*/{self.exam_num}")
+
+        if not subject_dirs:
+            self.logger.error(f"No matching subject/exam folder found under {flywheel_base_path}")
             return copied_files
+
+        subject_dir = subject_dirs[0]  # use first match
 
         for i, series in enumerate(series_numbers):
             try:
-                file_glob = file_pattern.format(self.exam_num, series, series_suffix)
-                matching_files = glob(f"{flywheel_path}/*/{file_glob}")
+                file_glob = f"{self.exam_num}_{series}_*.nii.gz"
+                self.logger.debug(f"Looking in: {subject_dir}/*{sequence_name}*/*{file_glob}")
+
+                matching_files = glob(f"{subject_dir}/*{sequence_name}*/*{file_glob}")
+                self.logger.debug(f"Found: {matching_files}")
 
                 if matching_files:
                     source_file = matching_files[0]
