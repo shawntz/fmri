@@ -37,7 +37,7 @@ class BIDSConverter:
         series_overrides: Optional[Dict[str, List[int]]] = None,
     ):
         self.user = user
-        self.subid = subid, # new (trimmed) id
+        self.subid = subid # new (trimmed) id
         self.exam_num = fw_session_id
         self.project_dir = project_dir
         self.fw_group_id = fw_group_id
