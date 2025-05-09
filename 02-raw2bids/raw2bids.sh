@@ -39,24 +39,6 @@ fi
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
-# # determine which subjects file to use
-# if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-#   # use step-specific subjects file from the mapping defined in settings.sh
-#   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-#   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
-# else
-#   # fall back to default all-subjects.txt
-#   #SUBJECTS_FILE="all-subjects.txt"
-#   SUBJECTS_FILE="02-subjects.txt"
-#   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
-# fi
-
-# # get current subject ID from list
-# subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
-# if [ -z "${subject_id}" ]; then
-#   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
-#   exit 1
-# fi
 subject="sub-${new_subid}"
 
 # logging setup
@@ -65,17 +47,17 @@ log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
 processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
 # start logging
-echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a "${log_file}"
+echo "($(date)) [INFO] Starting processing for subject: ${subject}" | tee -a "${log_file}"
 
 # check if this subject was already processed
 if [ -f "${processed_file}" ]; then
-  if grep -q "^${subject_id}$" "${processed_file}"; then
-	echo "($(date)) [INFO] Subject ${subject_id} already processed, skipping" | tee -a "${log_file}"
+  if grep -q "^${new_subid}$" "${processed_file}"; then
+	echo "($(date)) [INFO] Subject ${subject} already processed, skipping" | tee -a "${log_file}"
     exit 0
   fi
 fi
 
-echo "($(date)) [INFO] Processing subject ${subject_id}" | tee -a "${log_file}"
+echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 
 module load python/3.9.0
 
@@ -97,5 +79,5 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/bids-converter.py \
   --config "${CONFIG_FILE}"
 echo "($(date)) [INFO] Raw to BIDS directory conversion complete" | tee -a "${log_file}"
 
-echo "${subject_id}" >> "${processed_file}"
-echo "($(date)) [INFO] Successfully completed BIDSifying MRI files for subject ${subject_id}" | tee -a "${log_file}"
+echo "${new_subid}" >> "${processed_file}"
+echo "($(date)) [INFO] Successfully completed BIDSifying MRI files for subject: ${subject}" | tee -a "${log_file}"
