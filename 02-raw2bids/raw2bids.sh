@@ -20,7 +20,7 @@ fw_seshid=$3
 new_subid=$4
 
 echo "=================================================="
-echo "Flywheel Download"
+echo "Raw Data to BIDS"
 echo "=================================================="
 echo "User: $USER"
 echo "Flywheel Group ID: $FW_GROUP_ID"
@@ -47,7 +47,8 @@ if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subject
   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
 else
   # fall back to default all-subjects.txt
-  SUBJECTS_FILE="all-subjects.txt"
+  #SUBJECTS_FILE="all-subjects.txt"
+  SUBJECTS_FILE="02-subjects.txt"
   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 fi
 
@@ -97,17 +98,3 @@ echo "($(date)) [INFO] Raw to BIDS directory conversion complete" | tee -a "${lo
 
 echo "${subject_id}" >> "${processed_file}"
 echo "($(date)) [INFO] Successfully completed BIDSifying MRI files for subject ${subject_id}" | tee -a "${log_file}"
-
-# user=args.user,
-#         subid=args.subid,
-#         exam_num=args.exam_num,
-#         age_type=args.age_type,
-#         experiment_type=args.experiment_type,
-#         config_file=args.config,
-#         series_overrides=series_overrides,
-#     )
-
---fw_subject_id "${fw_subid}" \
-  --fw_session_id "${fw_seshid}" \
-  --fw_group_id "${FW_GROUP_ID}" \
-  --fw_project_id "${FW_PROJECT_ID}" \
