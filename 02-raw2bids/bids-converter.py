@@ -147,7 +147,8 @@ class BIDSConverter:
                 file_glob = f"{self.exam_num}_{series}_*.nii.gz"
                 self.logger.debug(f"Looking in: {subject_dir}/*{sequence_name}*/*{file_glob}")
 
-                matching_files = glob(f"{subject_dir}/*{sequence_name}*/*{file_glob}")
+                # matching_files = glob(f"{subject_dir}/*{sequence_name}*/*{file_glob}")
+                matching_files = glob(f"{subject_dir}/*/{file_glob}")
                 self.logger.debug(f"Found: {matching_files}")
 
                 if matching_files:
