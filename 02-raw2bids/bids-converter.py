@@ -389,7 +389,7 @@ def main():
 
     converter = BIDSConverter(
         user=args.user,
-        subid=args.subid
+        subid=args.subid,
         fw_session_id=args.exam_num,
         project_dir=args.project_dir,
         fw_group_id=args.fw_group_id,
