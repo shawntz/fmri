@@ -59,6 +59,7 @@ class BIDSConverter:
         )
 
         self.scratch_dir = f"/scratch/users/{self.user}/fw_{self.exam_num}"
+        self.scratch_base_dir = f"/scratch/users/{self.user}"
         self.bids_path = f"{self.project_dir}/bids"
         self.fw_tar_path = f"{self.project_dir}/flywheel"
 
@@ -80,7 +81,7 @@ class BIDSConverter:
             tar.extractall()
             tar.close()
 
-            scitran_path = f"{self.scratch_dir}/untar_{self.exam_num}/scitran"
+            scitran_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran"
             self.mkdir(scitran_path)
 
             tar_source = "scitran/"
@@ -129,7 +130,7 @@ class BIDSConverter:
         file_pattern: str,
         series_suffix: str = "",
     ) -> List[str]:
-        flywheel_path = f"{self.scratch_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
+        flywheel_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
         series_numbers = self.config_manager.get_series_numbers(sequence_name)
         copied_files = []
 
