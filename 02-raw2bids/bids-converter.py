@@ -129,7 +129,7 @@ class BIDSConverter:
         file_pattern: str,
         series_suffix: str = "",
     ) -> List[str]:
-        flywheel_path = f"untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
+        flywheel_path = f"{self.scratch_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
         series_numbers = self.config_manager.get_series_numbers(sequence_name)
         copied_files = []
 
