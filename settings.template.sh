@@ -49,7 +49,7 @@ FW_PROJECT_ID="amass"
 # ============================================================================
 # (3) TASK/SCAN PARAMETERS
 # ============================================================================
-FW_CLI_API_KEY_FILE="path/to/flywheel_api_key.txt"
+FW_CLI_API_KEY_FILE="${HOME}/flywheel_api_key.txt"
 FW_URL="cni.flywheel.io"
 CONFIG_FILE="scan-config.json"
 EXPERIMENT_TYPE="advanced" # CHOOSE BETWEEN 'basic' AND 'advanced' within `scan-config.json`
