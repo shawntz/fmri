@@ -62,7 +62,7 @@ subject="sub-${subject_id}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/00-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
 # start logging
 echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a "${log_file}"

@@ -47,7 +47,7 @@ subject="sub-${new_subid}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/00-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/01-processed_subjects.txt"
 
 # start logging
 echo "($(date)) [INFO] Starting Flywheel data download for subject ${fw_subid}" | tee -a "${log_file}"

@@ -63,6 +63,7 @@ run_numbers=("01" "02" "03" "04" "05" "06" "07" "08")  # ALL TASK BOLD RUN NUMBE
 # ============================================================================
 EXPECTED_FMAP_VOLS=12   # EXPECTED NUMBER OF VOLUMES IN ORIGINAL FIELDMAP SCANS
 EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
+EXPECTED_BOLD_VOLS_AFTER_TRIMMING=210  # EXPECTED SIZE OF TRIMMED TASK VOLUMES AFTER ACCOUNTING FOR LEAD-IN AND LEAD-OUT
 #
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
@@ -88,8 +89,8 @@ declare -A fmap_mapping=(
 # you may do so here by following this general template:
 #
 # declare -A subjects_mapping=(
-#     ["01-prepare"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
-#     ["02-fmriprep"]="02-subjects.txt"
+#     ["01-fw2server"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
+#     ["02-raw2bids"]="02-subjects.txt"
 # )
 #
 # note: keep in mind that we've built in checks at the beginning of each pipeline
@@ -131,7 +132,7 @@ SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
 # ============================================================================
 FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
 FMRIPREP_SLURM_ARRAY_SIZE=1
-FMRIPREP_SLURM_TIME="12:00:00"
+FMRIPREP_SLURM_TIME="48:00:00"
 FMRIPREP_SLURM_CPUS_PER_TASK="16"
 FMRIPREP_SLURM_MEM_PER_CPU="4G"
 #

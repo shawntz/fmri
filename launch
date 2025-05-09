@@ -198,11 +198,14 @@ def confirm_parameters(user_inputs, param_keys):
 def run_script(step_choice, user_inputs):
     # map step choice to script name
     scripts = {
-        "1": "00-run.sbatch",
-        "2": "01-run.sbatch",
-        "3": "01-run.sbatch",
-        "4": "02-run.sbatch",
-        "5": "03-run.sbatch"
+        "1": "01-run.sbatch",
+        "2": "02-run.sbatch",
+        "3": "03-run.sbatch",
+        "4": "04-run.sbatch",
+        "5": "05-run.sbatch",
+        "6": "06-run.sbatch",
+        "7": "07-run.sbatch",
+        "8": "08-run.sbatch",
     }
 
     selected_script = scripts[step_choice]
