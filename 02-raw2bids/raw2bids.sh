@@ -28,6 +28,7 @@ echo "Flywheel Session ID: $fw_seshid"
 echo "BIDS Subject ID: $new_subid"
 echo "Experiment Type: $EXPERIMENT_TYPE"
 echo "Config File: $CONFIG_FILE"
+echo "Project Dir: $BASE_DIR"
 echo "=================================================="
 
 # check if scan-config.json file exists
@@ -88,7 +89,7 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/bids-converter.py \
   --user "${USER}" \
   --subid "${new_subid}" \
   --exam_num "${fw_seshid}" \
-  --project_dir "${project_dir}" \
+  --project_dir "${BASE_DIR}" \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
   --task_id "${new_task_id}" \
