@@ -81,14 +81,26 @@ class BIDSConverter:
             new_tar_loc = f"{self.new_scratch_path_for_zipped_tar}/{self.exam_num}.tar"
             self.logger.info(f"Extracting tar file: {file_path} -> {new_tar_loc}")
             shutil.move(file_path, new_tar_loc)
-            tar = tarfile.open(new_tar_loc)
-            tar.extractall()
-            tar.close()
 
-            scitran_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}/scitran"
+            # tar = tarfile.open(new_tar_loc)
+            # tar.extractall()
+
+            untar_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}"
+            self.mkdir(untar_path)
+
+            with tarfile.open(new_tar_loc) as tar:
+                tar.extractall(path=untar_path)
+
+            # tar.close()
+
+            # scitran_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}/scitran"
+            scitran_path = os.path.join(untar_path, "scitran")
             self.mkdir(scitran_path)
 
-            tar_source = "scitran/"
+            self.logger.info(f"Untar contents:\n{os.system(f'tree {untar_path} | head -n 40')}")
+
+            # tar_source = "scitran/"
+            tar_source = os.path.join(untar_path, "scitran")
             if os.path.exists(tar_source):
                 tarfiles = os.listdir(tar_source)
                 for file in tarfiles:
