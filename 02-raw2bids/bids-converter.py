@@ -146,11 +146,11 @@ class BIDSConverter:
         file_pattern: str,  # deprecated
         series_suffix: str = "",
     ) -> List[str]:
-        flywheel_base_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
+        flywheel_base_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
         series_numbers = self.config_manager.get_series_numbers(sequence_name)
         copied_files = []
 
-        subject_dirs = glob(f"{flywheel_base_path}/sub-{self.subid}/*/{self.exam_num}")
+        subject_dirs = glob(f"{flywheel_base_path}/*/{self.exam_num}")
         self.logger.info(f"Found matching subject/exam folder(s) in {subject_dirs}")
 
         if not subject_dirs:
