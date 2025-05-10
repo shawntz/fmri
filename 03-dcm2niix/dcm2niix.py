@@ -87,7 +87,11 @@ def main():
     # Delete screenshots
     for pattern in ["*2000*.dicom", "*4000*.dicom", "*_200*.dicom"]:
         for f in dicom_extract_dir.glob(pattern):
-            f.unlink()
+            print(f"[INFO] Removing {f}")
+            if f.is_file():
+                f.unlink()
+            elif f.is_dir():
+                shutil.rmtree(f)
 
     print(f"[INFO] Screenshot DICOMs deleted from {dicom_extract_dir}")
 
