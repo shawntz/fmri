@@ -63,7 +63,7 @@ fi
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/05-processed_subjects.txt"
 
 # setup dirs (if needed)
 mkdir -p "${DERIVS_DIR}"
