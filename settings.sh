@@ -134,6 +134,7 @@ FMRIPREP_VERSION="24.0.1"
 DERIVS_DIR="${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}"
 SINGULARITY_IMAGE_DIR="${BASE_DIR}/singularity_images"
 SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
+HEUDICONV_IMAGE="heudiconv_latest.sif"
 #
 # ============================================================================
 # (10) FMRIPREP SPECIFIC SLURM SETTINGS
