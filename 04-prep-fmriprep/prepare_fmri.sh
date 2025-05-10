@@ -72,7 +72,8 @@ if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subject
   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
 else
   # fall back to default all-subjects.txt
-  SUBJECTS_FILE="all-subjects.txt"
+  #SUBJECTS_FILE="all-subjects.txt"
+  SUBJECTS_FILE="04-subjects.txt"
   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 fi
 
