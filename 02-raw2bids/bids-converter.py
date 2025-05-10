@@ -272,7 +272,8 @@ class BIDSConverter:
 
     def cleanup(self) -> None:
         try:
-            untar_dir = f"/scratch/users/{self.user}/untar_{self.exam_num}"
+            # untar_dir = f"/scratch/users/{self.user}/untar_{self.exam_num}"
+            untar_dir = self.new_scratch_path_for_zipped_tar}
             if os.path.exists(untar_dir):
                 shutil.rmtree(untar_dir)
                 self.logger.info(f"Removed temporary directory: {untar_dir}")
