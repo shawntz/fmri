@@ -39,7 +39,7 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/dcm2niix.py \
   --fw_project_id "${FW_PROJECT_ID}" \
   --task_id "${new_task_id}" \
   --sing_image_path "${SINGULARITY_IMAGE_DIR}"/"${HEUDICONV_IMAGE}" \
-  --scripts_dir "${SCRIPTS_DIR}"
+  --scripts_dir "${SCRIPTS_DIR}"/${JOB_NAME}
 echo "($(date)) [INFO] Raw dicom to BIDS conversion complete" | tee -a "${log_file}"
 
 echo "${new_subid}" >> "${processed_file}"
