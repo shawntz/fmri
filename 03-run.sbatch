@@ -15,7 +15,7 @@ array_opt="--array=0"
 echo "($(date)) [INFO] - SLURM JOB PARAMETERS:"
 echo "  --job-name: ${JOB_NAME}"
 echo "  ${array_opt}"
-echo "  --time: ${SLURM_TIME}"
+echo "  --time: ${DCMNIIX_SLURM_TIME}"
 echo "  --mem-per-cpu: ${SLURM_MEM}"
 echo "  --cpus-per-task: ${SLURM_CPUS}"
 echo "  --partition: ${SLURM_PARTITION}"
@@ -28,7 +28,7 @@ echo "  --mail-user: ${SLURM_EMAIL}"
 sbatch \
     --job-name=${JOB_NAME} \
     ${array_opt} \
-    --time=${SLURM_TIME} \
+    --time=${DCMNIIX_SLURM_TIME} \
     --mem-per-cpu=${SLURM_MEM} \
     --cpus-per-task=${SLURM_CPUS} \
     --partition=${SLURM_PARTITION} \

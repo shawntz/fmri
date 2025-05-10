@@ -120,6 +120,7 @@ else
 fi
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
+export DCMNIIX_SLURM_TIME="6:00:00"
 export SLURM_MEM="8G"  # memory alloc per cpu
 export SLURM_CPUS="8"
 export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
