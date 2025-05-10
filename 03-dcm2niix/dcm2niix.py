@@ -70,7 +70,7 @@ def main():
     print(f"[INFO] Tar archive moved to {tar_target}")
 
     # Unzip DICOMs
-    zipdir = untar_dir / "scitran" / "awagner" / "amass" / f"{new_prefix}{args.subid}" / f"{args.exam_num}"
+    zipdir = untar_dir / "scitran" / f"{args.fw_group_id}" / f"{args.fw_project_id}" / f"{args.subid}" / f"{args.exam_num}"
     print(f"[INFO] Unzipping all zip files from {zipdir}")
     for zf in zipdir.glob("**/*.zip"):
         subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
