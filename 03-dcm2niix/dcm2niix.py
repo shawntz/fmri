@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     return parser.parse_args()
 
-f main():
+def main():
     args = parse_args()
 
     if args.user is None:
