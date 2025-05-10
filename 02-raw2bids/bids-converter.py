@@ -94,26 +94,26 @@ class BIDSConverter:
             # tar.close()
 
             # scitran_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}/scitran"
-            scitran_path = os.path.join(untar_path, "scitran")
-            self.mkdir(scitran_path)
+            # scitran_path = os.path.join(untar_path, "scitran")
+            # self.mkdir(scitran_path)
 
             self.logger.info(f"Untar contents:\n{os.system(f'tree {untar_path} | head -n 40')}")
 
             # tar_source = "scitran/"
-            tar_source = os.path.join(untar_path, "scitran")
-            if os.path.exists(tar_source):
-                tarfiles = os.listdir(tar_source)
-                for file in tarfiles:
-                    file_name = os.path.join(tar_source, file)
-                    shutil.move(file_name, scitran_path)
-                os.system("rm -rf scitran")
-                self.logger.info(
-                    "Files unpacked and moved into subject specific directory!"
-                )
-            else:
-                self.logger.warning(
-                    f"Directory {tar_source} does not exist after extraction"
-                )
+            # tar_source = os.path.join(untar_path, "scitran")
+            # if os.path.exists(tar_source):
+            #     tarfiles = os.listdir(tar_source)
+            #     for file in tarfiles:
+            #         file_name = os.path.join(tar_source, file)
+            #         shutil.move(file_name, scitran_path)
+            #     os.system("rm -rf scitran")
+            #     self.logger.info(
+            #         "Files unpacked and moved into subject specific directory!"
+            #     )
+            # else:
+            #     self.logger.warning(
+            #         f"Directory {tar_source} does not exist after extraction"
+            #     )
 
         except Exception as e:
             self.logger.error(f"Error extracting tar file: {str(e)}")
