@@ -32,6 +32,7 @@ def parse_args():
     parser.add_argument("--fw_project_id", action="store", required=True, help="Flywheel Project ID (e.g., amass)")
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
+    parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
     return parser.parse_args()
 
 def main():
@@ -48,7 +49,8 @@ def main():
     oak_base = Path(f"{args.project_dir}")
     bids_dir = oak_base / "bids"
     dicoms_dir = oak_base / "dicoms"
-    heu_file = "dcm_heuristic.py"
+    code_dir = Path(f"{args.scripts_dir}")
+    heu_file = code_dir / "dcm_heuristic.py"
 
     # Source and target DICOM tar
     tar_input = scratch_base / f"fw_{args.exam_num}" / "dicoms" / f"{args.exam_num}.tar"
