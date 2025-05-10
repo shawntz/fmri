@@ -22,7 +22,7 @@ subject="sub-${new_subid}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/03-processed_subjects.txt"
 
 echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 
