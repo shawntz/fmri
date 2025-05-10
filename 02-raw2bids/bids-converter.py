@@ -77,6 +77,7 @@ class BIDSConverter:
 
     def untar_file(self, file_path: str) -> None:
         try:
+            self.mkdir(self.new_scratch_path_for_zipped_tar)
             new_tar_loc = f"{self.new_scratch_path_for_zipped_tar}/{self.exam_num}.tar"
             self.logger.info(f"Extracting tar file: {file_path} -> {new_tar_loc}")
             shutil.move(file_path, new_tar_loc)
