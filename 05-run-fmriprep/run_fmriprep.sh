@@ -27,13 +27,38 @@ else
   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 fi
 
-# get current subject ID from list
+# # get current subject ID from list
+# subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
+# if [ -z "${subject_id}" ]; then
+#   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+#   exit 1
+# fi
+# subject="sub-${subject_id}"
+
+# count number of subjects
+num_subjects=$(wc -l < "${SUBJECTS_FILE}")
+if [ "${num_subjects}" -eq 0 ]; then
+  echo "Error: No subjects found in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+  exit 1
+fi
+
+# default to index 0 if not running as array and only 1 subject
+if [ -z "${SLURM_ARRAY_TASK_ID}" ]; then
+  if [ "${num_subjects}" -eq 1 ]; then
+    SLURM_ARRAY_TASK_ID=0
+    echo "($(date)) [INFO] Only one subject found; defaulting to SLURM_ARRAY_TASK_ID=0"
+  else
+    echo "Error: SLURM_ARRAY_TASK_ID not set, but multiple subjects in list" | tee -a "${log_file}"
+    exit 1
+  fi
+fi
+
+# grab subject line
 subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
 if [ -z "${subject_id}" ]; then
   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
   exit 1
 fi
-subject="sub-${subject_id}"
 
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
