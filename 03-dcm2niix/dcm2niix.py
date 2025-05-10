@@ -72,9 +72,15 @@ def main():
     print(f"[INFO] Tar archive moved to {tar_target}")
 
     # Unzip DICOMs
-    zipdir = untar_dir / "scitran" / f"{args.fw_group_id}" / f"{args.fw_project_id}" / f"{args.subid}" / f"{args.exam_num}"
-    print(f"[INFO] Unzipping all zip files from {zipdir}")
-    for zf in zipdir.glob("**/*.zip"):
+    flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+    subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
+    if not subject_dirs:
+        raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
+    subject_dir = Path(subject_dirs[0])
+
+    # zipdir = untar_dir / "scitran" / f"{args.fw_group_id}" / f"{args.fw_project_id}" / f"{args.subid}" / f"{args.exam_num}"
+    print(f"[INFO] Unzipping all zip files from {subject_dir}")
+    for zf in subject_dir.glob("**/*.zip"):
         subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
 
     # Delete screenshots
