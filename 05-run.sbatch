@@ -44,9 +44,10 @@ cmd="sbatch \
     ./${JOB_NAME}/run_fmriprep.sh ${JOB_NAME}"
 
 # add anat-only flag if specified
-if [ ! -z "${ANAT_ONLY_FLAG}" ]; then
-    cmd="${cmd} --anat-only"
-fi
+# if [ ! -z "${ANAT_ONLY_FLAG}" ]; then
+#     cmd="${cmd} --anat-only"
+# fi
+cmd="${cmd} --anat-only"
 
 # submit job
 echo "($(date)) [INFO] Submitting job with command:"

@@ -153,10 +153,14 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "5": {  # Step 5 (fmriprep)
-            "keys": ["anat_only"],
-            "prompts": ["Only run anatomical workflows?"]
+        "5": {  # Step 5 (fmriprep --anat-only)
+            "keys": [],
+            "prompts": []
         },
+        # "5": {  # Step 5 (fmriprep)
+        #     "keys": ["anat_only"],
+        #     "prompts": ["Only run anatomical workflows?"]
+        # },
         "6": {  # Step 6 (postproc)
             "keys": [],
             "prompts": []
