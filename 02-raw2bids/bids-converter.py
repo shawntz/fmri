@@ -151,7 +151,7 @@ class BIDSConverter:
         copied_files = []
 
         subject_dirs = glob(f"{flywheel_base_path}/sub-{self.subid}/*/{self.exam_num}")
-        self.logger.info(f"Found matching subject/exam folder(s) in {subjects_dirs}")
+        self.logger.info(f"Found matching subject/exam folder(s) in {subject_dirs}")
 
         if not subject_dirs:
             self.logger.error(f"No matching subject/exam folder found under {flywheel_base_path}")
@@ -257,7 +257,8 @@ class BIDSConverter:
             subj_tar_path = f"{self.fw_tar_path}/sub-{self.subid}"
             self.mkdir(subj_tar_path)
 
-            source_tar = f"{self.scratch_dir}/niftis/{self.exam_num}.tar"
+            # source_tar = f"{self.scratch_dir}/niftis/{self.exam_num}.tar"
+            source_tar = f"{self.new_scratch_path_for_zipped_tar}/{self.exam_num}.tar"
             target_tar = f"{subj_tar_path}/{self.exam_num}.tar"
 
             if os.path.exists(source_tar):
