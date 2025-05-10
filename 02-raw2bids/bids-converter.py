@@ -58,8 +58,9 @@ class BIDSConverter:
             f"Using experiment type '{experiment_type}' with sequences: {self.experiment_sequences}"
         )
 
-        self.scratch_dir = f"/scratch/users/{self.user}/fw_{self.exam_num}"
         self.scratch_base_dir = f"/scratch/users/{self.user}"
+        self.scratch_dir = f"{self.scratch_base_dir}/fw_{self.exam_num}"
+        self.new_scratch_path_for_zipped_tar = f"{self.scratch_base_dir}/sub-{self.subid}"
         self.bids_path = f"{self.project_dir}/bids"
         self.fw_tar_path = f"{self.project_dir}/flywheel"
 
@@ -76,12 +77,14 @@ class BIDSConverter:
 
     def untar_file(self, file_path: str) -> None:
         try:
-            self.logger.info(f"Extracting tar file: {file_path}")
-            tar = tarfile.open(file_path)
+            new_tar_loc = f"{self.new_scratch_path_for_zipped_tar}/{self.exam_num}.tar"
+            self.logger.info(f"Extracting tar file: {file_path} -> {new_tar_loc}")
+            shutil.move(file_path, new_tar_loc)
+            tar = tarfile.open(new_tar_loc)
             tar.extractall()
             tar.close()
 
-            scitran_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran"
+            scitran_path = f"{self.new_scratch_path_for_zipped_tar}/untar_{self.exam_num}/scitran"
             self.mkdir(scitran_path)
 
             tar_source = "scitran/"
@@ -127,20 +130,22 @@ class BIDSConverter:
         sequence_name: str,
         target_dir: str,
         bids_prefix: str,
-        file_pattern: str,
+        file_pattern: str,  # deprecated
         series_suffix: str = "",
     ) -> List[str]:
         flywheel_base_path = f"{self.scratch_base_dir}/untar_{self.exam_num}/scitran/{self.fw_group_id}/{self.fw_project_id}"
         series_numbers = self.config_manager.get_series_numbers(sequence_name)
         copied_files = []
 
-        subject_dirs = glob(f"{flywheel_base_path}/*/{self.exam_num}")
+        subject_dirs = glob(f"{flywheel_base_path}/sub-{self.subid}/*/{self.exam_num}")
+        self.logger.info(f"Found matching subject/exam folder(s) in {subjects_dirs}")
 
         if not subject_dirs:
             self.logger.error(f"No matching subject/exam folder found under {flywheel_base_path}")
             return copied_files
 
         subject_dir = subject_dirs[0]  # use first match
+        self.logger.info(f"Using subject directory: {subject_dir}")
 
         for i, series in enumerate(series_numbers):
             try:
