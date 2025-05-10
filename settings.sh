@@ -107,10 +107,17 @@ FILE_PERMISSIONS=775  # FILE LEVEL
 # ============================================================================
 # (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
-#num_subjects=$(wc -l < "all-subjects.txt")  # count number of subjects
-num_subjects=$(wc -l < "02-subjects.txt")  # count number of subjects
-echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
-array_range="0-$((num_subjects-1))"  # compute array size (0 to num_subjects-1 since array indices start at 0)
+# TODO: make this indepdent of the settings.sh file so it's only run when needed
+#  and is step-dependent (i.e., 03-subjects.txt instead of all-subjects.txt)
+if [[ -f "all-subjects.txt" ]]; then
+    num_subjects=$(wc -l < "all-subjects.txt")
+    echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
+    array_range="0-$((num_subjects-1))"
+else
+    echo "($(date)) [WARNING] subjects file not found, defaulting to single subject"
+    num_subjects=1
+    array_range="0"
+fi
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
 export SLURM_MEM="8G"  # memory alloc per cpu
