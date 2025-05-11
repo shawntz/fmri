@@ -120,12 +120,12 @@ else
 fi
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
-export DCMNIIX_SLURM_TIME="6:00:00"
-export SLURM_MEM="8G"  # memory alloc per cpu
+export DCMNIIX_SLURM_TIME="12:00:00"
+export SLURM_MEM="4G"  # memory alloc per cpu
 export SLURM_CPUS="8"
 export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
 export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
-export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings file
+export SLURM_LOG_DIR="${BASE_DIR}/logs"  # use BASE_DIR from main settings file
 export SLURM_PARTITION="awagner,hns,normal"  # compute resource preferences order
 #
 # ============================================================================

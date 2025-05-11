@@ -20,8 +20,7 @@ def infotodict(seqinfo):
     t1w = create_key('sub-{subject}/anat/sub-{subject}_T1w')
     t2 = create_key('sub-{subject}/anat/sub-{subject}_inplaneT2')
     mtlc = create_key('sub-{subject}/anat/sub-{subject}_mt-lc')
-    func_test = create_key(
-        'sub-{subject}/func/sub-{subject}_task-GoalAttnMemTest_run-{item:02d}_dir-PA_bold')
+    func_test = create_key('sub-{subject}/func/sub-{subject}_task-amass_run-{item:02d}_dir-PA_bold')
     fmap = create_key('sub-{subject}/fmap/sub-{subject}_run-{item:02d}_dir-AP_epi')
 
     info = {

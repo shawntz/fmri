@@ -49,16 +49,17 @@ def main():
     untar_dir = scratch_sub_dir / f"untar_{args.exam_num}"
     oak_base = Path(f"{args.project_dir}")
     bids_dir = oak_base / "bids"
+    scratch_work_dir = scratch_sub_dir / f"dcm2niix_work_dir"
     dicoms_dir = oak_base / "dicoms"
     code_dir = Path(f"{args.scripts_dir}")
     heu_file = code_dir / "dcm_heuristic.py"
 
     # Source and target DICOM tar
     tar_input = scratch_base / f"fw_{args.exam_num}" / "dicoms" / f"{args.exam_num}.tar"
-    tar_target = dicoms_dir / f"sub-{args.subid}.tar"
+    tar_target = scratch_work_dir / f"sub-{args.subid}.tar"
 
     # Make needed dirs
-    dicom_extract_dir = dicoms_dir / f"sub-{args.subid}"
+    dicom_extract_dir = scratch_work_dir / f"sub-{args.subid}"
     dicom_extract_dir.mkdir(parents=True, exist_ok=True)
     untar_dir.mkdir(parents=True, exist_ok=True)
 
@@ -79,7 +80,6 @@ def main():
         raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
     subject_dir = Path(subject_dirs[0])
 
-    # zipdir = untar_dir / "scitran" / f"{args.fw_group_id}" / f"{args.fw_project_id}" / f"{args.subid}" / f"{args.exam_num}"
     print(f"[INFO] Unzipping all zip files from {subject_dir}")
     for zf in subject_dir.glob("**/*.zip"):
         subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)

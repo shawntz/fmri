@@ -89,15 +89,14 @@ class FlywheelDownloader:
 
     def make_directories(self) -> Tuple[str, str, str]:
         dir_scratch = f"/scratch/users/{self.user}/fw_{self.fw_session_id}"
-        dir_nifti = f"{dir_scratch}/niftis"
         dir_dicom = f"{dir_scratch}/dicoms"
 
-        for dir in [dir_scratch, dir_nifti, dir_dicom]:
+        for dir in [dir_scratch, dir_dicom]:
             if not os.path.exists(dir):
                 os.makedirs(dir)
                 self.logger.info(f"Created directory: {dir}")
 
-        return dir_scratch, dir_nifti, dir_dicom
+        return dir_scratch, dir_dicom
 
     def download(self, data_type: str, output_dir: str) -> bool:
         try:
@@ -135,13 +134,8 @@ class FlywheelDownloader:
 
     def run(self) -> bool:
         self.login_to_fw()
-
-        _, dir_nifti, dir_dicom = self.make_directories()
-
-        self.download("nifti", dir_nifti)
-
+        _, dir_dicom = self.make_directories()
         self.download("dicom", dir_dicom)
-
         self.logger.info("Flywheel Downloader workflow completed successfully!")
         return True
 
