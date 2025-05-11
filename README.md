@@ -6,7 +6,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 
 - [x] 1. automated transfer of scanner acquisitions from FlyWheel -> Server
 - [x] 2. Raw -> BIDS format
-- [ ] 3. `dcm2niix` DICOM to NIfTI converter,
+- [x] 3. `dcm2niix` DICOM to NIfTI converter,
 - [x] 4. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep,
 - [x] 5. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)
 - [ ] 6. Download Freesurfer output for manual surface editing
