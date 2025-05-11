@@ -23,17 +23,22 @@ if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subject
   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 else
   # fall back to default all-subjects.txt
-  SUBJECTS_FILE="all-subjects.txt"
+  SUBJECTS_FILE="05-subjects.txt"
   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 fi
 
 # # get current subject ID from list
-# subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
-# if [ -z "${subject_id}" ]; then
-#   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
-#   exit 1
-# fi
-# subject="sub-${subject_id}"
+subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+if [ -z "${subject_id}" ]; then
+  echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+  exit 1
+fi
+subject="sub-${subject_id}"
+
+# logging setup
+mkdir -p "${SLURM_LOG_DIR}/subjects"
+log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
+processed_file="${SLURM_LOG_DIR}/05-processed_subjects.txt"
 
 # count number of subjects
 num_subjects=$(wc -l < "${SUBJECTS_FILE}")
@@ -54,16 +59,11 @@ if [ -z "${SLURM_ARRAY_TASK_ID}" ]; then
 fi
 
 # grab subject line
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" "${SUBJECTS_FILE}")
-if [ -z "${subject_id}" ]; then
-  echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID+1)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
-  exit 1
-fi
-
-# logging setup
-mkdir -p "${SLURM_LOG_DIR}/subjects"
-log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/05-processed_subjects.txt"
+# subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+# if [ -z "${subject_id}" ]; then
+#   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+#   exit 1
+# fi
 
 # setup dirs (if needed)
 mkdir -p "${DERIVS_DIR}"
