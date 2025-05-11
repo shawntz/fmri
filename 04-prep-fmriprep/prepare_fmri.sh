@@ -65,13 +65,6 @@ is_first_run_for_fieldmap() {
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
-subject="sub-${subject_id}"
-
-# logging setup
-mkdir -p "${SLURM_LOG_DIR}/subjects"
-log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
-
 # determine which subjects file to use
 if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
   # use step-specific subjects file from the mapping defined in settings.sh
@@ -86,6 +79,14 @@ fi
 
 # get current subject ID from list
 subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+
+subject="sub-${subject_id}"
+
+# logging setup
+mkdir -p "${SLURM_LOG_DIR}/subjects"
+log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
+processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
+
 if [ -z "${subject_id}" ]; then
   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
   exit 1
