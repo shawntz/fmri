@@ -175,7 +175,8 @@ for run_bold in "${run_numbers[@]}"; do
 	fmap_total_vols=$(fslnvols "${fieldmap_input}")
 	fmap_remain_vols=$((fmap_total_vols - n_dummy))
 
-  if $fmap_total_vols -ne $EXPECTED_FMAP_VOLS; then
+  # TODO:
+  # if $fmap_total_vols -ne $EXPECTED_FMAP_VOLS; then
   ##throw error
 
   echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a "${log_file}"
