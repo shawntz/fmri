@@ -31,7 +31,7 @@ echo "  --mail-type: BEGIN,END,FAIL"
 echo "  --mail-user: ${SLURM_EMAIL}"
 
 cmd="sbatch \
-    --job-name=${JOB_NAME} \
+    --job-name=${FMRIPREP_SLURM_JOB_NAME} \
     ${array_opt} \
     --time=${FMRIPREP_SLURM_TIME} \
     --mem-per-cpu=${FMRIPREP_SLURM_MEM_PER_CPU} \
