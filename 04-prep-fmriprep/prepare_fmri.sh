@@ -65,6 +65,13 @@ is_first_run_for_fieldmap() {
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
+subject="sub-${subject_id}"
+
+# logging setup
+mkdir -p "${SLURM_LOG_DIR}/subjects"
+log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
+processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
+
 # determine which subjects file to use
 if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
   # use step-specific subjects file from the mapping defined in settings.sh
@@ -83,12 +90,6 @@ if [ -z "${subject_id}" ]; then
   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
   exit 1
 fi
-subject="sub-${subject_id}"
-
-# logging setup
-mkdir -p "${SLURM_LOG_DIR}/subjects"
-log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
 
 # start logging
 echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a "${log_file}"
@@ -150,7 +151,7 @@ for run_bold in "${run_numbers[@]}"; do
   fi
 
 	# validate trimmed BOLD volumes
-	if ! validate_volumes "${new_bold}" ${remain_bold_vols} "trimmed BOLD run ${run_bold}"; then
+	if ! validate_volumes "${new_bold}" ${EXPECTED_BOLD_VOLS_AFTER_TRIMMING} "trimmed BOLD run ${run_bold}"; then
     continue
   fi
 
@@ -236,7 +237,7 @@ for run_bold in "${run_numbers[@]}"; do
   echo "......................................" | tee -a "${log_file}"
   echo "($(date)) [INFO] Final volume summary:" | tee -a "${log_file}"
   echo "  Original BOLD volumes: ${EXPECTED_BOLD_VOLS}" | tee -a "${log_file}"
-  echo "  Retained BOLD volumes: ${remain_bold_vols}" | tee -a "${log_file}"
+  echo "  Retained BOLD volumes: ${EXPECTED_BOLD_VOLS_AFTER_TRIMMING}" | tee -a "${log_file}"
   echo "  Original fieldmap volumes: ${EXPECTED_FMAP_VOLS}" | tee -a "${log_file}"
   echo "  Retained fieldmap volumes: ${remain_fmap_vols}" | tee -a "${log_file}"
   echo "  Dummy volumes removed: ${n_dummy}" | tee -a "${log_file}"
