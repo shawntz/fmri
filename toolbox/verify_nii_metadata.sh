@@ -20,7 +20,7 @@ module load python/3.9.0
 
 echo "($(date)) [INFO] Running header-based QC" | tee -a "${log_file}"
 
-python3 "${SCRIPTS_DIR}/${JOB_NAME}/verify_nii_metadata.py" \
+python3 "${SCRIPTS_DIR}/${JOB_NAME}toolbox/verify_nii_metadata.py" \
   --subid "${new_subid}" \
   --project_dir "${BASE_DIR}" \
   --config_path "${CONFIG_FILE}" \
