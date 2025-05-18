@@ -118,7 +118,7 @@ def display_menu():
         ("5", "Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)"),
         ("6", "Download Freesurfer output for manual surface editing"),
         ("7", "Reupload edited Freesurfer directories"),
-        ("8", "Run remaining fMRIPrep steps") # end at step of minimal preprocessing 
+        ("8", "Run remaining fMRIPrep steps"), # end at step of minimal preprocessing 
         ("9", "QC: Verify dcm -> nii -> bids metadata")
         # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
         # make any adjustments pre analysis modeling as necessary
