@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
-import argparse
 import os
 import json
 import csv
 import re
 from glob import glob
+import argparse
 
 def load_config(config_path):
     with open(config_path, "r") as f:
@@ -25,51 +24,69 @@ def get_expected_series_map(config):
             }
     return mapping
 
-def run_qc(input_dir, config_path, output_csv):
+def collect_bids_files(subject_dir):
+    files = []
+    func_dir = os.path.join(subject_dir, "func")
+    fmap_dir = os.path.join(subject_dir, "fmap")
+
+    func_pattern = re.compile(r"sub-[^_]+_task-GoalAttnMemTest_run-\d{2}_dir-PA_bold\\.nii\\.gz$")
+    fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\\.nii\\.gz$")
+
+    for f in glob(os.path.join(func_dir, "*.nii.gz")):
+        if func_pattern.search(os.path.basename(f)):
+            files.append(f)
+
+    for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+        if fmap_pattern.search(os.path.basename(f)):
+            files.append(f)
+
+    return files
+
+def run_qc(subject_dir, config_path, output_csv):
     config = load_config(config_path)
     expected_by_series_number = get_expected_series_map(config)
-
-    bids_paths = ['func', 'anat', 'fmap']
-
     records = []
 
-    for bids_type in bids_paths:
-        for nii_path in glob(os.path.join(input_dir, bids_type, "*.nii.gz")):
-            base = os.path.basename(nii_path).replace(".nii.gz", "")
-            json_path = os.path.join(input_dir, bids_type, base + ".json")
+    bids_files = collect_bids_files(subject_dir)
 
-            row = {
-                "Filename": base,
-                "AcquisitionNumber": None,
-                "SeriesDescription": None,
-                "MatchedSequence": "FALSE",
-                "SequenceType": "",
-                "Match": "FALSE",
-                "RunFromDescription": "",
-                "RunMatchToFilename": "N/A"
-            }
+    for nii_path in bids_files:
+        base = os.path.basename(nii_path).replace(".nii.gz", "")
+        json_path = os.path.join(os.path.dirname(nii_path), base + ".json")
 
-            if not os.path.exists(json_path):
-                row["SeriesDescription"] = "Missing JSON"
-                records.append(row)
-                continue
+        row = {
+            "Filename": base,
+            "SeriesNumber": None,
+            "SeriesDescription": None,
+            "MatchedSequence": "FAIL",
+            "SequenceType": "",
+            "ExpectedSeriesNumber": "",
+            "ExpectedSeriesDescription": "",
+            "Match": "FAIL",
+            "RunFromDescription": "",
+            "RunMatchToFilename": "N/A"
+        }
 
-            with open(json_path, "r") as f:
-                metadata = json.load(f)
+        if not os.path.exists(json_path):
+            row["SeriesDescription"] = "Missing JSON"
+            records.append(row)
+            continue
 
-            acq = metadata.get("AcquisitionNumber")
-            desc = metadata.get("SeriesDescription")
+        with open(json_path, "r") as f:
+            metadata = json.load(f)
 
-            row["AcquisitionNumber"] = acq
-            row["SeriesDescription"] = desc
+        series_number = metadata.get("SeriesNumber")
+        desc = metadata.get("SeriesDescription")
 
-            if acq not in expected_by_series_number:
-                records.append(row)
-                continue
+        row["SeriesNumber"] = series_number
+        row["SeriesDescription"] = desc
 
-            expected = expected_by_series_number[acq]
+        expected = expected_by_series_number.get(series_number)
+
+        if expected:
+            row["MatchedSequence"] = "PASS"
             row["SequenceType"] = expected["sequence_type"]
-            row["MatchedSequence"] = "TRUE"
+            row["ExpectedSeriesNumber"] = series_number
+            row["ExpectedSeriesDescription"] = expected.get("series_description", "")
 
             pattern = expected.get("series_description_pattern")
             template = expected.get("filename_template")
@@ -83,23 +100,23 @@ def run_qc(input_dir, config_path, output_csv):
 
                     if template:
                         expected_fragment = template.format(run=run_num)
-                        row["RunMatchToFilename"] = "TRUE" if expected_fragment in base else "FALSE"
-                        row["Match"] = "TRUE" if row["RunMatchToFilename"] == "TRUE" else "FALSE"
+                        row["RunMatchToFilename"] = "PASS" if expected_fragment in base else "FAIL"
+                        if row["RunMatchToFilename"] == "PASS":
+                            row["Match"] = "PASS"
                     else:
-                        row["Match"] = "TRUE"
+                        row["Match"] = "PASS"
                 else:
-                    row["RunMatchToFilename"] = "FALSE"
-                    row["Match"] = "FALSE"
+                    row["RunMatchToFilename"] = "FAIL"
+                    row["Match"] = "FAIL"
             else:
                 expected_desc = expected.get("series_description")
                 if expected_desc:
-                    row["Match"] = "TRUE" if desc == expected_desc else "FALSE"
+                    row["Match"] = "PASS" if desc == expected_desc else "FAIL"
                 else:
-                    row["Match"] = "TRUE"
+                    row["Match"] = "PASS"
 
-            records.append(row)
+        records.append(row)
 
-    # Write CSV
     with open(output_csv, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=records[0].keys())
         writer.writeheader()
