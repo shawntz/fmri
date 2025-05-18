@@ -102,31 +102,37 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
 
             if pattern:
                 match = re.search(pattern, desc or "")
+            else:
+                # fallback to filename-based run extraction for fmap files
+                match = re.search(r"run-(?P<run>\d{2})", base)
+
+            
                 print("MATCH")
                 print(match)
-                if match and "run" in match.groupdict():
-                    run_num = int(match.group("run"))
-                    print("RUN_NUM")
-                    print(run_num)
-                    run_str = f"run-{run_num:02d}"
-                    row["RunFromDescription"] = run_str
+            
+            if match and "run" in match.groupdict():
+                run_num = int(match.group("run"))
+                print("RUN_NUM")
+                print(run_num)
+                run_str = f"run-{run_num:02d}"
+                row["RunFromDescription"] = run_str
 
-                    if template:
-                        expected_fragment = template.format(run=run_num)
-                        row["RunMatchToFilename"] = "PASS" if expected_fragment in base else "FAIL"
-                        if row["RunMatchToFilename"] == "PASS":
-                            row["Match"] = "PASS"
-                    else:
+                if template:
+                    expected_fragment = template.format(run=run_num)
+                    row["RunMatchToFilename"] = "PASS" if expected_fragment in base else "FAIL"
+                    if row["RunMatchToFilename"] == "PASS":
                         row["Match"] = "PASS"
                 else:
-                    row["RunMatchToFilename"] = "FAIL"
-                    row["Match"] = "FAIL"
-            else:
-                expected_desc = expected.get("series_description")
-                if expected_desc:
-                    row["Match"] = "PASS" if desc == expected_desc else "FAIL"
-                else:
                     row["Match"] = "PASS"
+            else:
+                row["RunMatchToFilename"] = "FAIL"
+                row["Match"] = "FAIL"
+        else:
+            expected_desc = expected.get("series_description")
+            if expected_desc:
+                row["Match"] = "PASS" if desc == expected_desc else "FAIL"
+            else:
+                row["Match"] = "PASS"
 
         records.append(row)
 
