@@ -2,6 +2,7 @@
   "default_sequences": {
     "t1": {
       "series_numbers": [2],
+      "series_description": "T1 Whole Brain .9mm sag",
       "required": true,
       "description": "T1-weighted anatomical scan"
     },
@@ -12,17 +13,21 @@
     },
     "mt": {
       "series_numbers": [16],
+      "series_description": "SPGR MT Xing2018",
       "required": false,
       "description": "Magnetization transfer scan"
     },
     "test": {
       "series_numbers": [5, 6, 8, 9, 11, 12, 14, 15],
       "required": true,
+      "series_description_pattern": "BOLD_HB_1.8iso_test(?P<run>[0-9]+)",
+      "filename_template": "run-{run:02d}",
       "description": "Test functional scans"
     },
     "pe1": {
       "series_numbers": [4, 7, 10, 13],
       "required": false,
+      "series_description": "BOLD_HB_1.8iso_pe1_CAL",
       "description": "PE1 field map scans"
     }
   },
