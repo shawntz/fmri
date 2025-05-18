@@ -5,16 +5,7 @@
 
 source ./settings.sh
 
-JOB_NAME=$1
-
-if [ -z "${JOB_NAME}" ]; then
-  echo "Error: Pipeline step name not provided" | tee -a "${log_file}"
-  echo "Usage: $0 <step-name>" | tee -a "${log_file}"
-  exit 1
-fi
-
-fw_seshid=$2
-new_subid=$3
+new_subid=$1
 
 subject="sub-${new_subid}"
 

@@ -167,7 +167,7 @@ def get_parameters(step_choice):
             "prompts": []
         },
         "9": {
-            "keys": ["bids_id_number"],
+            "keys": ["new_subid"],
             "prompts": ["Assigned BIDS Subj ID?"]
         }
     }
