@@ -42,9 +42,9 @@ def run_qc(input_dir, config_path, output_csv):
                 "Filename": base,
                 "AcquisitionNumber": None,
                 "SeriesDescription": None,
-                "MatchedSequence": "❌",
+                "MatchedSequence": "FALSE",
                 "SequenceType": "",
-                "Match": "❌",
+                "Match": "FALSE",
                 "RunFromDescription": "",
                 "RunMatchToFilename": "N/A"
             }
@@ -69,7 +69,7 @@ def run_qc(input_dir, config_path, output_csv):
 
             expected = expected_by_series_number[acq]
             row["SequenceType"] = expected["sequence_type"]
-            row["MatchedSequence"] = "✅"
+            row["MatchedSequence"] = "TRUE"
 
             pattern = expected.get("series_description_pattern")
             template = expected.get("filename_template")
@@ -83,19 +83,19 @@ def run_qc(input_dir, config_path, output_csv):
 
                     if template:
                         expected_fragment = template.format(run=run_num)
-                        row["RunMatchToFilename"] = "✅" if expected_fragment in base else "❌"
-                        row["Match"] = "✅" if row["RunMatchToFilename"] == "✅" else "❌"
+                        row["RunMatchToFilename"] = "TRUE" if expected_fragment in base else "FALSE"
+                        row["Match"] = "TRUE" if row["RunMatchToFilename"] == "TRUE" else "FALSE"
                     else:
-                        row["Match"] = "✅"
+                        row["Match"] = "TRUE"
                 else:
-                    row["RunMatchToFilename"] = "❌"
-                    row["Match"] = "❌"
+                    row["RunMatchToFilename"] = "FALSE"
+                    row["Match"] = "FALSE"
             else:
                 expected_desc = expected.get("series_description")
                 if expected_desc:
-                    row["Match"] = "✅" if desc == expected_desc else "❌"
+                    row["Match"] = "TRUE" if desc == expected_desc else "FALSE"
                 else:
-                    row["Match"] = "✅"
+                    row["Match"] = "TRUE"
 
             records.append(row)
 
