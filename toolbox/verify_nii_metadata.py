@@ -29,77 +29,75 @@ def run_qc(input_dir, config_path, output_csv):
     config = load_config(config_path)
     expected_by_series_number = get_expected_series_map(config)
 
+    bids_paths = ['func', 'anat', 'fmap']
+
     records = []
 
-    for nii_path in glob(os.path.join(input_dir, "*.nii.gz")):
-        base = os.path.basename(nii_path).replace(".nii.gz", "")
-        json_path = os.path.join(input_dir, base + ".json")
+    for bids_type in bids_paths:
+        for nii_path in glob(os.path.join(input_dir, bids_type, "*.nii.gz")):
+            base = os.path.basename(nii_path).replace(".nii.gz", "")
+            json_path = os.path.join(input_dir, base + ".json")
 
-        print(nii_path)
-        print(base)
-        print(json_path)
-        print(" ")
+            row = {
+                "Filename": base,
+                "AcquisitionNumber": None,
+                "SeriesDescription": None,
+                "MatchedSequence": "❌",
+                "SequenceType": "",
+                "Match": "❌",
+                "RunFromDescription": "",
+                "RunMatchToFilename": "N/A"
+            }
 
-        row = {
-            "Filename": base,
-            "AcquisitionNumber": None,
-            "SeriesDescription": None,
-            "MatchedSequence": "❌",
-            "SequenceType": "",
-            "Match": "❌",
-            "RunFromDescription": "",
-            "RunMatchToFilename": "N/A"
-        }
+            if not os.path.exists(json_path):
+                row["SeriesDescription"] = "Missing JSON"
+                records.append(row)
+                continue
 
-        if not os.path.exists(json_path):
-            row["SeriesDescription"] = "Missing JSON"
-            records.append(row)
-            continue
+            with open(json_path, "r") as f:
+                metadata = json.load(f)
 
-        with open(json_path, "r") as f:
-            metadata = json.load(f)
+            acq = metadata.get("AcquisitionNumber")
+            desc = metadata.get("SeriesDescription")
 
-        acq = metadata.get("AcquisitionNumber")
-        desc = metadata.get("SeriesDescription")
+            row["AcquisitionNumber"] = acq
+            row["SeriesDescription"] = desc
 
-        row["AcquisitionNumber"] = acq
-        row["SeriesDescription"] = desc
+            if acq not in expected_by_series_number:
+                records.append(row)
+                continue
 
-        if acq not in expected_by_series_number:
-            records.append(row)
-            continue
+            expected = expected_by_series_number[acq]
+            row["SequenceType"] = expected["sequence_type"]
+            row["MatchedSequence"] = "✅"
 
-        expected = expected_by_series_number[acq]
-        row["SequenceType"] = expected["sequence_type"]
-        row["MatchedSequence"] = "✅"
+            pattern = expected.get("series_description_pattern")
+            template = expected.get("filename_template")
 
-        pattern = expected.get("series_description_pattern")
-        template = expected.get("filename_template")
+            if pattern:
+                match = re.search(pattern, desc or "")
+                if match and "run" in match.groupdict():
+                    run_num = int(match.group("run"))
+                    run_str = f"run-{run_num:02d}"
+                    row["RunFromDescription"] = run_str
 
-        if pattern:
-            match = re.search(pattern, desc or "")
-            if match and "run" in match.groupdict():
-                run_num = int(match.group("run"))
-                run_str = f"run-{run_num:02d}"
-                row["RunFromDescription"] = run_str
-
-                if template:
-                    expected_fragment = template.format(run=run_num)
-                    row["RunMatchToFilename"] = "✅" if expected_fragment in base else "❌"
-                    row["Match"] = "✅" if row["RunMatchToFilename"] == "✅" else "❌"
+                    if template:
+                        expected_fragment = template.format(run=run_num)
+                        row["RunMatchToFilename"] = "✅" if expected_fragment in base else "❌"
+                        row["Match"] = "✅" if row["RunMatchToFilename"] == "✅" else "❌"
+                    else:
+                        row["Match"] = "✅"
+                else:
+                    row["RunMatchToFilename"] = "❌"
+                    row["Match"] = "❌"
+            else:
+                expected_desc = expected.get("series_description")
+                if expected_desc:
+                    row["Match"] = "✅" if desc == expected_desc else "❌"
                 else:
                     row["Match"] = "✅"
-            else:
-                row["RunMatchToFilename"] = "❌"
-                row["Match"] = "❌"
-        else:
-            expected_desc = expected.get("series_description")
-            if expected_desc:
-                row["Match"] = "✅" if desc == expected_desc else "❌"
-            else:
-                row["Match"] = "✅"
 
-        records.append(row)
+            records.append(row)
 
     # Write CSV
     with open(output_csv, "w", newline="") as f:
