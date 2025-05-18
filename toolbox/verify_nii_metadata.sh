@@ -23,6 +23,6 @@ echo "($(date)) [INFO] Running header-based QC" | tee -a "${log_file}"
 python3 "${SCRIPTS_DIR}/${JOB_NAME}toolbox/verify_nii_metadata.py" \
   --subid "${new_subid}" \
   --project_dir "${BASE_DIR}" \
-  --task_id "${task_id}" \
+  --task_id "${new_task_id}" \
   --config_path "${CONFIG_FILE}" \
   --log_out_dir "${SLURM_LOG_DIR}"

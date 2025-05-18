@@ -30,14 +30,19 @@ def collect_bids_files(subject_dir, task_name):
     fmap_dir = os.path.join(subject_dir, "fmap")
 
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\.nii\.gz$")
-    fmap_pattern = re.compile(r"sub-[^_]+_run-(?P<run>\d{2})_dir-AP_epi\.nii\.gz$")
+    fmap_pattern_ap = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-AP_epi\.nii\.gz$")
+    fmap_pattern_pa = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-PA_epi\.nii\.gz$")
 
     for f in glob(os.path.join(func_dir, "*.nii.gz")):
         if func_pattern.search(os.path.basename(f)):
             files.append(f)
 
     for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
-        if fmap_pattern.search(os.path.basename(f)):
+        if fmap_pattern_ap.search(os.path.basename(f)):
+            files.append(f)
+
+    for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+        if fmap_pattern_pa.search(os.path.basename(f)):
             files.append(f)
 
     return files
@@ -54,6 +59,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
         json_path = os.path.join(os.path.dirname(nii_path), base + ".json")
 
         row = {
+            "RootPath": subject_dir,
             "Filename": base,
             "SeriesNumber": None,
             "SeriesDescription": None,
@@ -141,7 +147,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     subject = f"sub-{args.subid}"
-    subject_dir = os.path.join(args.project_dir, "bids", subject)
+    subject_dir = os.path.join(args.project_dir, "bids_trimmed", subject)
     output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
     output_csv = os.path.join(output_dir, f"{subject}_qc_summary.csv")
     os.makedirs(output_dir, exist_ok=True)
