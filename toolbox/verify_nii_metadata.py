@@ -24,12 +24,15 @@ def get_expected_series_map(config):
             }
     return mapping
 
-def collect_bids_files(subject_dir):
+def collect_bids_files(subject_dir, task_name):
     files = []
     func_dir = os.path.join(subject_dir, "func")
     fmap_dir = os.path.join(subject_dir, "fmap")
+    print(os.listdir(func_dir))
 
-    func_pattern = re.compile(r"sub-[^_]+_task-GoalAttnMemTest_run-\d{2}_dir-PA_bold\\.nii\\.gz$")
+    func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\\.nii\\.gz$")
+    print(f"Regex: {func_pattern.pattern}")
+    
     fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\\.nii\\.gz$")
 
     for f in glob(os.path.join(func_dir, "*.nii.gz")):
@@ -42,12 +45,12 @@ def collect_bids_files(subject_dir):
 
     return files
 
-def run_qc(subject_dir, config_path, output_csv):
+def run_qc(subject_dir, task_name, config_path, output_csv):
     config = load_config(config_path)
     expected_by_series_number = get_expected_series_map(config)
     records = []
 
-    bids_files = collect_bids_files(subject_dir)
+    bids_files = collect_bids_files(subject_dir, task_name)
 
     for nii_path in bids_files:
         base = os.path.basename(nii_path).replace(".nii.gz", "")
@@ -128,6 +131,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run metadata QC for converted NIfTI files")
     parser.add_argument("--subid", required=True, help="Subject ID (e.g., 001)")
     parser.add_argument("--project_dir", required=True, help="Base project directory")
+    parser.add_argument("--task_id", required=True, help="Original task name used at scanner")
     parser.add_argument("--config_path", required=True, help="Path to expected scan config JSON")
     parser.add_argument("--log_out_dir", required=True, help="Path to save out csv log file")
 
@@ -138,4 +142,4 @@ if __name__ == "__main__":
     output_csv = os.path.join(output_dir, f"{subject}_qc_summary.csv")
     os.makedirs(output_dir, exist_ok=True)
 
-    run_qc(subject_dir=subject_dir, config_path=args.config_path, output_csv=output_csv)
+    run_qc(subject_dir=subject_dir, task_name=args.task_id, config_path=args.config_path, output_csv=output_csv)
