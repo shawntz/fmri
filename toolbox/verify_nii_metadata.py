@@ -32,7 +32,7 @@ def collect_bids_files(subject_dir, task_name):
 
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\\.nii\\.gz$")
     print(f"Regex: {func_pattern.pattern}")
-    
+
     fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\\.nii\\.gz$")
 
     for f in glob(os.path.join(func_dir, "*.nii.gz")):
@@ -51,6 +51,8 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
     records = []
 
     bids_files = collect_bids_files(subject_dir, task_name)
+    print("BIDS FILES")
+    print(bids_files)
 
     for nii_path in bids_files:
         base = os.path.basename(nii_path).replace(".nii.gz", "")
@@ -84,6 +86,8 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
         row["SeriesDescription"] = desc
 
         expected = expected_by_series_number.get(series_number)
+        print("EXPECTED")
+        print(expected)
 
         if expected:
             row["MatchedSequence"] = "PASS"
