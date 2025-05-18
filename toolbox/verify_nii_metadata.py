@@ -33,7 +33,8 @@ def collect_bids_files(subject_dir, task_name):
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\.nii\.gz$")
     print(f"Regex: {func_pattern.pattern}")
 
-    fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\.nii\.gz$")
+    # fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\.nii\.gz$")
+    fmap_pattern = re.compile(r"sub-[^_]+_run-(?P<run>\d{2})_dir-AP_epi\.nii\.gz$")
     print(f"Regex: {fmap_pattern.pattern}")
 
     for f in glob(os.path.join(func_dir, "*.nii.gz")):
