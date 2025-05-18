@@ -123,7 +123,10 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
                     if row["RunMatchToFilename"] == "PASS":
                         row["Match"] = "PASS"
                 else:
-                    row["Match"] = "PASS"
+                    # Fallback: directly compare extracted run_str to filename
+                    row["RunMatchToFilename"] = "PASS" if run_str in base else "FAIL"
+                    if row["RunMatchToFilename"] == "PASS":
+                        row["Match"] = "PASS"
             else:
                 row["RunMatchToFilename"] = "FAIL"
                 row["Match"] = "FAIL"
