@@ -35,6 +35,11 @@ def run_qc(input_dir, config_path, output_csv):
         base = os.path.basename(nii_path).replace(".nii.gz", "")
         json_path = os.path.join(input_dir, base + ".json")
 
+        print(nii_path)
+        print(base)
+        print(json_path)
+        print(" ")
+
         row = {
             "Filename": base,
             "AcquisitionNumber": None,
@@ -115,7 +120,7 @@ if __name__ == "__main__":
     subject = f"sub-{args.subid}"
     input_dir = os.path.join(args.project_dir, "bids", subject)
     output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
-    output_csv = os.path.join(output_dir, f"sub-{subject}_qc_summary.csv")
+    output_csv = os.path.join(output_dir, f"{subject}_qc_summary.csv")
     os.makedirs(output_dir, exist_ok=True)
 
     run_qc(input_dir=input_dir, config_path=args.config_path, output_csv=output_csv)
