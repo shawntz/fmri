@@ -119,6 +119,7 @@ def display_menu():
         ("6", "Download Freesurfer output for manual surface editing"),
         ("7", "Reupload edited Freesurfer directories"),
         ("8", "Run remaining fMRIPrep steps") # end at step of minimal preprocessing 
+        ("9", "QC: Verify dcm -> nii -> bids metadata")
         # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
         # make any adjustments pre analysis modeling as necessary
         # failure mode: verification that the edited file persisted through step 8 we need to somehow make sure the fmriprep is using the edited files (in the event theyre misnamed, after number 8 finishes, if it generated a new batch of fmri anatomical scans md5 checksum with manual edit vs. md5 of the anatomical file its using for the next step)
@@ -164,6 +165,10 @@ def get_parameters(step_choice):
         "6": {  # Step 6 (postproc)
             "keys": [],
             "prompts": []
+        },
+        "9": {
+            "keys": ["bids_id_number"],
+            "prompts": ["Assigned BIDS Subj ID?"]
         }
     }
 
@@ -214,6 +219,7 @@ def run_script(step_choice, user_inputs):
         "6": "06-run.sbatch",
         "7": "07-run.sbatch",
         "8": "08-run.sbatch",
+        "9": "toolbox/verify_nii_metadata.sh"
     }
 
     selected_script = scripts[step_choice]
