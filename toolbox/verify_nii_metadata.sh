@@ -24,4 +24,4 @@ python3 "${SCRIPTS_DIR}/${JOB_NAME}/verify_nii_metadata.py" \
   --subid "${new_subid}" \
   --project_dir "${BASE_DIR}" \
   --config_path "${CONFIG_FILE}" \
-  --log_out_dir "${SLURM_LOG_DIR}
+  --log_out_dir "${SLURM_LOG_DIR}"
