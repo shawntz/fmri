@@ -28,14 +28,9 @@ def collect_bids_files(subject_dir, task_name):
     files = []
     func_dir = os.path.join(subject_dir, "func")
     fmap_dir = os.path.join(subject_dir, "fmap")
-    print(os.listdir(func_dir))
 
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\.nii\.gz$")
-    print(f"Regex: {func_pattern.pattern}")
-
-    # fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\.nii\.gz$")
     fmap_pattern = re.compile(r"sub-[^_]+_run-(?P<run>\d{2})_dir-AP_epi\.nii\.gz$")
-    print(f"Regex: {fmap_pattern.pattern}")
 
     for f in glob(os.path.join(func_dir, "*.nii.gz")):
         if func_pattern.search(os.path.basename(f)):
@@ -53,8 +48,6 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
     records = []
 
     bids_files = collect_bids_files(subject_dir, task_name)
-    print("BIDS FILES")
-    print(bids_files)
 
     for nii_path in bids_files:
         base = os.path.basename(nii_path).replace(".nii.gz", "")
@@ -88,8 +81,6 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
         row["SeriesDescription"] = desc
 
         expected = expected_by_series_number.get(series_number)
-        print("EXPECTED")
-        print(expected)
 
         if expected:
             row["MatchedSequence"] = "PASS"
@@ -105,15 +96,9 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
             else:
                 # fallback to filename-based run extraction for fmap files
                 match = re.search(r"run-(?P<run>\d{2})", base)
-
-            
-                print("MATCH")
-                print(match)
             
             if match and "run" in match.groupdict():
                 run_num = int(match.group("run"))
-                print("RUN_NUM")
-                print(run_num)
                 run_str = f"run-{run_num:02d}"
                 row["RunFromDescription"] = run_str
 
@@ -123,7 +108,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
                     if row["RunMatchToFilename"] == "PASS":
                         row["Match"] = "PASS"
                 else:
-                    # Fallback: directly compare extracted run_str to filename
+                    # fallback case: directly compare extracted run_str to filename
                     row["RunMatchToFilename"] = "PASS" if run_str in base else "FAIL"
                     if row["RunMatchToFilename"] == "PASS":
                         row["Match"] = "PASS"
@@ -162,3 +147,4 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
 
     run_qc(subject_dir=subject_dir, task_name=args.task_id, config_path=args.config_path, output_csv=output_csv)
+    
