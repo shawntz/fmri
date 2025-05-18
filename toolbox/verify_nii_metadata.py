@@ -36,7 +36,7 @@ def run_qc(input_dir, config_path, output_csv):
     for bids_type in bids_paths:
         for nii_path in glob(os.path.join(input_dir, bids_type, "*.nii.gz")):
             base = os.path.basename(nii_path).replace(".nii.gz", "")
-            json_path = os.path.join(input_dir, base + ".json")
+            json_path = os.path.join(input_dir, bids_type, base + ".json")
 
             row = {
                 "Filename": base,
