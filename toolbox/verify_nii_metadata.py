@@ -133,9 +133,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     subject = f"sub-{args.subid}"
-    input_dir = os.path.join(args.project_dir, "bids", subject)
+    subject_dir = os.path.join(args.project_dir, "bids", subject)
     output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
     output_csv = os.path.join(output_dir, f"{subject}_qc_summary.csv")
     os.makedirs(output_dir, exist_ok=True)
 
-    run_qc(input_dir=input_dir, config_path=args.config_path, output_csv=output_csv)
+    run_qc(subject_dir=subject_dir, config_path=args.config_path, output_csv=output_csv)
