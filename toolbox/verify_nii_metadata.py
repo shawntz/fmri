@@ -101,6 +101,8 @@ def run_qc(subject_dir, task_name, config_path, output_csv):
 
             if pattern:
                 match = re.search(pattern, desc or "")
+                print("MATCH")
+                print(match)
                 if match and "run" in match.groupdict():
                     run_num = int(match.group("run"))
                     run_str = f"run-{run_num:02d}"
