@@ -30,7 +30,7 @@ def collect_bids_files(subject_dir, task_name, bids_dir_type):
     fmap_dir = os.path.join(subject_dir, "fmap")
 
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\.nii\.gz$")
-    fmap_pattern = re.compile(r"sub-[^_]+_run-\d{2}_dir-AP_epi\.nii\.gz$")
+    fmap_pattern = re.compile(r"sub-[^_]+_run-(?P<run>\d{2})_dir-AP_epi\.nii\.gz$")
     fmap_pattern_ap = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-AP_epi\.nii\.gz$")
     fmap_pattern_pa = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-PA_epi\.nii\.gz$")
 
