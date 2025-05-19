@@ -119,7 +119,8 @@ while read -r subject_id; do
     # Check corresponding fieldmap based on mapping
     run_fmap=${fmap_mapping[$run_bold]}
     fieldmap_file="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${task_name}_run-${run_fmap}_dir-AP_epi.nii.gz"
-    check_volumes "${fieldmap_file}" "${EXPECTED_FMAP_VOLS}" "FIELDMAP" "${run_fmap}" "${subject_id}"
+	fmap_remain_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
+    check_volumes "${fieldmap_file}" "${fmap_remain_vols}" "FIELDMAP" "${run_fmap}" "${subject_id}"
   done
 
   echo "[INFO] Completed volume check for subject ${subject_id}"
