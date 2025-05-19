@@ -6,19 +6,13 @@
 source ./settings.sh
 
 new_subid=$1
-
 subject="sub-${new_subid}"
 
-# logging setup
-mkdir -p "${SLURM_LOG_DIR}/subjects"
-log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/03-processed_subjects.txt"
-
-echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
+echo "($(date)) [INFO] Processing subject: ${subject}"
 
 module load python/3.9.0
 
-echo "($(date)) [INFO] Running header-based QC" | tee -a "${log_file}"
+echo "($(date)) [INFO] Running header-based QC"
 
 python3 "${SCRIPTS_DIR}/${JOB_NAME}toolbox/verify_nii_metadata.py" \
   --subid "${new_subid}" \

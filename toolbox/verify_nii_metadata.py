@@ -24,12 +24,13 @@ def get_expected_series_map(config):
             }
     return mapping
 
-def collect_bids_files(subject_dir, task_name):
+def collect_bids_files(subject_dir, task_name, bids_dir_type):
     files = []
     func_dir = os.path.join(subject_dir, "func")
     fmap_dir = os.path.join(subject_dir, "fmap")
 
     func_pattern = re.compile(fr"sub-[^_]+_task-{task_name}_run-\d{{2}}_dir-PA_bold\.nii\.gz$")
+    fmap_pattern = re.compile(r"sub-[^_]+_run-(?P<run>\d{2})_dir-AP_epi\.nii\.gz$")
     fmap_pattern_ap = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-AP_epi\.nii\.gz$")
     fmap_pattern_pa = re.compile(fr"sub-[^_]+_acq-{task_name}_run-(?P<run>\d{{2}})_dir-PA_epi\.nii\.gz$")
 
@@ -37,22 +38,27 @@ def collect_bids_files(subject_dir, task_name):
         if func_pattern.search(os.path.basename(f)):
             files.append(f)
 
-    for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
-        if fmap_pattern_ap.search(os.path.basename(f)):
-            files.append(f)
+    if bids_dir_type == "bids":
+        for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+            if fmap_pattern.search(os.path.basename(f)):
+                files.append(f)
+    elif bids_dir_type == "bids_trimmed":
+        for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+            if fmap_pattern_ap.search(os.path.basename(f)):
+                files.append(f)
 
-    for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
-        if fmap_pattern_pa.search(os.path.basename(f)):
-            files.append(f)
+        for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+            if fmap_pattern_pa.search(os.path.basename(f)):
+                files.append(f)
 
     return files
 
-def run_qc(subject_dir, task_name, config_path, output_csv):
+def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
     config = load_config(config_path)
     expected_by_series_number = get_expected_series_map(config)
     records = []
 
-    bids_files = collect_bids_files(subject_dir, task_name)
+    bids_files = collect_bids_files(subject_dir, task_name, bids_dir_type)
 
     for nii_path in bids_files:
         base = os.path.basename(nii_path).replace(".nii.gz", "")
@@ -146,11 +152,15 @@ if __name__ == "__main__":
     parser.add_argument("--log_out_dir", required=True, help="Path to save out csv log file")
 
     args = parser.parse_args()
-    subject = f"sub-{args.subid}"
-    subject_dir = os.path.join(args.project_dir, "bids_trimmed", subject)
-    output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
-    output_csv = os.path.join(output_dir, f"{subject}_qc_summary.csv")
-    os.makedirs(output_dir, exist_ok=True)
 
-    run_qc(subject_dir=subject_dir, task_name=args.task_id, config_path=args.config_path, output_csv=output_csv)
+    bids_dir_types = ["bids", "bids_trimmed"]
+
+    for dir_type in bids_dir_types:
+        subject = f"sub-{args.subid}"
+        subject_dir = os.path.join(args.project_dir, "bids_trimmed", subject)
+        output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
+        output_csv = os.path.join(output_dir, f"{subject}_qc_summary-{dir_type}.csv")
+        os.makedirs(output_dir, exist_ok=True)
+
+        run_qc(subject_dir=subject_dir, task_name=args.task_id, config_path=args.config_path, output_csv=output_csv, bids_dir_type=dir_type)
     
