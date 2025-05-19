@@ -139,7 +139,9 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
                 row["RunMatchToFilename"] = "FAIL"
                 row["Match"] = "FAIL"
         else:
+            print("other case:")
             expected_desc = expected.get("series_description")
+            print(f"expected_desc: {expected_desc}")
             if expected_desc:
                 row["Match"] = "PASS" if desc == expected_desc else "FAIL"
             else:
