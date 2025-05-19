@@ -166,7 +166,7 @@ if __name__ == "__main__":
         subject = f"sub-{args.subid}"
         subject_dir = os.path.join(args.project_dir, dir_type, subject)
         output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
-        output_csv = os.path.join(output_dir, f"{subject}_qc_summary-{dir_type}.csv")
+        output_csv = os.path.join(output_dir, f"{subject}_summary-{dir_type}.csv")
         os.makedirs(output_dir, exist_ok=True)
 
         if dir_type == "bids":
