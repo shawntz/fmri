@@ -40,9 +40,7 @@ def collect_bids_files(subject_dir, task_name, bids_dir_type):
 
     if bids_dir_type == "bids":
         for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
-            print(f)
             if fmap_pattern.search(os.path.basename(f)):
-                print(f)
                 files.append(f)
     elif bids_dir_type == "bids_trimmed":
         for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
@@ -105,17 +103,9 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
             pattern = expected.get("series_description_pattern")
             template = expected.get("filename_template")
 
-            print(f"expected pattern: {pattern}")
-            print(f"expected template: {template}")
-
             if pattern:
-                print("condition: pattern was matched")
                 match = re.search(pattern, desc or "")
-            # elif bids_dir_type == "bids":
-            #     print("condition: pattern was not matched / bids_dir_type == 'bids'")
-            #     match = re.search(pattern, desc or "")
             else:
-                print("condition: fallback case")
                 # fallback to filename-based run extraction for fmap files
                 match = re.search(r"run-(?P<run>\d{2})", base)
             
@@ -141,9 +131,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
                 row["RunMatchToFilename"] = "FAIL"
                 row["Match"] = "FAIL"
         else:
-            print("other case:")
             expected_desc = expected.get("series_description")
-            print(f"expected_desc: {expected_desc}")
             if expected_desc:
                 row["Match"] = "PASS" if desc == expected_desc else "FAIL"
             else:
