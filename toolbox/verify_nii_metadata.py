@@ -40,7 +40,9 @@ def collect_bids_files(subject_dir, task_name, bids_dir_type):
 
     if bids_dir_type == "bids":
         for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
+            print(f)
             if fmap_pattern.search(os.path.basename(f)):
+                print(f)
                 files.append(f)
     elif bids_dir_type == "bids_trimmed":
         for f in glob(os.path.join(fmap_dir, "*.nii.gz")):
@@ -161,12 +163,14 @@ if __name__ == "__main__":
     parser.add_argument("--subid", required=True, help="Subject ID (e.g., 001)")
     parser.add_argument("--project_dir", required=True, help="Base project directory")
     parser.add_argument("--task_id", required=True, help="Original task name used at scanner")
+    parser.add_argument("--new_task_id", required=True, help="Updated task name (same as --task_id if no changes desired)")
     parser.add_argument("--config_path", required=True, help="Path to expected scan config JSON")
     parser.add_argument("--log_out_dir", required=True, help="Path to save out csv log file")
 
     args = parser.parse_args()
 
     bids_dir_types = ["bids", "bids_trimmed"]
+    task_id_names = [args.task_id, args.new_task_id]
 
     for dir_type in bids_dir_types:
         subject = f"sub-{args.subid}"
@@ -175,5 +179,10 @@ if __name__ == "__main__":
         output_csv = os.path.join(output_dir, f"{subject}_qc_summary-{dir_type}.csv")
         os.makedirs(output_dir, exist_ok=True)
 
-        run_qc(subject_dir=subject_dir, task_name=args.task_id, config_path=args.config_path, output_csv=output_csv, bids_dir_type=dir_type)
+        if dir_type == "bids":
+            current_task = task_id_names[0]
+        elif dir_type == "bids_trimmed":
+            current_task = task_id_names[1]
+
+        run_qc(subject_dir=subject_dir, task_name=current_task, config_path=args.config_path, output_csv=output_csv, bids_dir_type=dir_type)
     
