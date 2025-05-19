@@ -119,7 +119,7 @@ def display_menu():
         ("6", "Download Freesurfer output for manual surface editing"),
         ("7", "Reupload edited Freesurfer directories"),
         ("8", "Run remaining fMRIPrep steps"), # end at step of minimal preprocessing 
-        ("9", "QC: Verify dcm -> nii -> bids metadata")
+        ("9", "QC: Verify dcm -> nii -> bids metadata"),
         ("10", "QC: Verify number of volumes per scan file")
         # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
         # make any adjustments pre analysis modeling as necessary
