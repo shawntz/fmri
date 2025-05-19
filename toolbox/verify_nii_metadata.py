@@ -111,9 +111,9 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
             if pattern:
                 print("condition: pattern was matched")
                 match = re.search(pattern, desc or "")
-            elif bids_dir_type == "bids":
-                print("condition: pattern was not matched / bids_dir_type == 'bids'")
-                match = re.search(pattern, desc or "")
+            # elif bids_dir_type == "bids":
+            #     print("condition: pattern was not matched / bids_dir_type == 'bids'")
+            #     match = re.search(pattern, desc or "")
             else:
                 print("condition: fallback case")
                 # fallback to filename-based run extraction for fmap files
