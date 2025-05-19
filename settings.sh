@@ -107,23 +107,55 @@ FILE_PERMISSIONS=775  # FILE LEVEL
 # ============================================================================
 # (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
-# TODO: make this indepdent of the settings.sh file so it's only run when needed
-#  and is step-dependent (i.e., 03-subjects.txt instead of all-subjects.txt)
-if [[ -f "all-subjects.txt" ]]; then
-    num_subjects=$(wc -l < "all-subjects.txt")
-    echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
-    array_range="0-$((num_subjects-1))"
-else
-    echo "($(date)) [WARNING] subjects file not found, defaulting to single subject"
-    num_subjects=1
-    array_range="0"
-fi
+# interactive prompt to choose which subjects file to use
+select_subjects_file() {
+    local step_num=""
+    local subjects_file="all-subjects.txt"
+    local custom_file=""
+    
+    # only prompt if being sourced in an interactive shell
+    if [[ -t 0 ]]; then
+        echo "Select subjects file to use:"
+        echo "1) Use all-subjects.txt (default)"
+        echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
+        read -p "Enter choice [1/2]: " choice
+        
+        if [[ "$choice" == "2" ]]; then
+            read -p "Enter step number (e.g., 04): " step_num
+            custom_file="${step_num}-subjects.txt"
+            
+            if [[ -f "$custom_file" ]]; then
+                subjects_file="$custom_file"
+                echo "Using $subjects_file"
+            else
+                echo "Warning: $custom_file not found. Falling back to all-subjects.txt"
+            fi
+        fi
+    fi
+    
+    # calculate number of subjects based on selected file
+    if [[ -f "$subjects_file" ]]; then
+        num_subjects=$(wc -l < "$subjects_file")
+        echo "($(date)) [INFO] Found ${num_subjects} total subjects in $subjects_file"
+        array_range="0-$((num_subjects-1))"
+    else
+        echo "($(date)) [WARNING] $subjects_file not found, defaulting to single subject"
+        num_subjects=1
+        array_range="0"
+    fi
+
+    export SELECTED_SUBJECTS_FILE="$subjects_file"
+    export SLURM_ARRAY_SIZE="${array_range}"
+}
+
+# Run the function to set up the variables
+select_subjects_file
+
 export SLURM_EMAIL="${USER_EMAIL}"
 export SLURM_TIME="2:00:00"
 export DCMNIIX_SLURM_TIME="12:00:00"
 export SLURM_MEM="4G"  # memory alloc per cpu
 export SLURM_CPUS="8"
-export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
 export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
 export SLURM_LOG_DIR="${BASE_DIR}/logs"  # use BASE_DIR from main settings file
 export SLURM_PARTITION="awagner,hns,normal"  # compute resource preferences order
