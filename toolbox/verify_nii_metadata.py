@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
     for dir_type in bids_dir_types:
         subject = f"sub-{args.subid}"
-        subject_dir = os.path.join(args.project_dir, "bids_trimmed", subject)
+        subject_dir = os.path.join(args.project_dir, bids_dir_types, subject)
         output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
         output_csv = os.path.join(output_dir, f"{subject}_qc_summary-{dir_type}.csv")
         os.makedirs(output_dir, exist_ok=True)
