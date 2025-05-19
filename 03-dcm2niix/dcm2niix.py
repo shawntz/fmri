@@ -70,8 +70,8 @@ def main():
         tar.extractall(path=untar_dir)
 
     # Move tar to permanent oak location
-    shutil.move(str(scratch_sub_dir / f"{args.exam_num}.tar"), tar_target)
-    print(f"[INFO] Tar archive moved to {tar_target}")
+    ## shutil.move(str(scratch_sub_dir / f"{args.exam_num}.tar"), tar_target)
+    ## print(f"[INFO] Tar archive moved to {tar_target}")
 
     # Unzip DICOMs
     flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
