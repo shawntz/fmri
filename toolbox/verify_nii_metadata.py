@@ -66,6 +66,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type, subid
 
         row = {
             "SubjectId": subid,
+            "BidsDirType": bids_dir_type,
             "RootPath": subject_dir,
             "Filename": base,
             "SeriesNumber": None,
