@@ -131,12 +131,16 @@ cp "${RAW_DIR}"/"${subject}"/anat/"${subject}"_T1w.json "${TRIM_DIR}"/"${subject
 for run_bold in "${run_numbers[@]}"; do
   echo "($(date)) [INFO] Processing run ${run_bold}" | tee -a "${log_file}"
 
+  # get actual task ID from any BOLD file that matches the current run
+  bold_file=$(ls "${RAW_DIR}/${subject}/func/"*run-${run_bold}_dir-PA_bold.nii.gz | head -n1)
+  detected_task_id=$(basename "${bold_file}" | sed -E 's/.*_task-([^_]+)_run-.*/\1/')
+
 	#===========================================
 	# (1) TRIM DUMMY SCANS FROM TASK BOLD
 	#===========================================
 	echo "($(date)) [INFO] Trimming first ${n_dummy} dummy TRs from BOLD run ${run_bold}"
 
-	old_bold="${RAW_DIR}/${subject}/func/${subject}_task-${task_id}_run-${run_bold}_dir-PA_bold.nii.gz"
+	old_bold="${RAW_DIR}/${subject}/func/${subject}_task-${detected_task_id}_run-${run_bold}_dir-PA_bold.nii.gz"
 	new_bold="${TRIM_DIR}/${subject}/func/${subject}_task-${new_task_id}_run-${run_bold}_dir-PA_bold.nii.gz"
 
 	# validate initial BOLD volumes
@@ -157,7 +161,7 @@ for run_bold in "${run_numbers[@]}"; do
   fi
 
 	# copy and update JSON sidecar files
-	cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${task_id}"_run-"${run_bold}"_dir-PA_bold.json \
+	cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${detected_task_id}"_run-"${run_bold}"_dir-PA_bold.json \
   "${TRIM_DIR}"/"${subject}"/func/"${subject}"_task-"${new_task_id}"_run-"${run_bold}"_dir-PA_bold.json
 
 
@@ -219,10 +223,10 @@ for run_bold in "${run_numbers[@]}"; do
     fi
 
 		# copy json files for fmap
-		cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${task_id}"_run-"${run_bold}"_dir-PA_bold.json \
+		cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${detected_task_id}"_run-"${run_bold}"_dir-PA_bold.json \
 		"${TRIM_DIR}"/"${subject}"/fmap/"${subject}"_acq-"${new_task_id}"_run-"${run_fmap}"_dir-PA_epi.json
 
-    cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${task_id}"_run-"${run_bold}"_dir-PA_bold.json \
+    cp "${RAW_DIR}"/"${subject}"/func/"${subject}"_task-"${detected_task_id}"_run-"${run_bold}"_dir-PA_bold.json \
 		"${TRIM_DIR}"/"${subject}"/fmap/"${subject}"_acq-"${new_task_id}"_run-"${run_fmap}"_dir-AP_epi.json
   fi
 	
@@ -277,4 +281,3 @@ echo "($(date)) [INFO] Metadata update complete" | tee -a "${log_file}"
 echo "${subject_id}" >> "${processed_file}"
 echo "($(date)) [INFO] Successfully completed processing for subject ${subject_id}" | tee -a "${log_file}"
 echo "($(date)) [INFO] -> DOUBLE CHECK FILES AND THEN PROCEED TO FMRIPREP!" | tee -a "${log_file}"
-
