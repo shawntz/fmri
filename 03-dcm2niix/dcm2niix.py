@@ -50,7 +50,7 @@ def main():
     oak_base = Path(f"{args.project_dir}")
     bids_dir = oak_base / "bids"
     scratch_work_dir = scratch_sub_dir / f"dcm2niix_work_dir"
-    dicoms_dir = scratch_work_dir / f"sub-{args.subid}"
+    dicoms_dir = scratch_work_dir
     code_dir = Path(f"{args.scripts_dir}")
     heu_file = code_dir / "dcm_heuristic.py"
 
