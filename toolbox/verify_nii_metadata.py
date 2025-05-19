@@ -53,7 +53,7 @@ def collect_bids_files(subject_dir, task_name, bids_dir_type):
 
     return files
 
-def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
+def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type, subid):
     config = load_config(config_path)
     expected_by_series_number = get_expected_series_map(config)
     records = []
@@ -65,6 +65,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
         json_path = os.path.join(os.path.dirname(nii_path), base + ".json")
 
         row = {
+            "SubjectId": subid,
             "RootPath": subject_dir,
             "Filename": base,
             "SeriesNumber": None,
@@ -172,5 +173,5 @@ if __name__ == "__main__":
         elif dir_type == "bids_trimmed":
             current_task = task_id_names[1]
 
-        run_qc(subject_dir=subject_dir, task_name=current_task, config_path=args.config_path, output_csv=output_csv, bids_dir_type=dir_type)
+        run_qc(subject_dir=subject_dir, task_name=current_task, config_path=args.config_path, output_csv=output_csv, bids_dir_type=dir_type, subid=args.subid)
     
