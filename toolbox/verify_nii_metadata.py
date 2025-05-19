@@ -103,11 +103,17 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
             pattern = expected.get("series_description_pattern")
             template = expected.get("filename_template")
 
+            print(f"expected pattern: {pattern}")
+            print(f"expected template: {template}")
+
             if pattern:
+                print("condition: pattern was matched")
                 match = re.search(pattern, desc or "")
             elif bids_dir_type == "bids":
+                print("condition: pattern was not matched / bids_dir_type == 'bids'")
                 match = re.search(pattern, desc or "")
             else:
+                print("condition: fallback case")
                 # fallback to filename-based run extraction for fmap files
                 match = re.search(r"run-(?P<run>\d{2})", base)
             
@@ -122,10 +128,13 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type):
                     if row["RunMatchToFilename"] == "PASS":
                         row["Match"] = "PASS"
                 else:
-                    # fallback case: directly compare extracted run_str to filename
-                    row["RunMatchToFilename"] = "PASS" if run_str in base else "FAIL"
-                    if row["RunMatchToFilename"] == "PASS":
+                    if bids_dir_type == "bids":
                         row["Match"] = "PASS"
+                    elif bids_dir_type == "bids_trimmed": 
+                        # fallback case: directly compare extracted run_str to filename
+                        row["RunMatchToFilename"] = "PASS" if run_str in base else "FAIL"
+                        if row["RunMatchToFilename"] == "PASS":
+                            row["Match"] = "PASS"
             else:
                 row["RunMatchToFilename"] = "FAIL"
                 row["Match"] = "FAIL"
