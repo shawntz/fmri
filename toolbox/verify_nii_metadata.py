@@ -134,10 +134,13 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type, subid
                 row["Match"] = "FAIL"
         else:
             expected_desc = expected.get("series_description")
-            if expected_desc:
-                row["Match"] = "PASS" if desc == expected_desc else "FAIL"
+            if expected_desc is not None:
+                if expected_desc:
+                    row["Match"] = "PASS" if desc == expected_desc else "FAIL"
+                else:
+                    row["Match"] = "PASS"
             else:
-                row["Match"] = "PASS"
+                row["Match"] = None
 
         records.append(row)
 
