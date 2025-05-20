@@ -50,15 +50,15 @@ if [ "${num_subjects}" -eq 0 ]; then
 fi
 
 # default to index 0 if not running as array and only 1 subject
-if [ -z "${SLURM_ARRAY_TASK_ID}" ]; then
-  if [ "${num_subjects}" -eq 1 ]; then
-    SLURM_ARRAY_TASK_ID=0
-    echo "($(date)) [INFO] Only one subject found; defaulting to SLURM_ARRAY_TASK_ID=0"
-  else
-    echo "Error: SLURM_ARRAY_TASK_ID not set, but multiple subjects in list" | tee -a "${log_file}"
-    exit 1
-  fi
-fi
+# if [ -z "${SLURM_ARRAY_TASK_ID}" ]; then
+#   if [ "${num_subjects}" -eq 1 ]; then
+#     SLURM_ARRAY_TASK_ID=0
+#     echo "($(date)) [INFO] Only one subject found; defaulting to SLURM_ARRAY_TASK_ID=0"
+#   else
+#     echo "Error: SLURM_ARRAY_TASK_ID not set, but multiple subjects in list" | tee -a "${log_file}"
+#     exit 1
+#   fi
+# fi
 
 # grab subject line
 # subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
