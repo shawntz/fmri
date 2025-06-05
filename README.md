@@ -1,5 +1,19 @@
 <h2 align="center">SML fMRI Preprocessing Template<br />(<em>aka, meta fmriprep</em>)</h2>
 
+    ███████╗███╗   ███╗██████╗ ██╗
+    ██╔════╝████╗ ████║██╔══██╗██║
+    █████╗  ██╔████╔██║██████╔╝██║
+    ██╔══╝  ██║╚██╔╝██║██╔══██╗██║
+    ██║     ██║ ╚═╝ ██║██║  ██║██║
+    ╚═╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝
+
+    ██████╗ ██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗
+    ██╔══██╗██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝
+    ██████╔╝██║██████╔╝█████╗  ██║     ██║██╔██╗ ██║█████╗
+    ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║     ██║██║╚██╗██║██╔══╝
+    ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗
+    ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
+
 This repo is a work in progress intended to transform the [Stanford Memory Lab's](https://memorylab.stanford.edu/) (SML) internal fMRI preprocessing scripts into a generalizable workflow for consistency within and across lab projects.
 
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
