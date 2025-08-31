@@ -15,6 +15,10 @@ umask 002  # modify permissions so fslroi inherits correct permissions
 # Note that the arguments are minimum index and size (not maximum index). 
 # So to extract voxels 10 to 12 inclusive you would specify 10 and 3 (not 10 and 12).
 #
+# fslroi uses 0 indexing, so here if we have a scan with 220 volumes and we want to
+# trim off the first 5 "lead-in" volumes, the two args we'd pass to fslroi would be:
+# 5, 215 (since index == 5 is the starting volume, i.e., volume 6; and, 220 - 5 == 215
+# is the number of volumes that we want to extract)
 
 source ./settings.sh
 
