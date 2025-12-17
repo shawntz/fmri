@@ -26,7 +26,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
 - [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
 - [ ] *Future:* Download Freesurfer output for manual surface editing
-- [ ] *Future:* Reupload edited Freesurfer directories  
+- [ ] *Future:* Reupload edited Freesurfer directories
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]
