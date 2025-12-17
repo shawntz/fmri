@@ -176,20 +176,31 @@ import sys
 
 try:
     config_path = os.environ.get('_YAML_CONFIG_FILE', 'config.yaml')
+import sys
+
+def bash_single_quote(s: str) -> str:
+    """
+    Return a shell-safe single-quoted literal for string s.
+    Example: abc'def -> 'abc'"'"'def'
+    """
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
+try:
+    config_path = os.environ.get('_YAML_CONFIG_FILE', 'config.yaml')
     with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-    
-    if isinstance(config, dict) and 'fmap_mapping' in config:
+        config = yaml.safe_load(f) or {}
+
+    fmap_cfg = config.get('fmap_mapping')
+    if isinstance(fmap_cfg, dict) and fmap_cfg:
         print("declare -gA fmap_mapping=(")
-        for key, value in config['fmap_mapping'].items():
-            print(f'    ["{key}"]="{value}"')
+        for key, value in fmap_cfg.items():
+            key_str = "" if key is None else str(key)
+            val_str = "" if value is None else str(value)
+            print(f"    [{bash_single_quote(key_str)}]={bash_single_quote(val_str)}")
         print(")")
-    else:
-        # Ensure fmap_mapping is always defined as an associative array in Bash
-        print("declare -gA fmap_mapping=()")
 except Exception as e:
     print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
-    exit(1)
+    sys.exit(1)
 EOF
 )"
 if [ $? -ne 0 ]; then
