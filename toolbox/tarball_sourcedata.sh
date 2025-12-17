@@ -1,6 +1,6 @@
 #!/bin/bash
 # @Author: Shawn Schwartz - Stanford Memory Lab
-# @Date: December 17, 2024
+# @Date: December 17, 2025
 # @Description: Utility to tarball and untar subject sourcedata directories for inode optimization
 
 # ============================================================================
