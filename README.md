@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/shawntz/fmri/releases"><img src="https://img.shields.io/github/v/release/shawntz/fmri?label=version" alt="Release Version"></a>
   <a href="https://github.com/shawntz/fmri/blob/main/LICENSE"><img src="https://img.shields.io/github/license/shawntz/fmri" alt="License"></a>
-  <a href="https://sml-fmri.readthedocs.io/"><img src="https://readthedocs.org/projects/sml-fmri/badge/?version=latest" alt="Documentation Status"></a>
+  <a href="https://fmriprep-workbench.readthedocs.io/"><img src="https://readthedocs.org/projects/fmriprep-workbench/badge/?version=latest" alt="Documentation Status"></a>
   <a href="https://github.com/shawntz/fmri/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-available-blue" alt="Changelog"></a>
 </p>
 
@@ -42,7 +42,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 
 ## 📚 Documentation
 
-Full documentation is available on [ReadTheDocs](https://sml-fmri.readthedocs.io/) (coming soon).
+Full documentation is available on [ReadTheDocs](https://fmriprep-workbench.readthedocs.io/).
 
 For quick reference, see:
 - [Installation Guide](docs/installation.rst)
