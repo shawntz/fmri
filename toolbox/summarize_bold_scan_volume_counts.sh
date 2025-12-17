@@ -47,11 +47,16 @@ check_volumes() {
   return 0
 }
 
-# Prompt user to select subjects file
-echo "Select subjects file to use:"
-echo "1) Use all-subjects.txt (default)"
-echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
-read -p "Enter choice [1/2]: " user_choice
+# Prompt user to select subjects file only if running interactively
+if [[ -t 0 ]]; then
+  echo "Select subjects file to use:"
+  echo "1) Use all-subjects.txt (default)"
+  echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
+  read -p "Enter choice [1/2]: " user_choice
+else
+  # Non-interactive mode, leave user_choice empty
+  user_choice=""
+fi
 
 # Determine which subjects file to use based on user input
 if [ "$user_choice" = "2" ]; then
@@ -91,13 +96,25 @@ elif [ -z "$user_choice" ] && [ -v subjects_mapping ] && [ ${#subjects_mapping[@
   # Fallback to environment variable when no user input (e.g., running in batch mode)
   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
   echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
+  
+  # Validate file exists and count subjects
+  if [ -f "${SUBJECTS_FILE}" ]; then
+    subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null || echo "0")
+    echo "[INFO] Found ${subject_count} total subjects in ${SUBJECTS_FILE}"
+  else
+    echo "[ERROR] File ${SUBJECTS_FILE} not found!"
+    exit 1
+  fi
 elif [ -z "$user_choice" ]; then
   # No user input and no environment variable - default to all-subjects.txt
   SUBJECTS_FILE="all-subjects.txt"
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
   
-  # Validate file exists
-  if [ ! -f "${SUBJECTS_FILE}" ]; then
+  # Validate file exists and count subjects
+  if [ -f "${SUBJECTS_FILE}" ]; then
+    subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null || echo "0")
+    echo "[INFO] Found ${subject_count} total subjects in ${SUBJECTS_FILE}"
+  else
     echo "[ERROR] File ${SUBJECTS_FILE} not found!"
     exit 1
   fi
