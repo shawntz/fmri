@@ -19,12 +19,12 @@ This repo is a work in progress intended to transform the [Stanford Memory Lab's
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
 
 - [x] 1. automated transfer of scanner acquisitions from FlyWheel -> Server
-- [x] 3. `dcm2niix` DICOM to NIfTI converter (converts raw DICOM -> BIDS format)
-- [x] 4. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep
-- [x] 5. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 6)
-- [x] 6. Run remaining fMRIPrep steps (full anatomical + functional workflows)
-- [x] 9. QC: Verify dcm -> nii -> bids metadata
-- [x] 10. QC: Verify number of volumes per scan file
+- [x] 2. `dcm2niix` DICOM to NIfTI converter (converts raw DICOM -> BIDS format)
+- [x] 3. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep
+- [x] 4. QC: Verify dcm -> nii -> bids metadata
+- [x] 5. QC: Verify number of volumes per scan file
+- [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
+- [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
 - [ ] *Future:* Download Freesurfer output for manual surface editing
 - [ ] *Future:* Reupload edited Freesurfer directories  
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
@@ -110,16 +110,22 @@ The preprocessing pipeline requires proper configuration of several parameters t
 # example: running step 1 (FlyWheel download)
 ./01-run.sbatch
 
-# example: running step 3 (dcm2niix BIDS conversion)
+# example: running step 2 (dcm2niix BIDS conversion)
 ./03-run.sbatch
 
-# example: running step 4 (prep for fMRIPrep)
+# example: running step 3 (prep for fMRIPrep)
 ./04-run.sbatch
 
-# example: running step 5 (fMRIPrep anatomical workflows only)
+# example: running step 4 (QC: verify metadata)
+./toolbox/verify_nii_metadata.sh
+
+# example: running step 5 (QC: verify volume counts)
+./toolbox/summarize_bold_scan_volume_counts.sh
+
+# example: running step 6 (fMRIPrep anatomical workflows only)
 ./05-run.sbatch
 
-# example: running step 6 (fMRIPrep full workflows)
+# example: running step 7 (fMRIPrep full workflows)
 ./06-run.sbatch
 ```
 
