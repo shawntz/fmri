@@ -118,7 +118,7 @@ def display_menu():
         ("6", "Run remaining fMRIPrep steps"), # end at step of minimal preprocessing 
         ("9", "QC: Verify dcm -> nii -> bids metadata"),
         ("10", "QC: Verify number of volumes per scan file"),
-        ("11", "Utility: Tarball/Untar sourcedata directories (optimize inode usage)")
+        ("11", "Utility: Tarball/Untar sourcedata directories (optimize inode usage)"),
         # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
         # make any adjustments pre analysis modeling as necessary
         # failure mode: verification that the edited file persisted through step 8 we need to somehow make sure the fmriprep is using the edited files (in the event theyre misnamed, after number 8 finishes, if it generated a new batch of fmri anatomical scans md5 checksum with manual edit vs. md5 of the anatomical file its using for the next step)
@@ -203,7 +203,7 @@ def get_parameters(step_choice):
         # Build command based on operation
         if operation in ["2", "4"]:
             # For tar-subjects/untar-subjects, need subject list
-            subjects_spec = get_user_input("Subject list (comma-separated IDs or file path)")
+            subjects_spec = get_user_input(param_prompts[2])
             user_inputs.extend([operation_map[operation], subjects_spec])
         else:
             # For tar-all/untar-all
