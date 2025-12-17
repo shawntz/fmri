@@ -1,6 +1,6 @@
 #!/bin/bash
 # @Author: Shawn Schwartz - Stanford Memory Lab
-# @Date: December 17, 2025
+# @Date: December 17, 2024
 # @Description: Utility to tarball and untar subject sourcedata directories for inode optimization
 
 # ============================================================================
@@ -225,7 +225,9 @@ tarball_subject() {
   
   # Create tar file
   # Use -C to change directory so tar doesn't include full path
-  if tar -cf "$tar_file" -C "$sourcedata_dir" "sub-${subject_id}" 2>/dev/null; then
+  local tar_stderr=$(mktemp)
+  if tar -cf "$tar_file" -C "$sourcedata_dir" "sub-${subject_id}" 2>"$tar_stderr"; then
+    rm -f "$tar_stderr"
     local tar_size=$(du -h "$tar_file" | cut -f1)
     log_message "SUCCESS" "Created tarball: $tar_file (${tar_size})"
     
@@ -243,6 +245,10 @@ tarball_subject() {
     return 0
   else
     log_message "ERROR" "Failed to create tarball for sub-${subject_id}"
+    if [ -s "$tar_stderr" ]; then
+      log_message "ERROR" "Tar error: $(cat "$tar_stderr")"
+    fi
+    rm -f "$tar_stderr"
     return 1
   fi
 }
@@ -273,7 +279,9 @@ untar_subject() {
   log_message "INFO" "Extracting tarball for sub-${subject_id}..."
   
   # Extract tar file
-  if tar -xf "$tar_file" -C "$sourcedata_dir" 2>/dev/null; then
+  local tar_stderr=$(mktemp)
+  if tar -xf "$tar_file" -C "$sourcedata_dir" 2>"$tar_stderr"; then
+    rm -f "$tar_stderr"
     log_message "SUCCESS" "Extracted tarball to: $subject_dir"
     
     # Verify extraction
@@ -287,6 +295,10 @@ untar_subject() {
     fi
   else
     log_message "ERROR" "Failed to extract tarball for sub-${subject_id}"
+    if [ -s "$tar_stderr" ]; then
+      log_message "ERROR" "Tar error: $(cat "$tar_stderr")"
+    fi
+    rm -f "$tar_stderr"
     return 1
   fi
 }

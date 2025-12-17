@@ -384,7 +384,7 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 **Why use this utility?**
 - Reduces inode usage significantly on shared supercompute environments
 - Each subject's sourcedata directory may contain thousands of DICOM files
-- Archiving into a single tar file per subject converts thousands of inodes into just one
+- Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
 - Easy to extract subjects back when needed for reprocessing or analysis
 
 ### Other Utilities
