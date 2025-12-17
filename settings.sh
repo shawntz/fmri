@@ -113,8 +113,8 @@ select_subjects_file() {
     local subjects_file="all-subjects.txt"
     local custom_file=""
     
-    # check if being called from steps 1 or 3 (single-subject steps that don't need subjects file)
     # SKIP_SUBJECTS_PROMPT can be set by scripts that don't need the subjects file prompt
+    # For example, single-subject steps like 01-run.sbatch and 03-run.sbatch
     local skip_prompt=false
     if [[ "${SKIP_SUBJECTS_PROMPT:-}" == "true" ]]; then
         skip_prompt=true
