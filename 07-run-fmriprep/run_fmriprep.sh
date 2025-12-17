@@ -21,10 +21,10 @@ fi
 #   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # else
 #   # fall back to default all-subjects.txt
-#   SUBJECTS_FILE="05-subjects.txt"
+#   SUBJECTS_FILE="07-subjects.txt"
 #   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # fi
-SUBJECTS_FILE="06-subjects.txt"
+SUBJECTS_FILE="07-subjects.txt"
 echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 
 # # get current subject ID from list
@@ -38,7 +38,7 @@ subject="sub-${subject_id}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/06-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/07-processed_subjects.txt"
 
 # count number of subjects
 num_subjects=$(wc -l < "${SUBJECTS_FILE}")
