@@ -192,6 +192,10 @@ except Exception as e:
     exit(1)
 EOF
 )"
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to load fmap_mapping from ${_YAML_CONFIG_FILE}"
+    return 1 2>/dev/null || exit 1
+fi
 
 # Convert run_numbers from space-separated string to bash array
 if [ -n "${run_numbers}" ]; then
