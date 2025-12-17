@@ -10,8 +10,8 @@ import sys
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'SML fMRI Preprocessing Template'
-copyright = '2024, Stanford Memory Lab'
-author = 'Shawn Schwartz, Jintao Sheng, Haopei Yang, Douglas Miller, Subbulakshmi S, Mingjian He, Ali Trelle, Anthony Wagner'
+copyright = '2025, Shawn Schwartz and Stanford Memory Lab'
+author = 'Shawn T. Schwartz'
 release = '1.0.0'
 version = '1.0'
 
