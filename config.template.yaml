@@ -138,7 +138,7 @@ pipeline:
 # (10) FMRIPREP SPECIFIC SLURM SETTINGS
 # ============================================================================
 fmriprep_slurm:
-  job_name: 'fmriprep${FMRIPREP_VERSION//.}_${new_task_id}'
+  job_name: 'fmriprep${FMRIPREP_VERSION}_${new_task_id}'
   array_size: '1'
   time: '48:00:00'
   cpus_per_task: '16'
