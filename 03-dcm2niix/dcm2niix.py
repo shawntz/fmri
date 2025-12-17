@@ -137,7 +137,7 @@ def main():
 
     # Cleanup
     # shutil.rmtree(scratch_sub_dir)
-    print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
+    # print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
 
     # Run heudiconv
     print(f"[INFO] Running heudiconv for sub-{args.subid}")
