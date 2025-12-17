@@ -73,7 +73,7 @@ fi
 
 # Determine which subjects file to use based on user input
 if [ "$user_choice" = "2" ]; then
-  # Note: This read is safe because user_choice="2" only occurs in interactive mode
+  # Note: This read is safe because user_choice="2" only occurs when stdin is a terminal (interactive mode)
   read -p "Enter step number (e.g., 04): " step_number
   
   # Validate step_number contains only alphanumeric characters to prevent path traversal
