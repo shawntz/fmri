@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-12-17
+
+
+### 🚀 Features
+- feat(01-prepare): add core `prepare_fmri.sh` script
+- feat(01-prepare): add core `update_fmap_metadata.py` script
+- feat(01-prepare): add core `submit_job.sbatch` executable
+- feat(fmriprep): test scripts
+- feat: gracefully skip missing bold runs instead of quitting
+- feat: add dynamic subject txt files to pipeline steps
+- feat: add new `pull_fmriprep_reports` utility script in the new `tools/` directory
+- feat(TUI): add interactive launcher component
+- feat: frontend work on flywheel downloader utility script
+- feat: add changelog, release workflow automation, and ReadTheDocs integration
+
+### 🐛 Bug Fixes
+
+### 📚 Documentation
+- docs: add README for documentation directory
+
+### 🔧 Maintenance
+- chore: update gitignore
+- chore: update LICENSE
+- chore: add contributing guidelines
+- chore(readme): add first complete draft with info and instructions
+- chore(README): fix markdown table formatting issues
+- chore: relocate job submitter script
+- chore: update settings template
+- chore: clean up slurm args in `submit_01.sbatch`
+- chore: rename sbatch run file
+- chore: clean up INFO logs in `01-run.sbatch`
+- chore: clean up log messages in `prepare_fmri.sh`
+- chore: make `update_fmap_metadata.py` executable
+- chore: update logging methods
+- chore: restructure subjects.txt files
+- chore: update values in `settings.template.sh`
+- chore: restructure subjects template file
+- chore: update subjects txt file approach
+- chore: add new log statements
+- chore: update readme
+- chore: update `01-run.sbatch`
+- chore: update `02-run.sbatch`
+- chore: update README.md
+- chore: lint `prepare_fmri.sh`
+- chore: fix #5
+- chore: lint `fmriprep.sh`
+- refactor: migrate `fw-downloader` to independent step
+- refactor(sbatch): run scripts
+- refactor(launch): window with new options
+
+### 💥 Breaking Changes
+- No breaking changes
+
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.0.0...v0.1.0
+
+
 ### Added
 - Automated release workflow with version and changelog generation
 - Conventional commits support for automatic versioning
@@ -40,3 +96,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/shawntz/fmri/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/shawntz/fmri/releases/tag/v1.0.0
+
+[0.1.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.0
