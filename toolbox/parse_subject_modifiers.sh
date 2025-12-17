@@ -2,6 +2,9 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: December 17, 2025
 # @Description: Parse subject ID with suffix modifiers from subject list files
+
+# Maximum expected pipeline step number (adjust as pipeline steps are added)
+readonly MAX_STEP_NUMBER=6
 #
 # This utility function parses subject IDs that may include suffix modifiers
 # to provide granular control over pipeline execution.
@@ -97,13 +100,13 @@ parse_subject_modifiers() {
       force)
         SHOULD_FORCE="true"
         ;;
-      step[0-9]|step[0-9][0-9])
+      step[1-9]|step[1-9][0-9]*)
         has_step_modifier=true
         # Extract the step number from modifier (e.g., "step1" -> "1")
         local modifier_step="${modifier#step}"
-        # Warn if step number is out of expected range (steps 1-6 are currently defined)
-        if [ "${modifier_step}" -gt 6 ]; then
-          echo "($(date)) [WARNING] Step modifier 'step${modifier_step}' references a step that may not exist (expected: step1-step6)" >&2
+        # Warn if step number is out of expected range
+        if [ "${modifier_step}" -gt "${MAX_STEP_NUMBER}" ]; then
+          echo "($(date)) [WARNING] Step modifier 'step${modifier_step}' references a step that may not exist (expected: step1-step${MAX_STEP_NUMBER})" >&2
         fi
         # Check if this modifier matches the current step
         if [ "${modifier_step}" = "${step_number}" ]; then
