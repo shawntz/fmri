@@ -3,3 +3,8 @@
 subjects.txt
 __pycache__/
 *.pyc
+
+# Documentation build files
+docs/_build/
+docs/_static/
+docs/_templates/

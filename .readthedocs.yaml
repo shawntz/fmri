@@ -1,0 +1,33 @@
+# Read the Docs configuration file for fMRI preprocessing template
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+version: 2
+
+# Build documentation in the "docs/" directory with Sphinx
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  jobs:
+    post_checkout:
+      # Clone repository submodules (if any)
+      - git submodule update --init --recursive
+    pre_build:
+      # Install dependencies
+      - pip install sphinx sphinx-rtd-theme myst-parser
+
+# Build documentation using Sphinx
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: false
+
+# Formats to build (pdf, htmlzip, epub)
+formats:
+  - pdf
+  - htmlzip
+  - epub
+
+# Python requirements for building docs
+python:
+  install:
+    - requirements: docs/requirements.txt
