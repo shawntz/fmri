@@ -95,6 +95,22 @@ def main():
 
     print(f"[INFO] Screenshot DICOMs deleted from {dicom_extract_dir}")
 
+    # Validate DICOM files exist before running heudiconv
+    dicom_files = list(dicom_extract_dir.glob("**/*.dcm"))
+    if not dicom_files:
+        raise FileNotFoundError(
+            f"No DICOM files (*.dcm) found in {dicom_extract_dir}. "
+            f"Please verify the ZIP files were extracted correctly."
+        )
+    print(f"[INFO] Found {len(dicom_files)} DICOM files in {dicom_extract_dir}")
+
+    # Clear heudiconv cache to avoid using stale file paths
+    # This is especially important when manually curating directories
+    heudiconv_cache = bids_dir / ".heudiconv" / args.subid
+    if heudiconv_cache.exists():
+        print(f"[INFO] Removing stale heudiconv cache: {heudiconv_cache}")
+        shutil.rmtree(heudiconv_cache)
+
     # Cleanup
     # shutil.rmtree(scratch_sub_dir)
     print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
