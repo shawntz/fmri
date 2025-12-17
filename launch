@@ -111,17 +111,13 @@ def display_menu():
     print_header()
 
     menu_items = [
-        ("1", "Download from FlyWheel -> Server"),
-        ("3", "Run dcm2niix to extract MRI DICOM headers to JSON files in BIDS format"),
-        ("4", "Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
-        ("5", "Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)"),
-        ("6", "Run remaining fMRIPrep steps"), # end at step of minimal preprocessing 
-        ("9", "QC: Verify dcm -> nii -> bids metadata"),
-        ("10", "QC: Verify number of volumes per scan file")
-        # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
-        # make any adjustments pre analysis modeling as necessary
-        # failure mode: verification that the edited file persisted through step 8 we need to somehow make sure the fmriprep is using the edited files (in the event theyre misnamed, after number 8 finishes, if it generated a new batch of fmri anatomical scans md5 checksum with manual edit vs. md5 of the anatomical file its using for the next step)
-        #("9", "Run postprocessing (spatial smoothing, group average volume)")
+        ("1", "Step 1: Download from FlyWheel -> Server"),
+        ("3", "Step 3: Run dcm2niix (DICOM -> BIDS format conversion)"),
+        ("4", "Step 4: Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
+        ("5", "Step 5: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 6)"),
+        ("6", "Step 6: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
+        ("9", "Step 9: QC - Verify dcm -> nii -> bids metadata"),
+        ("10", "Step 10: QC - Verify number of volumes per scan file")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
