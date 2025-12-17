@@ -113,8 +113,15 @@ select_subjects_file() {
     local subjects_file="all-subjects.txt"
     local custom_file=""
     
-    # only prompt if being sourced in an interactive shell
-    if [[ -t 0 ]]; then
+    # check if being called from steps 1 or 3 (single-subject steps that don't need subjects file)
+    # SKIP_SUBJECTS_PROMPT can be set by scripts that don't need the subjects file prompt
+    local skip_prompt=false
+    if [[ "${SKIP_SUBJECTS_PROMPT:-}" == "true" ]]; then
+        skip_prompt=true
+    fi
+    
+    # only prompt if being sourced in an interactive shell and not from single-subject steps
+    if [[ -t 0 ]] && [[ "$skip_prompt" == false ]]; then
         echo "Select subjects file to use:"
         echo "1) Use all-subjects.txt (default)"
         echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
@@ -136,10 +143,14 @@ select_subjects_file() {
     # calculate number of subjects based on selected file
     if [[ -f "$subjects_file" ]]; then
         num_subjects=$(wc -l < "$subjects_file")
-        echo "($(date)) [INFO] Found ${num_subjects} total subjects in $subjects_file"
+        if [[ "$skip_prompt" == false ]]; then
+            echo "($(date)) [INFO] Found ${num_subjects} total subjects in $subjects_file"
+        fi
         array_range="0-$((num_subjects))"
     else
-        echo "($(date)) [WARNING] $subjects_file not found, defaulting to single subject"
+        if [[ "$skip_prompt" == false ]]; then
+            echo "($(date)) [WARNING] $subjects_file not found, defaulting to single subject"
+        fi
         num_subjects=1
         array_range="0"
     fi
