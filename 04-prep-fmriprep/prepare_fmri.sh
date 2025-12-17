@@ -21,6 +21,7 @@ umask 002  # modify permissions so fslroi inherits correct permissions
 # is the number of volumes that we want to extract)
 
 source ./settings.sh
+source ./toolbox/parse_subject_modifiers.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then
@@ -81,9 +82,14 @@ SUBJECTS_FILE="04-subjects.txt"
 echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 #fi
 
-# get current subject ID from list
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+# get current subject entry from list (may include modifiers)
+subject_entry=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
 
+# parse subject ID and modifiers
+parse_subject_modifiers "${subject_entry}" "${JOB_NAME}"
+
+# use parsed subject ID
+subject_id="${SUBJECT_ID}"
 subject="sub-${subject_id}"
 
 # logging setup
@@ -98,13 +104,33 @@ fi
 
 # start logging
 echo "($(date)) [INFO] Starting processing for subject ${subject_id}" | tee -a "${log_file}"
+echo "($(date)) [INFO] Subject entry: ${subject_entry}" | tee -a "${log_file}"
+if [ ${#SUBJECT_MODIFIERS[@]} -gt 0 ]; then
+  echo "($(date)) [INFO] Modifiers detected: ${SUBJECT_MODIFIERS[*]}" | tee -a "${log_file}"
+fi
 
-# check if this subject was already processed
-if [ -f "${processed_file}" ]; then
-  if grep -q "^${subject_id}$" "${processed_file}"; then
-	echo "($(date)) [INFO] Subject ${subject_id} already processed, skipping" | tee -a "${log_file}"
-    exit 0
+# check if subject should be skipped
+if [ "${SHOULD_SKIP}" = "true" ]; then
+  echo "($(date)) [INFO] Subject ${subject_id} has 'skip' modifier, skipping" | tee -a "${log_file}"
+  exit 0
+fi
+
+# check if this step should run for this subject
+if [ "${SHOULD_RUN_STEP}" = "false" ]; then
+  echo "($(date)) [INFO] Subject ${subject_id} is not configured to run in step ${JOB_NAME}, skipping" | tee -a "${log_file}"
+  exit 0
+fi
+
+# check if this subject was already processed (unless force flag is set)
+if [ "${SHOULD_FORCE}" = "false" ]; then
+  if [ -f "${processed_file}" ]; then
+    if grep -q "^${subject_id}$" "${processed_file}"; then
+	  echo "($(date)) [INFO] Subject ${subject_id} already processed, skipping" | tee -a "${log_file}"
+      exit 0
+    fi
   fi
+else
+  echo "($(date)) [INFO] Subject ${subject_id} has 'force' modifier, will reprocess even if already completed" | tee -a "${log_file}"
 fi
 
 echo "($(date)) [INFO] Processing subject ${subject_id}" | tee -a "${log_file}"
