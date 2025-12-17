@@ -37,6 +37,7 @@ Thank you for considering contributing to our lab's fMRI preprocessing pipeline.
    - Add comments explaining preprocessing decisions
    - Update documentation as needed
    - Add tests if applicable
+   - Use conventional commit messages (see below)
 
 4. **Submit Pull Request**
    - Provide clear description of changes
@@ -68,6 +69,68 @@ Thank you for considering contributing to our lab's fMRI preprocessing pipeline.
    - Test with different data types
    - Verify BIDS compliance
    - Check edge cases
+
+## Commit Message Guidelines
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated changelog generation and semantic versioning.
+
+### Format
+
+```
+<type>(<scope>): <subject>
+```
+
+### Types
+
+- `feat`: New feature (MINOR version bump)
+- `fix`: Bug fix (PATCH version bump)
+- `docs`: Documentation only changes
+- `style`: Formatting changes (no code change)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `build`: Build system changes
+- `ci`: CI configuration changes
+- `chore`: Other changes (no src/test changes)
+
+### Breaking Changes
+
+Add `!` after type or `BREAKING CHANGE:` in footer for MAJOR version bump:
+
+```
+feat!: remove deprecated API
+
+BREAKING CHANGE: The old API endpoint has been removed.
+```
+
+### Examples
+
+**Feature:**
+```
+feat(preprocessing): add multi-echo support
+```
+
+**Bug Fix:**
+```
+fix(fieldmap): correct IntendedFor mapping
+
+Fixes #123
+```
+
+**Documentation:**
+```
+docs: update configuration guide
+```
+
+## Release Process
+
+Releases are automated via GitHub Actions:
+1. Commits are analyzed on push to main
+2. Version is determined from commit messages
+3. Changelog is generated automatically
+4. GitHub release is created
+
+See [Semantic Versioning](https://semver.org/) for version numbering details.
 
 ## Questions?
 

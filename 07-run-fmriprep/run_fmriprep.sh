@@ -6,6 +6,7 @@
 # @Param: ANAT_ONLY_FLAG (positional argument #2) - optional setting to speed up freesurfer before manual surface editing
 
 source ./load_config.sh
+source ./toolbox/parse_subject_modifiers.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then
@@ -14,8 +15,6 @@ if [ -z "${JOB_NAME}" ]; then
   exit 1
 fi
 
-ANAT_ONLY_FLAG=$2
-
 # # determine which subjects file to use
 # if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
 #   # use step-specific subjects file from the mapping defined in config.yaml
@@ -23,16 +22,26 @@ ANAT_ONLY_FLAG=$2
 #   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # else
 #   # fall back to default all-subjects.txt
-#   SUBJECTS_FILE="05-subjects.txt"
+#   SUBJECTS_FILE="07-subjects.txt"
 #   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # fi
-SUBJECTS_FILE="05-subjects.txt"
+SUBJECTS_FILE="07-subjects.txt"
 echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 
-# # get current subject ID from list
-subject_id=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
-if [ -z "${subject_id}" ]; then
+# get current subject entry from list (may include modifiers)
+subject_entry=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+if [ -z "${subject_entry}" ]; then
   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
+  exit 1
+fi
+
+# parse subject ID and modifiers
+parse_subject_modifiers "${subject_entry}" "${JOB_NAME}"
+
+# use parsed subject ID
+subject_id="${SUBJECT_ID}"
+if [ -z "${subject_id}" ]; then
+  echo "Error: Failed to parse subject ID from entry: ${subject_entry}" | tee -a "${log_file}"
   exit 1
 fi
 subject="sub-${subject_id}"
@@ -40,7 +49,7 @@ subject="sub-${subject_id}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/05-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/07-processed_subjects.txt"
 
 # count number of subjects
 num_subjects=$(wc -l < "${SUBJECTS_FILE}")
@@ -77,12 +86,34 @@ mkdir -p "${WORKFLOW_LOG_DIR}"
 export FS_LICENSE="${FREESURFER_LICENSE}"
 export APPTAINERENV_TEMPLATEFLOW_HOME="/templateflow"
 
-# check if this subject was already processed
-if [ -f "${processed_file}" ]; then
-  if grep -q "^${subject_id}$" "${processed_file}"; then
-	echo "($(date)) [INFO] Subject ${subject_id} has already undergone fMRIPrep, skipping" | tee -a "${log_file}"
-    exit 0
+# log subject information
+echo "($(date)) [INFO] Subject entry: ${subject_entry}" | tee -a "${log_file}"
+if [ ${#SUBJECT_MODIFIERS[@]} -gt 0 ]; then
+  echo "($(date)) [INFO] Modifiers detected: ${SUBJECT_MODIFIERS[*]}" | tee -a "${log_file}"
+fi
+
+# check if subject should be skipped
+if [ "${SHOULD_SKIP}" = "true" ]; then
+  echo "($(date)) [INFO] Subject ${subject_id} has 'skip' modifier, skipping" | tee -a "${log_file}"
+  exit 0
+fi
+
+# check if this step should run for this subject
+if [ "${SHOULD_RUN_STEP}" = "false" ]; then
+  echo "($(date)) [INFO] Subject ${subject_id} is not configured to run in step ${JOB_NAME}, skipping" | tee -a "${log_file}"
+  exit 0
+fi
+
+# check if this subject was already processed (unless force flag is set)
+if [ "${SHOULD_FORCE}" = "false" ]; then
+  if [ -f "${processed_file}" ]; then
+    if grep -q "^${subject_id}$" "${processed_file}"; then
+	  echo "($(date)) [INFO] Subject ${subject_id} has already undergone fMRIPrep, skipping" | tee -a "${log_file}"
+      exit 0
+    fi
   fi
+else
+  echo "($(date)) [INFO] Subject ${subject_id} has 'force' modifier, will reprocess even if already completed" | tee -a "${log_file}"
 fi
 
 echo "($(date)) [INFO] Triggering fMRIPrep for subject ${subject_id}" | tee -a "${log_file}"
@@ -107,12 +138,6 @@ cmd="${SINGULARITY_CMD} ${TRIM_DIR} ${DERIVS_DIR} participant \
   --fd-spike-threshold ${FMRIPREP_FD_SPIKE_THRESHOLD} \
   --dvars-spike-threshold ${FMRIPREP_DVARS_SPIKE_THRESHOLD} \
   --output-spaces ${FMRIPREP_OUTPUT_SPACES}"
-
-# add anat-only flag if specified
-if [ "${ANAT_ONLY_FLAG}" = "--anat-only" ]; then
-  cmd="${cmd} --anat-only"
-  echo "($(date)) [INFO] Running anatomical processing only" | tee -a "${log_file}"
-fi
 
 # execute and log
 echo "($(date)) [INFO] Running task ${SLURM_ARRAY_TASK_ID}" | tee -a "${log_file}"

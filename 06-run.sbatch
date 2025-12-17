@@ -3,6 +3,7 @@
 source ./load_config.sh
 
 JOB_NAME="06-run-fmriprep"
+ANAT_ONLY_FLAG=$1  # optional setting for anat-only processing
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
@@ -41,6 +42,12 @@ cmd="sbatch \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
     ./${JOB_NAME}/run_fmriprep.sh ${JOB_NAME}"
+
+# add anat-only flag if specified
+# if [ ! -z "${ANAT_ONLY_FLAG}" ]; then
+#     cmd="${cmd} --anat-only"
+# fi
+cmd="${cmd} --anat-only"
 
 # submit job
 echo "($(date)) [INFO] Submitting job with command:"

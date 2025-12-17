@@ -98,6 +98,31 @@ declare -A fmap_mapping=(
 # thus, you shouldn't necessarily need separate 0x-subjects.txt files per step
 # unless this extra layer of control is useful for your needs.
 #
+# ----------------------------------------------------------------------------
+# SUBJECT ID SUFFIX MODIFIERS
+# ----------------------------------------------------------------------------
+# Subject list files now support suffix modifiers for granular control over
+# which steps run for each subject. Simply append modifiers to subject IDs
+# using colon (:) as a separator.
+#
+# SYNTAX: subject_id:modifier1:modifier2:...
+#
+# SUPPORTED MODIFIERS:
+#   step1, step2, step3, step4, step5, step6 - Only run specified step(s)
+#   force - Force rerun even if subject was already processed
+#   skip - Skip this subject entirely
+#
+# EXAMPLES:
+#   101                # Standard subject ID, runs all steps normally
+#   102:step4          # Only run step 4 (prep-fmriprep) for this subject
+#   103:step4:step5    # Only run steps 4 and 5 for this subject
+#   104:force          # Force rerun all steps for this subject
+#   105:step5:force    # Only run step 5, force rerun
+#   106:skip           # Skip this subject entirely
+#
+# This allows you to maintain a single subject list file while having
+# fine-grained control over pipeline execution for different subjects.
+#
 # ============================================================================
 # (7) DEFAULT PERMISSIONS
 # ============================================================================

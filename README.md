@@ -1,5 +1,12 @@
 <h2 align="center">SML fMRI Preprocessing Template<br />(<em>aka, meta fmriprep</em>)</h2>
 
+<p align="center">
+  <a href="https://github.com/shawntz/fmri/releases"><img src="https://img.shields.io/github/v/release/shawntz/fmri?label=version" alt="Release Version"></a>
+  <a href="https://github.com/shawntz/fmri/blob/main/LICENSE"><img src="https://img.shields.io/github/license/shawntz/fmri" alt="License"></a>
+  <a href="https://sml-fmri.readthedocs.io/"><img src="https://readthedocs.org/projects/sml-fmri/badge/?version=latest" alt="Documentation Status"></a>
+  <a href="https://github.com/shawntz/fmri/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-available-blue" alt="Changelog"></a>
+</p>
+
     ███████╗███╗   ███╗██████╗ ██╗
     ██╔════╝████╗ ████║██╔══██╗██║
     █████╗  ██╔████╔██║██████╔╝██║
@@ -19,18 +26,30 @@ This repo is a work in progress intended to transform the [Stanford Memory Lab's
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
 
 - [x] 1. automated transfer of scanner acquisitions from FlyWheel -> Server
-- [x] 2. Raw -> BIDS format
-- [x] 3. `dcm2niix` DICOM to NIfTI converter,
-- [x] 4. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep,
-- [x] 5. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)
-- [ ] 6. Download Freesurfer output for manual surface editing
-- [ ] 7. Reupload edited Freesurfer directories
-- [ ] 8. Run remaining fMRIPrep steps
-- [ ] 9. automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
+- [x] 2. `dcm2niix` DICOM to NIfTI converter (converts raw DICOM -> BIDS format)
+- [x] 3. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep
+- [x] 4. QC: Verify dcm -> nii -> bids metadata
+- [x] 5. QC: Verify number of volumes per scan file
+- [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
+- [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
+- [ ] *Future:* Download Freesurfer output for manual surface editing
+- [ ] *Future:* Reupload edited Freesurfer directories
+- [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]
 > - [x] indicates workflows that have been finished and validated
 > - [ ] indicates workflows that are still under active development
+
+## 📚 Documentation
+
+Full documentation is available on [ReadTheDocs](https://sml-fmri.readthedocs.io/) (coming soon).
+
+For quick reference, see:
+- [Installation Guide](docs/installation.rst)
+- [Configuration Guide](docs/configuration.rst)
+- [Usage Guide](docs/usage.rst)
+- [Changelog](CHANGELOG.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Using this Template
 
@@ -106,16 +125,26 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 ### manually calling upon each sidecar executable
 ```bash
-# example: running step 1
+# example: running step 1 (FlyWheel download)
 ./01-run.sbatch
 
-# example: running step 2
-# here, --anat-only is an optional flag that is passed directly to fMRIPrep
-# use this if you only want to run anatomical workflows:
-./02-run.sbatch --anat-only
-#
-# otherwise, to run both anatomical and functional workflows, use this:
+# example: running step 2 (dcm2niix BIDS conversion)
 ./02-run.sbatch
+
+# example: running step 3 (prep for fMRIPrep)
+./03-run.sbatch
+
+# example: running step 4 (QC: verify metadata)
+./toolbox/verify_nii_metadata.sh
+
+# example: running step 5 (QC: verify volume counts)
+./toolbox/summarize_bold_scan_volume_counts.sh
+
+# example: running step 6 (fMRIPrep anatomical workflows only)
+./06-run.sbatch
+
+# example: running step 7 (fMRIPrep full workflows)
+./07-run.sbatch
 ```
 
 ## Configuration Steps
@@ -265,6 +294,38 @@ fmap_mapping:
 # unless this extra layer of control is useful for your needs.
 ```
 
+#### Subject ID Suffix Modifiers
+
+Subject list files now support suffix modifiers for granular per-subject control. This allows you to maintain a single subject list while specifying different behavior for each subject.
+
+**Syntax:** `subject_id:modifier1:modifier2:...`
+
+**Supported Modifiers:**
+- `step1`, `step2`, `step3`, `step4`, `step5`, `step6` - Only run specified step(s) for this subject
+- `force` - Force rerun even if subject was already processed
+- `skip` - Skip this subject entirely
+
+**Examples:**
+```text
+101                # Standard subject ID, runs all steps normally
+102:step4          # Only run step 4 (prep-fmriprep) for this subject
+103:step4:step5    # Only run steps 4 and 5 for this subject
+104:force          # Force rerun all steps for this subject
+105:step5:force    # Only run step 5, force rerun
+106:skip           # Skip this subject entirely
+```
+
+**Example Subject List File (e.g., `04-subjects.txt`):**
+```text
+101
+102:step4
+103:step4:force
+104
+105:skip
+```
+
+This feature allows the template to maintain a single subject list file while providing extensible, fine-grained control over how the pipeline handles different subjects.
+
 ### Permissions
 ```yaml
 # ============================================================================
@@ -352,6 +413,66 @@ misc:
 > - Incorrect fieldmap mappings
 > - Permission issues
 
+---
+
+## Toolbox Utilities
+
+The `toolbox/` directory contains helpful utilities for managing your fMRI data:
+
+### Sourcedata Tarball Utility
+
+The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute environments by archiving subject sourcedata directories into tar files.
+
+**Features:**
+- Tarball individual or all subject directories
+- Extract tarballs back to sourcedata directories
+- Support for comma-separated subject lists or subject list files
+- Optional separate output directory for tar archives
+- Automatic cleanup of original directories (with option to keep)
+- Progress indicators and error handling
+
+**Usage Examples:**
+
+```bash
+# Tarball all subjects in sourcedata directory
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata
+
+# Tarball specific subjects (removes original directories by default)
+./toolbox/tarball_sourcedata.sh --tar-subjects "001,002,003" --sourcedata-dir /path/to/sourcedata
+
+# Tarball subjects from a file
+./toolbox/tarball_sourcedata.sh --tar-subjects all-subjects.txt --sourcedata-dir /path/to/sourcedata
+
+# Tarball but keep original directories
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata --keep-original
+
+# Store tar files in a separate directory
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata --output-dir /path/to/tarballs
+
+# Extract all tar files
+./toolbox/tarball_sourcedata.sh --untar-all --sourcedata-dir /path/to/sourcedata
+
+# Extract specific subjects
+./toolbox/tarball_sourcedata.sh --untar-subjects "001,002" --sourcedata-dir /path/to/sourcedata
+
+# Get help
+./toolbox/tarball_sourcedata.sh --help
+```
+
+**Why use this utility?**
+- Reduces inode usage significantly on shared supercompute environments
+- Each subject's sourcedata directory may contain thousands of DICOM files
+- Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
+- Easy to extract subjects back when needed for reprocessing or analysis
+
+### Other Utilities
+
+- `verify_nii_metadata.py` - Quality control for converted NIfTI metadata
+- `dir_checksum_compare.py` - Compare directories using checksums
+- `pull_fmriprep_reports.sh` - Download fMRIPrep HTML reports from server
+- `summarize_bold_scan_volume_counts.sh` - Validate scan volumes match expected counts
+
+---
 
 > [!NOTE]
 > ### Comments, suggestions, questions, issues?
