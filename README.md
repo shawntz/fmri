@@ -335,6 +335,66 @@ DEBUG=0
 > - Incorrect fieldmap mappings
 > - Permission issues
 
+---
+
+## Toolbox Utilities
+
+The `toolbox/` directory contains helpful utilities for managing your fMRI data:
+
+### Sourcedata Tarball Utility
+
+The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute environments by archiving subject sourcedata directories into tar files.
+
+**Features:**
+- Tarball individual or all subject directories
+- Extract tarballs back to sourcedata directories
+- Support for comma-separated subject lists or subject list files
+- Optional separate output directory for tar archives
+- Automatic cleanup of original directories (with option to keep)
+- Progress indicators and error handling
+
+**Usage Examples:**
+
+```bash
+# Tarball all subjects in sourcedata directory
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata
+
+# Tarball specific subjects (removes original directories by default)
+./toolbox/tarball_sourcedata.sh --tar-subjects "001,002,003" --sourcedata-dir /path/to/sourcedata
+
+# Tarball subjects from a file
+./toolbox/tarball_sourcedata.sh --tar-subjects all-subjects.txt --sourcedata-dir /path/to/sourcedata
+
+# Tarball but keep original directories
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata --keep-original
+
+# Store tar files in a separate directory
+./toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir /path/to/sourcedata --output-dir /path/to/tarballs
+
+# Extract all tar files
+./toolbox/tarball_sourcedata.sh --untar-all --sourcedata-dir /path/to/sourcedata
+
+# Extract specific subjects
+./toolbox/tarball_sourcedata.sh --untar-subjects "001,002" --sourcedata-dir /path/to/sourcedata
+
+# Get help
+./toolbox/tarball_sourcedata.sh --help
+```
+
+**Why use this utility?**
+- Reduces inode usage significantly on shared supercompute environments
+- Each subject's sourcedata directory may contain thousands of DICOM files
+- Archiving into a single tar file per subject converts thousands of inodes into just one
+- Easy to extract subjects back when needed for reprocessing or analysis
+
+### Other Utilities
+
+- `verify_nii_metadata.py` - Quality control for converted NIfTI metadata
+- `dir_checksum_compare.py` - Compare directories using checksums
+- `pull_fmriprep_reports.sh` - Download fMRIPrep HTML reports from server
+- `summarize_bold_scan_volume_counts.sh` - Validate scan volumes match expected counts
+
+---
 
 > [!NOTE]
 > ### Comments, suggestions, questions, issues?
