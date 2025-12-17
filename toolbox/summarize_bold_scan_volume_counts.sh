@@ -56,6 +56,13 @@ read -p "Enter choice [1/2]: " user_choice
 # Determine which subjects file to use based on user input
 if [ "$user_choice" = "2" ]; then
   read -p "Enter step number (e.g., 04): " step_number
+  
+  # Validate step_number contains only alphanumeric characters to prevent path traversal
+  if ! [[ "$step_number" =~ ^[a-zA-Z0-9]+$ ]]; then
+    echo "[ERROR] Invalid step number. Only alphanumeric characters are allowed."
+    exit 1
+  fi
+  
   SUBJECTS_FILE="${step_number}-subjects.txt"
   echo "Using ${SUBJECTS_FILE}"
   
@@ -67,14 +74,24 @@ if [ "$user_choice" = "2" ]; then
     echo "[ERROR] File ${SUBJECTS_FILE} not found!"
     exit 1
   fi
+elif [ "$user_choice" = "1" ] || [ -z "$user_choice" ]; then
+  # Default to all-subjects.txt for option 1 or empty input
+  SUBJECTS_FILE="all-subjects.txt"
+  echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
+  
+  # Validate that the default file exists
+  if [ ! -f "${SUBJECTS_FILE}" ]; then
+    echo "[ERROR] File ${SUBJECTS_FILE} not found!"
+    exit 1
+  fi
 elif [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # Fallback to environment variable if not choosing option 2
+  # Fallback to environment variable for other inputs
   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
   echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
 else
-  # Default to all-subjects.txt
-  SUBJECTS_FILE="all-subjects.txt"
-  echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
+  # Invalid choice
+  echo "[ERROR] Invalid choice. Please enter 1 or 2."
+  exit 1
 fi
 
 while read -r subject_id; do
