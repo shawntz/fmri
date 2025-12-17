@@ -127,7 +127,7 @@ pipeline:
 # (10) FMRIPREP SPECIFIC SLURM SETTINGS
 # ============================================================================
 fmriprep_slurm:
-  job_name: 'fmriprep${FMRIPREP_VERSION//.}_${new_task_id}'
+  job_name: 'fmriprep${FMRIPREP_VERSION}_${new_task_id}'
   # Placeholder; actual array size comes from the SLURM_ARRAY_SIZE environment
   # variable, which is set at runtime in load_config.sh after this config is parsed.
   array_size: 'SLURM_ARRAY_SIZE'
