@@ -167,7 +167,15 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "11": {  # Step 11 (Tarball/Untar utility)
+        "8": {  # Step 8 (QC: Verify dcm -> nii -> bids metadata)
+            "keys": ["new_subid"],
+            "prompts": ["Assigned BIDS Subject ID?"]
+        },
+        "9": {  # Step 9 (QC: Verify number of volumes per scan file)
+            "keys": [],
+            "prompts": []
+        },
+        "10": {  # Step 10 (Tarball/Untar utility)
             "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
             "prompts": [
                 "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
@@ -175,23 +183,6 @@ def get_parameters(step_choice):
                 "Subject list (comma-separated IDs or file path, press Enter to skip for tar-all/untar-all)",
                 "Keep original directories after tarballing? (only for tar operations)"
             ]
-        }
-        # "5": {  # Step 5 (fmriprep)
-        #     "keys": ["anat_only"],
-        #     "prompts": ["Only run anatomical workflows?"]
-        # }
-        # "6": {  # Step 6 ()
-        #     "keys": [],
-        #     "prompts": []
-        # },
-        # "9": {
-        #     "keys": ["new_subid"],
-        #     "prompts": ["Assigned BIDS Subj ID?"]
-        # },
-        # "10": {
-        #     "keys": [],
-        #     "prompts": []
-        # }
     }
 
     param_keys = step_params[step_choice]["keys"]
