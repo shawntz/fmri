@@ -16,6 +16,7 @@ Arguments:
     --new-task-id: New task identifier (if renaming)
     --fmap-mapping: JSON string of fieldmap:BOLD run mapping
     --runs: Comma-separated list of run numbers
+    --grouping: Heudiconv grouping strategy (default: 'studyUID', use 'all' for merged sessions)
 """
 
 import argparse, os, shutil, tarfile, subprocess
@@ -34,6 +35,8 @@ def parse_args():
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
+    parser.add_argument("--grouping", action="store", default="studyUID", 
+                        help="Heudiconv grouping strategy. Use 'all' to bypass study identifier conflicts for manually merged sessions. Default: 'studyUID'")
     return parser.parse_args()
 
 def main():
@@ -101,12 +104,14 @@ def main():
 
     # Run heudiconv
     print(f"[INFO] Running heudiconv for sub-{args.subid}")
+    print(f"[INFO] Using grouping strategy: {args.grouping}")
     cmd = (
         f"singularity run --cleanenv "
         f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
         f"-e {args.sing_image_path} "
         f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
-        f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite"
+        f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+        f"--grouping {args.grouping}"
     )
     subprocess.run(cmd, shell=True, check=True)
 
