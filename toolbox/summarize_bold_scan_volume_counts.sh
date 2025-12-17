@@ -47,62 +47,22 @@ check_volumes() {
   return 0
 }
 
-# Function to validate subjects file and count subjects
-validate_and_count_subjects() {
-  local file="$1"
-  
-  if [ ! -f "${file}" ]; then
-    echo "[ERROR] File ${file} not found!"
-    exit 1
-  fi
-  
-  local count=$(grep -c -v '^[[:space:]]*$' "${file}" 2>/dev/null || echo "0")
-  echo "[INFO] Found ${count} total subjects in ${file}"
-}
-
-# Prompt user to select subjects file only if running interactively
-if [[ -t 0 ]]; then
-  echo "Select subjects file to use:"
-  echo "1) Use all-subjects.txt (default)"
-  echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
-  read -p "Enter choice [1/2]: " user_choice
-else
-  # Non-interactive mode, leave user_choice empty
-  user_choice=""
-fi
-
-# Determine which subjects file to use based on user input
-if [ "$user_choice" = "2" ]; then
-  # Note: This read is safe because user_choice="2" only occurs when stdin is a terminal (interactive mode)
-  read -p "Enter step number (e.g., 04): " step_number
-  
-  # Validate step_number contains only alphanumeric characters to prevent path traversal
-  if ! [[ "$step_number" =~ ^[a-zA-Z0-9]+$ ]]; then
-    echo "[ERROR] Invalid step number. Only alphanumeric characters are allowed."
-    exit 1
-  fi
-  
-  SUBJECTS_FILE="${step_number}-subjects.txt"
-  echo "[INFO] Using ${SUBJECTS_FILE}"
-  validate_and_count_subjects "${SUBJECTS_FILE}"
-elif [ "$user_choice" = "1" ]; then
-  # Use all-subjects.txt for option 1
-  SUBJECTS_FILE="all-subjects.txt"
-  echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
-  validate_and_count_subjects "${SUBJECTS_FILE}"
-elif [ -z "$user_choice" ] && [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # Fallback to environment variable when no user input (e.g., running in batch mode)
+# Use the subjects file selected by settings.sh
+# The settings.sh script handles interactive prompting via select_subjects_file()
+# and exports the result in SELECTED_SUBJECTS_FILE
+if [ -n "$SELECTED_SUBJECTS_FILE" ]; then
+  SUBJECTS_FILE="$SELECTED_SUBJECTS_FILE"
+elif [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
   echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
-  validate_and_count_subjects "${SUBJECTS_FILE}"
-elif [ -z "$user_choice" ]; then
-  # No user input and no environment variable - default to all-subjects.txt
+else
   SUBJECTS_FILE="all-subjects.txt"
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
-  validate_and_count_subjects "${SUBJECTS_FILE}"
-else
-  # Invalid choice
-  echo "[ERROR] Invalid choice. Please enter 1 or 2."
+fi
+
+# Validate the subjects file exists
+if [ ! -f "${SUBJECTS_FILE}" ]; then
+  echo "[ERROR] Subjects file ${SUBJECTS_FILE} not found!"
   exit 1
 fi
 
