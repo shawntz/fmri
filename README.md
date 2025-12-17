@@ -262,6 +262,38 @@ declare -A fmap_mapping=(
 # unless this extra layer of control is useful for your needs.
 ```
 
+#### Subject ID Suffix Modifiers
+
+Subject list files now support suffix modifiers for granular per-subject control. This allows you to maintain a single subject list while specifying different behavior for each subject.
+
+**Syntax:** `subject_id:modifier1:modifier2:...`
+
+**Supported Modifiers:**
+- `step1`, `step2`, `step3`, `step4`, `step5`, `step6` - Only run specified step(s) for this subject
+- `force` - Force rerun even if subject was already processed
+- `skip` - Skip this subject entirely
+
+**Examples:**
+```text
+101                # Standard subject ID, runs all steps normally
+102:step4          # Only run step 4 (prep-fmriprep) for this subject
+103:step4:step5    # Only run steps 4 and 5 for this subject
+104:force          # Force rerun all steps for this subject
+105:step5:force    # Only run step 5, force rerun
+106:skip           # Skip this subject entirely
+```
+
+**Example Subject List File (e.g., `04-subjects.txt`):**
+```text
+101
+102:step4
+103:step4:force
+104
+105:skip
+```
+
+This feature allows the template to maintain a single subject list file while providing extensible, fine-grained control over how the pipeline handles different subjects.
+
 ### Permissions
 ```bash
 # ============================================================================
