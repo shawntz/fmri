@@ -66,7 +66,7 @@ if [ "$user_choice" = "2" ]; then
   SUBJECTS_FILE="${step_number}-subjects.txt"
   echo "Using ${SUBJECTS_FILE}"
   
-  # Count subjects in the file
+  # Validate file exists and count subjects
   if [ -f "${SUBJECTS_FILE}" ]; then
     subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null || echo "0")
     echo "($(date)) [INFO] Found ${subject_count} total subjects in ${SUBJECTS_FILE}"
@@ -74,20 +74,33 @@ if [ "$user_choice" = "2" ]; then
     echo "[ERROR] File ${SUBJECTS_FILE} not found!"
     exit 1
   fi
-elif [ "$user_choice" = "1" ] || [ -z "$user_choice" ]; then
-  # Default to all-subjects.txt for option 1 or empty input
+elif [ "$user_choice" = "1" ]; then
+  # Use all-subjects.txt for option 1
   SUBJECTS_FILE="all-subjects.txt"
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
   
-  # Validate that the default file exists
+  # Validate file exists and count subjects
+  if [ -f "${SUBJECTS_FILE}" ]; then
+    subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null || echo "0")
+    echo "[INFO] Found ${subject_count} total subjects in ${SUBJECTS_FILE}"
+  else
+    echo "[ERROR] File ${SUBJECTS_FILE} not found!"
+    exit 1
+  fi
+elif [ -z "$user_choice" ] && [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+  # Fallback to environment variable when no user input (e.g., running in batch mode)
+  SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
+  echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
+elif [ -z "$user_choice" ]; then
+  # No user input and no environment variable - default to all-subjects.txt
+  SUBJECTS_FILE="all-subjects.txt"
+  echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
+  
+  # Validate file exists
   if [ ! -f "${SUBJECTS_FILE}" ]; then
     echo "[ERROR] File ${SUBJECTS_FILE} not found!"
     exit 1
   fi
-elif [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # Fallback to environment variable for other inputs
-  SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-  echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
 else
   # Invalid choice
   echo "[ERROR] Invalid choice. Please enter 1 or 2."
@@ -157,7 +170,7 @@ while read -r subject_id; do
     # Check corresponding fieldmap based on mapping
     run_fmap=${fmap_mapping[$run_bold]}
     fieldmap_file="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${task_name}_run-${run_fmap}_dir-AP_epi.nii.gz"
-	fmap_remain_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
+    fmap_remain_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
     check_volumes "${fieldmap_file}" "${fmap_remain_vols}" "FIELDMAP" "${run_fmap}" "${subject_id}"
   done
 
