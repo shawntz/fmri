@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
     parser.add_argument("--grouping", action="store", default="studyUID", 
-                        help="Heudiconv grouping strategy. Use 'all' to bypass study identifier conflicts for manually merged sessions. Default: 'studyUID'")
+                        help="Heudiconv grouping strategy. Use 'all' to bypass the 'Conflicting study identifiers found' assertion when working with manually merged sessions. Default: 'studyUID'")
     return parser.parse_args()
 
 def main():
