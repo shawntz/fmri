@@ -145,7 +145,7 @@ def run_qc(subject_dir, task_name, config_path, output_csv, bids_dir_type, subid
         records.append(row)
 
     if not records:
-        print(f"⚠️  No BIDS files found for subject in {subject_dir}")
+        print(f"⚠️  No BIDS files found for sub-{subid} in {bids_dir_type} directory: {subject_dir}")
         print(f"   Skipping CSV generation for: {output_csv}")
         return
 
