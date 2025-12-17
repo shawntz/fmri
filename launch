@@ -218,12 +218,12 @@ def run_script(step_choice, user_inputs):
     # map step choice to script name
     scripts = {
         "1": "01-run.sbatch",
-        "2": "03-run.sbatch",
-        "3": "04-run.sbatch",
+        "2": "02-run.sbatch",
+        "3": "03-run.sbatch",
         "4": "toolbox/verify_nii_metadata.sh",
         "5": "toolbox/summarize_bold_scan_volume_counts.sh",
-        "6": "05-run.sbatch",
-        "7": "06-run.sbatch"
+        "6": "06-run.sbatch",
+        "7": "07-run.sbatch"
     }
 
     selected_script = scripts[step_choice]

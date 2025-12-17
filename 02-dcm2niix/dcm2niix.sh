@@ -2,7 +2,7 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: May 9, 2025
 # @Description: Trigger dcm2niix workflow.
-# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "03-dcm2niix")
+# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-dcm2niix")
 
 source ./settings.sh
 

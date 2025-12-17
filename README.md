@@ -111,10 +111,10 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ./01-run.sbatch
 
 # example: running step 2 (dcm2niix BIDS conversion)
-./03-run.sbatch
+./02-run.sbatch
 
 # example: running step 3 (prep for fMRIPrep)
-./04-run.sbatch
+./03-run.sbatch
 
 # example: running step 4 (QC: verify metadata)
 ./toolbox/verify_nii_metadata.sh
@@ -123,10 +123,10 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ./toolbox/summarize_bold_scan_volume_counts.sh
 
 # example: running step 6 (fMRIPrep anatomical workflows only)
-./05-run.sbatch
+./06-run.sbatch
 
 # example: running step 7 (fMRIPrep full workflows)
-./06-run.sbatch
+./07-run.sbatch
 ```
 
 ## Configuration Steps
