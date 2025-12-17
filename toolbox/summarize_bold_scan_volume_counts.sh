@@ -47,14 +47,32 @@ check_volumes() {
   return 0
 }
 
-# Determine which subjects file to use
-if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+# Use the subjects file selected by settings.sh
+# The settings.sh script handles interactive prompting via select_subjects_file()
+# and exports the result in SELECTED_SUBJECTS_FILE
+if [ -n "$SELECTED_SUBJECTS_FILE" ]; then
+  SUBJECTS_FILE="$SELECTED_SUBJECTS_FILE"
+elif [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-  echo "[INFO] Using step-specific subjects file: ${SUBJECTS_FILE}"
+  echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
 else
   SUBJECTS_FILE="all-subjects.txt"
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
 fi
+
+# Validate the subjects file exists and contains subjects
+if [ ! -f "${SUBJECTS_FILE}" ]; then
+  echo "[ERROR] Subjects file ${SUBJECTS_FILE} not found!"
+  exit 1
+fi
+
+# Count subjects and validate file is not empty
+subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null) || subject_count=0
+if [ "$subject_count" -eq 0 ]; then
+  echo "[ERROR] Subjects file ${SUBJECTS_FILE} is empty or contains only whitespace!"
+  exit 1
+fi
+echo "[INFO] Found ${subject_count} subjects in ${SUBJECTS_FILE}"
 
 while read -r subject_id; do
   subject="sub-${subject_id}"
@@ -119,7 +137,7 @@ while read -r subject_id; do
     # Check corresponding fieldmap based on mapping
     run_fmap=${fmap_mapping[$run_bold]}
     fieldmap_file="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${task_name}_run-${run_fmap}_dir-AP_epi.nii.gz"
-	fmap_remain_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
+    fmap_remain_vols=$((EXPECTED_FMAP_VOLS - n_dummy))
     check_volumes "${fieldmap_file}" "${fmap_remain_vols}" "FIELDMAP" "${run_fmap}" "${subject_id}"
   done
 
