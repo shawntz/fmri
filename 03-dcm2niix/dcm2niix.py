@@ -97,6 +97,8 @@ def main():
 
     # Validate DICOM files exist before running heudiconv
     # Check for DICOM files with various extensions (case-insensitive)
+    # Note: Using multiple patterns for Python 3.9+ compatibility
+    # (glob's case_sensitive parameter was added in Python 3.12)
     dicom_patterns = ["**/*.dcm", "**/*.DCM", "**/*.dicom", "**/*.DICOM"]
     dicom_files = []
     for pattern in dicom_patterns:
@@ -115,7 +117,7 @@ def main():
     dicom_dirs = set(f.parent for f in dicom_files)
     print(f"[INFO] DICOM files are organized in {len(dicom_dirs)} directories:")
     for d in sorted(dicom_dirs)[:5]:  # Show first 5 directories
-        file_count = len([f for f in dicom_files if f.parent == d])
+        file_count = sum(1 for f in dicom_files if f.parent == d)
         print(f"  - {d.name}: {file_count} files")
     if len(dicom_dirs) > 5:
         print(f"  ... and {len(dicom_dirs) - 5} more directories")
