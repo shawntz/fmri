@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Skip subjects file prompt since this step runs one subject at a time
+export SKIP_SUBJECTS_PROMPT=true
 source ./settings.sh
 
 JOB_NAME="01-fw2server"

@@ -37,7 +37,14 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 def clear_screen():
-    os.system('clear' if os.name == 'posix' else 'cls')
+    """Clear the screen using ANSI escape sequences for better compatibility with headless systems."""
+    # Flush stdout to ensure any pending output is written
+    sys.stdout.flush()
+    # Use ANSI escape sequences for more reliable clearing on headless systems
+    # \033[2J clears the entire screen
+    # \033[H moves cursor to home position (0,0)
+    sys.stdout.write('\033[2J\033[H')
+    sys.stdout.flush()
 
 def get_terminal_size():
     try:
@@ -111,17 +118,13 @@ def display_menu():
     print_header()
 
     menu_items = [
-        ("1", "Download from FlyWheel -> Server"),
-        ("3", "Run dcm2niix to extract MRI DICOM headers to JSON files in BIDS format"),
-        ("4", "Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
-        ("5", "Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)"),
-        ("6", "Run remaining fMRIPrep steps"), # end at step of minimal preprocessing 
-        ("9", "QC: Verify dcm -> nii -> bids metadata"),
-        ("10", "QC: Verify number of volumes per scan file")
-        # and now can have portable reusable datasets to upload to open neuro and or just use for other analysis without needing to redo any of this prep work
-        # make any adjustments pre analysis modeling as necessary
-        # failure mode: verification that the edited file persisted through step 8 we need to somehow make sure the fmriprep is using the edited files (in the event theyre misnamed, after number 8 finishes, if it generated a new batch of fmri anatomical scans md5 checksum with manual edit vs. md5 of the anatomical file its using for the next step)
-        #("9", "Run postprocessing (spatial smoothing, group average volume)")
+        ("1", "Step 1: Download from FlyWheel -> Server"),
+        ("2", "Step 2: Run dcm2niix (DICOM -> BIDS format conversion)"),
+        ("3", "Step 3: Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
+        ("4", "Step 4: QC - Verify dcm -> nii -> bids metadata"),
+        ("5", "Step 5: QC - Verify number of volumes per scan file"),
+        ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)"),
+        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -140,46 +143,46 @@ def get_parameters(step_choice):
             "keys": ["fw_subid", "fw_session_id"],
             "prompts": ["Subject ID on Flywheel?", "Session ID on Flywheel?"]
         },
-        "3": {  # Step 3 (dcm2niix BIDS)
+        "2": {  # Step 2 (dcm2niix BIDS)
             "keys": ["fw_session_id", "new_bids_id_number"],
             "prompts": ["Session ID on Flywheel?", "What subject ID number would you like to assign for BIDS?"]
         },
-        "4": {  # Step 4 (PREPare)
+        "3": {  # Step 3 (Prep for fMRIPrep)
             "keys": [],
             "prompts": []
         },
-        "5": {  # Step 5 (fmriprep --anat-only)
+        "4": {  # Step 4 (QC metadata)
             "keys": [],
             "prompts": []
         },
-        "6": {  # Step 6 (fmriprep)
+        "5": {  # Step 5 (QC volumes)
             "keys": [],
             "prompts": []
         },
-        "9": {  # Step 9 (QC: Verify dcm -> nii -> bids metadata)
+        "6": {  # Step 6 (fmriprep --anat-only)
+            "keys": [],
+            "prompts": []
+        },
+        "7": {  # Step 7 (fmriprep full)
+            "keys": [],
+            "prompts": []
+        },
+        "8": {  # Step 8 (QC: Verify dcm -> nii -> bids metadata)
             "keys": ["new_subid"],
             "prompts": ["Assigned BIDS Subject ID?"]
         },
-        "10": {  # Step 10 (QC: Verify number of volumes per scan file)
+        "9": {  # Step 9 (QC: Verify number of volumes per scan file)
             "keys": [],
             "prompts": []
-        }
-        # "5": {  # Step 5 (fmriprep)
-        #     "keys": ["anat_only"],
-        #     "prompts": ["Only run anatomical workflows?"]
-        # }
-        # "6": {  # Step 6 ()
-        #     "keys": [],
-        #     "prompts": []
-        # },
-        # "9": {
-        #     "keys": ["new_subid"],
-        #     "prompts": ["Assigned BIDS Subj ID?"]
-        # },
-        # "10": {
-        #     "keys": [],
-        #     "prompts": []
-        # }
+        },
+        "10": {  # Step 10 (Tarball/Untar utility)
+            "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
+            "prompts": [
+                "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
+                "Path to sourcedata directory",
+                "Subject list (comma-separated IDs or file path, press Enter to skip for tar-all/untar-all)",
+                "Keep original directories after tarballing? (only for tar operations)"
+            ]
     }
 
     param_keys = step_params[step_choice]["keys"]
@@ -187,6 +190,39 @@ def get_parameters(step_choice):
 
     user_inputs = []
 
+    # Special handling for tarball utility
+    if step_choice == "11":
+        # Get operation type
+        operation = get_user_input(param_prompts[0], options=["1", "2", "3", "4"])
+        operation_map = {
+            "1": "--tar-all",
+            "2": "--tar-subjects",
+            "3": "--untar-all",
+            "4": "--untar-subjects"
+        }
+        
+        # Build command based on operation
+        if operation in ["2", "4"]:
+            # For tar-subjects/untar-subjects, need subject list
+            subjects_spec = get_user_input(param_prompts[2])
+            user_inputs.extend([operation_map[operation], subjects_spec])
+        else:
+            # For tar-all/untar-all
+            user_inputs.append(operation_map[operation])
+        
+        # Get sourcedata directory
+        sourcedata_dir = get_user_input(param_prompts[1])
+        user_inputs.extend(["--sourcedata-dir", sourcedata_dir])
+        
+        # Ask about keeping original only for tar operations
+        if operation in ["1", "2"]:
+            keep_original = get_user_input(param_prompts[3], yes_no=True, default=False)
+            if keep_original:
+                user_inputs.append("--keep-original")
+        
+        return user_inputs, param_keys
+    
+    # Regular parameter handling for other steps
     for i in range(len(param_keys)):
         key = param_keys[i]
         prompt = param_prompts[i]
@@ -222,14 +258,16 @@ def run_script(step_choice, user_inputs):
     # map step choice to script name
     scripts = {
         "1": "01-run.sbatch",
+        "2": "02-run.sbatch",
         "3": "03-run.sbatch",
-        "4": "04-run.sbatch",
-        "5": "05-run.sbatch",
+        "4": "toolbox/verify_nii_metadata.sh",
+        "5": "toolbox/summarize_bold_scan_volume_counts.sh",
         "6": "06-run.sbatch",
         "7": "07-run.sbatch",
         "8": "08-run.sbatch",
         "9": "toolbox/verify_nii_metadata.sh",
-        "10": "toolbox/summarize_bold_scan_volume_counts.sh"
+        "10": "toolbox/summarize_bold_scan_volume_counts.sh",
+        "11": "toolbox/tarball_sourcedata.sh"
     }
 
     selected_script = scripts[step_choice]

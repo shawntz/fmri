@@ -1,0 +1,15 @@
+# Example subject list with suffix modifiers
+# Format: subject_id[:modifier1[:modifier2...]]
+#
+# Supported modifiers:
+#   step1, step2, step3, step4, step5, step6 - Only run specified step(s)
+#   force - Force rerun even if subject was already processed
+#   skip - Skip this subject entirely
+#
+# Examples:
+101
+102:step4
+103:step4:step5
+104:force
+105:step5:force
+106:skip
