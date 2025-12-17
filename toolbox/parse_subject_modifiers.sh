@@ -79,17 +79,20 @@ parse_subject_modifiers() {
   # Process modifiers
   local has_step_modifier=false
   local step_number=""
+  local current_step_found=false
   
   # Extract step number from current_step (e.g., "04-prep-fmriprep" -> "4")
   if [[ "${current_step}" =~ ^0*([0-9]+)- ]]; then
     step_number="${BASH_REMATCH[1]}"
   fi
   
+  # First pass: check for skip, force, and step modifiers
   for modifier in "${SUBJECT_MODIFIERS[@]}"; do
     case "${modifier}" in
       skip)
         SHOULD_SKIP="true"
         SHOULD_RUN_STEP="false"
+        return 0  # Skip overrides everything
         ;;
       force)
         SHOULD_FORCE="true"
@@ -100,7 +103,7 @@ parse_subject_modifiers() {
         local modifier_step="${modifier#step}"
         # Check if this modifier matches the current step
         if [ "${modifier_step}" = "${step_number}" ]; then
-          SHOULD_RUN_STEP="true"
+          current_step_found=true
         fi
         ;;
       *)
@@ -109,21 +112,11 @@ parse_subject_modifiers() {
     esac
   done
   
-  # If step modifiers were specified but current step doesn't match any, don't run
-  if [ "${has_step_modifier}" = "true" ] && [ "${SHOULD_RUN_STEP}" = "true" ]; then
-    # Check if current step was explicitly listed
-    local current_step_found=false
-    for modifier in "${SUBJECT_MODIFIERS[@]}"; do
-      if [[ "${modifier}" =~ ^step([0-9]+)$ ]]; then
-        local mod_step_num="${BASH_REMATCH[1]}"
-        if [ "${mod_step_num}" = "${step_number}" ]; then
-          current_step_found=true
-          break
-        fi
-      fi
-    done
-    
-    if [ "${current_step_found}" = "false" ]; then
+  # If step modifiers were specified, only run if current step was found
+  if [ "${has_step_modifier}" = "true" ]; then
+    if [ "${current_step_found}" = "true" ]; then
+      SHOULD_RUN_STEP="true"
+    else
       SHOULD_RUN_STEP="false"
     fi
   fi
