@@ -172,17 +172,21 @@ EOF
 eval "$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
 import yaml
 import os
+import sys
 
 try:
     config_path = os.environ.get('_YAML_CONFIG_FILE', 'config.yaml')
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
-    if 'fmap_mapping' in config:
+    if isinstance(config, dict) and 'fmap_mapping' in config:
         print("declare -gA fmap_mapping=(")
         for key, value in config['fmap_mapping'].items():
             print(f'    ["{key}"]="{value}"')
         print(")")
+    else:
+        # Ensure fmap_mapping is always defined as an associative array in Bash
+        print("declare -gA fmap_mapping=()")
 except Exception as e:
     print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
     exit(1)
