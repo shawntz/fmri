@@ -166,6 +166,15 @@ def get_parameters(step_choice):
         "7": {  # Step 7 (fmriprep full)
             "keys": [],
             "prompts": []
+        },
+        "11": {  # Step 11 (Tarball/Untar utility)
+            "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
+            "prompts": [
+                "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
+                "Path to sourcedata directory",
+                "Subject list (comma-separated IDs or file path, press Enter to skip for tar-all/untar-all)",
+                "Keep original directories after tarballing? (only for tar operations)"
+            ]
         }
         # "5": {  # Step 5 (fmriprep)
         #     "keys": ["anat_only"],
@@ -190,6 +199,39 @@ def get_parameters(step_choice):
 
     user_inputs = []
 
+    # Special handling for tarball utility
+    if step_choice == "11":
+        # Get operation type
+        operation = get_user_input(param_prompts[0], options=["1", "2", "3", "4"])
+        operation_map = {
+            "1": "--tar-all",
+            "2": "--tar-subjects",
+            "3": "--untar-all",
+            "4": "--untar-subjects"
+        }
+        
+        # Build command based on operation
+        if operation in ["2", "4"]:
+            # For tar-subjects/untar-subjects, need subject list
+            subjects_spec = get_user_input(param_prompts[2])
+            user_inputs.extend([operation_map[operation], subjects_spec])
+        else:
+            # For tar-all/untar-all
+            user_inputs.append(operation_map[operation])
+        
+        # Get sourcedata directory
+        sourcedata_dir = get_user_input(param_prompts[1])
+        user_inputs.extend(["--sourcedata-dir", sourcedata_dir])
+        
+        # Ask about keeping original only for tar operations
+        if operation in ["1", "2"]:
+            keep_original = get_user_input(param_prompts[3], yes_no=True, default=False)
+            if keep_original:
+                user_inputs.append("--keep-original")
+        
+        return user_inputs, param_keys
+    
+    # Regular parameter handling for other steps
     for i in range(len(param_keys)):
         key = param_keys[i]
         prompt = param_prompts[i]
@@ -230,7 +272,11 @@ def run_script(step_choice, user_inputs):
         "4": "toolbox/verify_nii_metadata.sh",
         "5": "toolbox/summarize_bold_scan_volume_counts.sh",
         "6": "06-run.sbatch",
-        "7": "07-run.sbatch"
+        "7": "07-run.sbatch",
+        "8": "08-run.sbatch",
+        "9": "toolbox/verify_nii_metadata.sh",
+        "10": "toolbox/summarize_bold_scan_volume_counts.sh",
+        "11": "toolbox/tarball_sourcedata.sh"
     }
 
     selected_script = scripts[step_choice]
