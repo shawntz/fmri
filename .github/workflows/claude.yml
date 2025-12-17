@@ -36,7 +36,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # This is an optional setting that allows Claude to read CI results on PRs
+          # This setting allows Claude to read CI results on PRs. It is only needed here if
+          # 'actions: read' is not already granted in the job permissions block above.
           additional_permissions: |
             actions: read
 
