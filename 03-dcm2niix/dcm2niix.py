@@ -96,13 +96,29 @@ def main():
     print(f"[INFO] Screenshot DICOMs deleted from {dicom_extract_dir}")
 
     # Validate DICOM files exist before running heudiconv
-    dicom_files = list(dicom_extract_dir.glob("**/*.dcm"))
+    # Check for DICOM files with various extensions (case-insensitive)
+    dicom_patterns = ["**/*.dcm", "**/*.DCM", "**/*.dicom", "**/*.DICOM"]
+    dicom_files = []
+    for pattern in dicom_patterns:
+        dicom_files.extend(dicom_extract_dir.glob(pattern))
+    
     if not dicom_files:
         raise FileNotFoundError(
-            f"No DICOM files (*.dcm) found in {dicom_extract_dir}. "
-            f"Please verify the ZIP files were extracted correctly."
+            f"No DICOM files found in {dicom_extract_dir}. "
+            f"Please verify the ZIP files were extracted correctly. "
+            f"Searched for patterns: {', '.join(dicom_patterns)}"
         )
+    
     print(f"[INFO] Found {len(dicom_files)} DICOM files in {dicom_extract_dir}")
+    
+    # Log directory structure for debugging
+    dicom_dirs = set(f.parent for f in dicom_files)
+    print(f"[INFO] DICOM files are organized in {len(dicom_dirs)} directories:")
+    for d in sorted(dicom_dirs)[:5]:  # Show first 5 directories
+        file_count = len([f for f in dicom_files if f.parent == d])
+        print(f"  - {d.name}: {file_count} files")
+    if len(dicom_dirs) > 5:
+        print(f"  ... and {len(dicom_dirs) - 5} more directories")
 
     # Clear heudiconv cache to avoid using stale file paths
     # This is especially important when manually curating directories
