@@ -2,7 +2,10 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: May 9, 2025
 # @Description: Trigger dcm2niix workflow.
-# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "03-dcm2niix")
+# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-dcm2niix")
+# @Param: fw_seshid (positional argument #2) - flywheel session ID
+# @Param: new_subid (positional argument #3) - new subject ID
+# @Param: grouping (positional argument #4) - optional grouping strategy (default: 'studyUID', use 'all' for merged sessions)
 
 source ./settings.sh
 
@@ -16,13 +19,14 @@ fi
 
 fw_seshid=$2
 new_subid=$3
+grouping=${4:-studyUID}  # Optional 4th argument, defaults to 'studyUID'
 
 subject="sub-${new_subid}"
 
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/03-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
 echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 
@@ -39,7 +43,8 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/dcm2niix.py \
   --fw_project_id "${FW_PROJECT_ID}" \
   --task_id "${new_task_id}" \
   --sing_image_path "${SINGULARITY_IMAGE_DIR}"/"${HEUDICONV_IMAGE}" \
-  --scripts_dir "${SCRIPTS_DIR}"/${JOB_NAME}
+  --scripts_dir "${SCRIPTS_DIR}"/${JOB_NAME} \
+  --grouping "${grouping}"
 echo "($(date)) [INFO] Raw dicom to BIDS conversion complete" | tee -a "${log_file}"
 
 echo "${new_subid}" >> "${processed_file}"

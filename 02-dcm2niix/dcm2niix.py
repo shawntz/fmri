@@ -16,6 +16,7 @@ Arguments:
     --new-task-id: New task identifier (if renaming)
     --fmap-mapping: JSON string of fieldmap:BOLD run mapping
     --runs: Comma-separated list of run numbers
+    --grouping: Heudiconv grouping strategy (default: 'studyUID', use 'all' for merged sessions)
 """
 
 import argparse, os, shutil, tarfile, subprocess
@@ -34,6 +35,8 @@ def parse_args():
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
+    parser.add_argument("--grouping", action="store", default="studyUID", 
+                        help="Heudiconv grouping strategy. Use 'all' to bypass the 'Conflicting study identifiers found' assertion when working with manually merged sessions. Default: 'studyUID'")
     return parser.parse_args()
 
 def main():
@@ -95,18 +98,60 @@ def main():
 
     print(f"[INFO] Screenshot DICOMs deleted from {dicom_extract_dir}")
 
+    # Validate DICOM files exist before running heudiconv
+    # Check for DICOM files with various extensions (case-insensitive)
+    # Note: Using multiple patterns for Python 3.9+ compatibility
+    # (glob's case_sensitive parameter was added in Python 3.12)
+    dicom_patterns = ["**/*.dcm", "**/*.DCM", "**/*.dicom", "**/*.DICOM"]
+    dicom_files = []
+    for pattern in dicom_patterns:
+        dicom_files.extend(dicom_extract_dir.glob(pattern))
+    
+    if not dicom_files:
+        raise FileNotFoundError(
+            f"No DICOM files found in {dicom_extract_dir}. "
+            f"Please verify the ZIP files were extracted correctly. "
+            f"Searched for patterns: {', '.join(dicom_patterns)}"
+        )
+    
+    print(f"[INFO] Found {len(dicom_files)} DICOM files in {dicom_extract_dir}")
+    
+    # Log directory structure for debugging
+    # Build a directory-to-file-count mapping in a single pass
+    dir_file_counts = {}
+    for f in dicom_files:
+        parent_dir = f.parent
+        dir_file_counts[parent_dir] = dir_file_counts.get(parent_dir, 0) + 1
+
+    dicom_dirs = list(dir_file_counts.keys())
+    print(f"[INFO] DICOM files are organized in {len(dicom_dirs)} directories:")
+    for d in sorted(dicom_dirs)[:5]:  # Show first 5 directories
+        file_count = dir_file_counts[d]
+        print(f"  - {d.name}: {file_count} files")
+    if len(dicom_dirs) > 5:
+        print(f"  ... and {len(dicom_dirs) - 5} more directories")
+
+    # Clear heudiconv cache to avoid using stale file paths
+    # This is especially important when manually curating directories
+    heudiconv_cache = bids_dir / ".heudiconv" / args.subid
+    if heudiconv_cache.exists():
+        print(f"[INFO] Removing stale heudiconv cache: {heudiconv_cache}")
+        shutil.rmtree(heudiconv_cache)
+
     # Cleanup
     # shutil.rmtree(scratch_sub_dir)
-    print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
+    # print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
 
     # Run heudiconv
     print(f"[INFO] Running heudiconv for sub-{args.subid}")
+    print(f"[INFO] Using grouping strategy: {args.grouping}")
     cmd = (
         f"singularity run --cleanenv "
         f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
         f"-e {args.sing_image_path} "
         f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
-        f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite"
+        f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+        f"--grouping {args.grouping}"
     )
     subprocess.run(cmd, shell=True, check=True)
 

@@ -9,7 +9,9 @@ module load fsl/5.0.10
 
 source ./settings.sh
 
-OUTPUT_DIR="${SLURM_LOG_DIR}/diagnostics"
+# Create timestamped output directory
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+OUTPUT_DIR="${SLURM_LOG_DIR}/diagnostics/${TIMESTAMP}"
 mkdir -p "${OUTPUT_DIR}"
 
 CSV_FILE="${OUTPUT_DIR}/scan_volumes_summary.csv"
@@ -113,6 +115,9 @@ while read -r subject_id; do
   for run_bold in "${run_numbers[@]}"; do
     bold_pattern="${TRIM_DIR}/${subject}/func/${subject}_task-*_run-${run_bold}_dir-PA_bold.nii.gz"
     bold_files=( $bold_pattern )
+    
+    # Default task_name to new_task_id from settings if not found
+    task_name="${new_task_id}"
 
     if [ ${#bold_files[@]} -eq 0 ]; then
       # No matching files found
@@ -143,3 +148,15 @@ while read -r subject_id; do
 
   echo "[INFO] Completed volume check for subject ${subject_id}"
 done < "${SUBJECTS_FILE}"
+
+echo ""
+echo "[INFO] All subjects processed. Generating summary report..."
+
+# Generate summary report using Python script
+TOOLBOX_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "${TOOLBOX_DIR}/summarize_diagnostics.py" --csv "${CSV_FILE}" --output-dir "${OUTPUT_DIR}"
+
+echo "[INFO] Diagnostic scan complete!"
+echo "[INFO] Results saved to: ${OUTPUT_DIR}"
+echo "[INFO]   - CSV file: ${CSV_FILE}"
+echo "[INFO]   - Summary report: ${OUTPUT_DIR}/diagnostic_summary.txt"

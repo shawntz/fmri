@@ -2,3 +2,4 @@
 #settings.sh
 subjects.txt
 __pycache__/
+*.pyc
