@@ -47,11 +47,32 @@ check_volumes() {
   return 0
 }
 
-# Determine which subjects file to use
-if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+# Prompt user to select subjects file
+echo "Select subjects file to use:"
+echo "1) Use all-subjects.txt (default)"
+echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
+read -p "Enter choice [1/2]: " user_choice
+
+# Determine which subjects file to use based on user input
+if [ "$user_choice" = "2" ]; then
+  read -p "Enter step number (e.g., 04): " step_number
+  SUBJECTS_FILE="${step_number}-subjects.txt"
+  echo "Using ${SUBJECTS_FILE}"
+  
+  # Count subjects in the file
+  if [ -f "${SUBJECTS_FILE}" ]; then
+    subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null || echo "0")
+    echo "($(date)) [INFO] Found ${subject_count} total subjects in ${SUBJECTS_FILE}"
+  else
+    echo "[ERROR] File ${SUBJECTS_FILE} not found!"
+    exit 1
+  fi
+elif [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
+  # Fallback to environment variable if not choosing option 2
   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-  echo "[INFO] Using step-specific subjects file: ${SUBJECTS_FILE}"
+  echo "[INFO] Using step-specific subjects file from environment: ${SUBJECTS_FILE}"
 else
+  # Default to all-subjects.txt
   SUBJECTS_FILE="all-subjects.txt"
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
 fi
