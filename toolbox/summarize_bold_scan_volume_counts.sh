@@ -47,8 +47,8 @@ check_volumes() {
   return 0
 }
 
-# Use the subjects file selected by settings.sh
-# The settings.sh script handles interactive prompting via select_subjects_file()
+# Use the subjects file selected by load_config.sh
+# The load_config.sh script handles interactive prompting via select_subjects_file()
 # and exports the result in SELECTED_SUBJECTS_FILE
 if [ -n "$SELECTED_SUBJECTS_FILE" ]; then
   SUBJECTS_FILE="$SELECTED_SUBJECTS_FILE"

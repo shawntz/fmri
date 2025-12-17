@@ -32,8 +32,8 @@ def parse_args():
     parser.add_argument("--fw_group_id", action="store", required=True, help="Flywheel group ID (i.e., parent dir of all project IDs, fw://surname)")
     parser.add_argument("--fw_project_id", action="store", required=True, help="Flywheel Project ID (e.g., amass)")
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
-    parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
-    parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
+    parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in config.yaml")
+    parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in config.yaml")
     return parser.parse_args()
 
 def main():

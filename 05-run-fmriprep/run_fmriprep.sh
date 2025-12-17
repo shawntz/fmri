@@ -18,7 +18,7 @@ ANAT_ONLY_FLAG=$2
 
 # # determine which subjects file to use
 # if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-#   # use step-specific subjects file from the mapping defined in settings.sh
+#   # use step-specific subjects file from the mapping defined in config.yaml
 #   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
 #   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # else
