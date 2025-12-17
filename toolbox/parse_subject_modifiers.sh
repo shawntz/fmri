@@ -101,6 +101,10 @@ parse_subject_modifiers() {
         has_step_modifier=true
         # Extract the step number from modifier (e.g., "step1" -> "1")
         local modifier_step="${modifier#step}"
+        # Warn if step number is out of expected range (steps 1-6 are currently defined)
+        if [ "${modifier_step}" -gt 6 ]; then
+          echo "($(date)) [WARNING] Step modifier 'step${modifier_step}' references a step that may not exist (expected: step1-step6)" >&2
+        fi
         # Check if this modifier matches the current step
         if [ "${modifier_step}" = "${step_number}" ]; then
           current_step_found=true
