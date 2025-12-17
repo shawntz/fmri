@@ -36,7 +36,7 @@ To build the documentation locally:
 
 Documentation is automatically built and published on ReadTheDocs when changes are pushed to the repository.
 
-Visit: https://sml-fmri.readthedocs.io/ (coming soon)
+Visit: https://fmriprep-workbench.readthedocs.io/
 
 ## Adding New Pages
 
