@@ -114,10 +114,16 @@ def main():
     print(f"[INFO] Found {len(dicom_files)} DICOM files in {dicom_extract_dir}")
     
     # Log directory structure for debugging
-    dicom_dirs = set(f.parent for f in dicom_files)
+    # Build a directory-to-file-count mapping in a single pass
+    dir_file_counts = {}
+    for f in dicom_files:
+        parent_dir = f.parent
+        dir_file_counts[parent_dir] = dir_file_counts.get(parent_dir, 0) + 1
+
+    dicom_dirs = list(dir_file_counts.keys())
     print(f"[INFO] DICOM files are organized in {len(dicom_dirs)} directories:")
     for d in sorted(dicom_dirs)[:5]:  # Show first 5 directories
-        file_count = sum(1 for f in dicom_files if f.parent == d)
+        file_count = dir_file_counts[d]
         print(f"  - {d.name}: {file_count} files")
     if len(dicom_dirs) > 5:
         print(f"  ... and {len(dicom_dirs) - 5} more directories")
