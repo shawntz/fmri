@@ -19,14 +19,15 @@ This repo is a work in progress intended to transform the [Stanford Memory Lab's
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
 
 - [x] 1. automated transfer of scanner acquisitions from FlyWheel -> Server
-- [x] 2. Raw -> BIDS format
-- [x] 3. `dcm2niix` DICOM to NIfTI converter,
-- [x] 4. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep,
-- [x] 5. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 8)
-- [ ] 6. Download Freesurfer output for manual surface editing
-- [ ] 7. Reupload edited Freesurfer directories
-- [ ] 8. Run remaining fMRIPrep steps
-- [ ] 9. automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
+- [x] 2. `dcm2niix` DICOM to NIfTI converter (converts raw DICOM -> BIDS format)
+- [x] 3. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep
+- [x] 4. QC: Verify dcm -> nii -> bids metadata
+- [x] 5. QC: Verify number of volumes per scan file
+- [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
+- [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
+- [ ] *Future:* Download Freesurfer output for manual surface editing
+- [ ] *Future:* Reupload edited Freesurfer directories
+- [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]
 > - [x] indicates workflows that have been finished and validated
@@ -106,16 +107,26 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 ### manually calling upon each sidecar executable
 ```bash
-# example: running step 1
+# example: running step 1 (FlyWheel download)
 ./01-run.sbatch
 
-# example: running step 2
-# here, --anat-only is an optional flag that is passed directly to fMRIPrep
-# use this if you only want to run anatomical workflows:
-./02-run.sbatch --anat-only
-#
-# otherwise, to run both anatomical and functional workflows, use this:
+# example: running step 2 (dcm2niix BIDS conversion)
 ./02-run.sbatch
+
+# example: running step 3 (prep for fMRIPrep)
+./03-run.sbatch
+
+# example: running step 4 (QC: verify metadata)
+./toolbox/verify_nii_metadata.sh
+
+# example: running step 5 (QC: verify volume counts)
+./toolbox/summarize_bold_scan_volume_counts.sh
+
+# example: running step 6 (fMRIPrep anatomical workflows only)
+./06-run.sbatch
+
+# example: running step 7 (fMRIPrep full workflows)
+./07-run.sbatch
 ```
 
 ## Configuration Steps

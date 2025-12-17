@@ -2,7 +2,7 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: May 9, 2025
 # @Description: Trigger dcm2niix workflow.
-# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "03-dcm2niix")
+# @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-dcm2niix")
 # @Param: fw_seshid (positional argument #2) - flywheel session ID
 # @Param: new_subid (positional argument #3) - new subject ID
 # @Param: grouping (positional argument #4) - optional grouping strategy (default: 'studyUID', use 'all' for merged sessions)
@@ -26,7 +26,7 @@ subject="sub-${new_subid}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/03-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
 echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 

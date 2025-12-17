@@ -15,6 +15,8 @@ if [ -z "${JOB_NAME}" ]; then
   exit 1
 fi
 
+ANAT_ONLY_FLAG=$2
+
 # # determine which subjects file to use
 # if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
 #   # use step-specific subjects file from the mapping defined in settings.sh
@@ -22,7 +24,7 @@ fi
 #   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # else
 #   # fall back to default all-subjects.txt
-#   SUBJECTS_FILE="05-subjects.txt"
+#   SUBJECTS_FILE="06-subjects.txt"
 #   echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # fi
 SUBJECTS_FILE="06-subjects.txt"
@@ -138,6 +140,12 @@ cmd="${SINGULARITY_CMD} ${TRIM_DIR} ${DERIVS_DIR} participant \
   --fd-spike-threshold ${FMRIPREP_FD_SPIKE_THRESHOLD} \
   --dvars-spike-threshold ${FMRIPREP_DVARS_SPIKE_THRESHOLD} \
   --output-spaces ${FMRIPREP_OUTPUT_SPACES}"
+
+# add anat-only flag if specified
+if [ "${ANAT_ONLY_FLAG}" = "--anat-only" ]; then
+  cmd="${cmd} --anat-only"
+  echo "($(date)) [INFO] Running anatomical processing only" | tee -a "${log_file}"
+fi
 
 # execute and log
 echo "($(date)) [INFO] Running task ${SLURM_ARRAY_TASK_ID}" | tee -a "${log_file}"

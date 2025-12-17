@@ -13,7 +13,7 @@ This directory contains scripts for converting DICOM files to NIfTI format using
 ### Standard Usage
 
 ```bash
-./dcm2niix.sh 03-dcm2niix <fw_session_id> <subject_id>
+./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id>
 ```
 
 ### For Manually Merged Sessions
@@ -27,7 +27,7 @@ AssertionError: Conflicting study identifiers found [1.2.840.113619.6.475..., 1.
 To bypass this check and process all DICOMs together regardless of study identifiers, use the `all` grouping strategy:
 
 ```bash
-./dcm2niix.sh 03-dcm2niix <fw_session_id> <subject_id> all
+./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
 ```
 
 ## Grouping Strategies
@@ -41,10 +41,10 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 
 ```bash
 # Standard processing
-./dcm2niix.sh 03-dcm2niix 21940 001
+./dcm2niix.sh 02-dcm2niix 21940 001
 
 # Processing merged sessions
-./dcm2niix.sh 03-dcm2niix 21940 001 all
+./dcm2niix.sh 02-dcm2niix 21940 001 all
 ```
 
 ## Direct Python Usage

@@ -78,7 +78,7 @@ ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 #else
   # fall back to default all-subjects.txt
   #SUBJECTS_FILE="all-subjects.txt"
-SUBJECTS_FILE="04-subjects.txt"
+SUBJECTS_FILE="03-subjects.txt"
 echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 #fi
 
@@ -95,7 +95,7 @@ subject="sub-${subject_id}"
 # logging setup
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
-processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/03-processed_subjects.txt"
 
 if [ -z "${subject_id}" ]; then
   echo "Error: No subject found at index $((SLURM_ARRAY_TASK_ID)) in ${SUBJECTS_FILE}" | tee -a "${log_file}"
