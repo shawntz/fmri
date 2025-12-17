@@ -73,6 +73,7 @@ fi
 
 # Determine which subjects file to use based on user input
 if [ "$user_choice" = "2" ]; then
+  # Note: This read is safe because user_choice="2" only occurs in interactive mode
   read -p "Enter step number (e.g., 04): " step_number
   
   # Validate step_number contains only alphanumeric characters to prevent path traversal
@@ -82,7 +83,7 @@ if [ "$user_choice" = "2" ]; then
   fi
   
   SUBJECTS_FILE="${step_number}-subjects.txt"
-  echo "Using ${SUBJECTS_FILE}"
+  echo "[INFO] Using ${SUBJECTS_FILE}"
   validate_and_count_subjects "${SUBJECTS_FILE}"
 elif [ "$user_choice" = "1" ]; then
   # Use all-subjects.txt for option 1
