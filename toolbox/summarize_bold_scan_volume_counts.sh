@@ -60,11 +60,19 @@ else
   echo "[INFO] Using default subjects file: ${SUBJECTS_FILE}"
 fi
 
-# Validate the subjects file exists
+# Validate the subjects file exists and contains subjects
 if [ ! -f "${SUBJECTS_FILE}" ]; then
   echo "[ERROR] Subjects file ${SUBJECTS_FILE} not found!"
   exit 1
 fi
+
+# Count subjects and validate file is not empty
+subject_count=$(grep -c -v '^[[:space:]]*$' "${SUBJECTS_FILE}" 2>/dev/null) || subject_count=0
+if [ "$subject_count" -eq 0 ]; then
+  echo "[ERROR] Subjects file ${SUBJECTS_FILE} is empty or contains only whitespace!"
+  exit 1
+fi
+echo "[INFO] Found ${subject_count} subjects in ${SUBJECTS_FILE}"
 
 while read -r subject_id; do
   subject="sub-${subject_id}"
