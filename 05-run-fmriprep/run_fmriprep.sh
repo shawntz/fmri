@@ -5,7 +5,7 @@
 # @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-fmriprep")
 # @Param: ANAT_ONLY_FLAG (positional argument #2) - optional setting to speed up freesurfer before manual surface editing
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then

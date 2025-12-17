@@ -4,7 +4,7 @@
 # @Description: Trigger dcm2niix workflow.
 # @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "03-dcm2niix")
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME=$1
 

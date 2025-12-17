@@ -8,7 +8,7 @@
 
 umask 002  # modify permissions so downstream steps inherit correct file permissions
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then

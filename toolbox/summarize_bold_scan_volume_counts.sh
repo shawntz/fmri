@@ -7,7 +7,7 @@ module load python/3.9.0
 module load biology
 module load fsl/5.0.10
 
-source ./settings.sh
+source ./load_config.sh
 
 OUTPUT_DIR="${SLURM_LOG_DIR}/diagnostics"
 mkdir -p "${OUTPUT_DIR}"

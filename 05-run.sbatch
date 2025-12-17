@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME="05-run-fmriprep"
 ANAT_ONLY_FLAG=$1  # optional setting for anat-only processing

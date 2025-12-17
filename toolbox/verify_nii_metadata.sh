@@ -3,7 +3,7 @@
 # @Date: May 17, 2025
 # @Description: Entry point to verify dcm2niix generated metadata in BIDS format.
 
-source ./settings.sh
+source ./load_config.sh
 
 new_subid=$1
 subject="sub-${new_subid}"

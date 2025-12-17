@@ -64,7 +64,7 @@ The template provides a standardized structure and validated scripts that you ca
 After creating your repository from this template:
 
 1. Clone your new repository
-2. Copy `settings.template.sh` to `settings.sh` and customize parameters
+2. Copy `config.template.yaml` to `config.yaml` and customize parameters
 3. Modify paths and scan parameters for your study
 4. Follow the `configuration guide` in the detailed documentation below
 
@@ -73,12 +73,12 @@ After creating your repository from this template:
 # SML fMRI Configuration Guide
 
 ## Overview
-The preprocessing pipeline requires proper configuration of several parameters to handle your study's specific requirements. This guide explains how to set up the `settings.sh` file that controls the pipeline's behavior.
+The preprocessing pipeline requires proper configuration of several parameters to handle your study's specific requirements. This guide explains how to set up the `config.yaml` file that controls the pipeline's behavior.
 
 > [!IMPORTANT]
 > ## Submitting Jobs to Slurm Workload Manager
 >
-> There are two approaches you can take to trigger each preprocessing step following proper configuration in the `settings.sh` file:
+> There are two approaches you can take to trigger each preprocessing step following proper configuration in the `config.yaml` file:
 >
 > 1) Use the provided TUI `launcher` executable, which provides an interactive popup window with more context and explanations + interactive parameter setting (as needed) for any given step.
 >
@@ -120,9 +120,9 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 ## Configuration Steps
 
-### 1. Copy Settings Template
+### 1. Copy Configuration Template
 ```bash
-cp settings.template.sh settings.sh
+cp config.template.yaml config.yaml
 ```
 
 ### 2. Modify Paths
@@ -170,152 +170,169 @@ cp settings.template.sh settings.sh
 ## Required Settings
 
 ### Path Configuration
-```bash
+```yaml
 # ============================================================================
 # (1) SETUP DIRECTORIES
 # ============================================================================
-BASE_DIR="/my/project/dir"           # ROOT DIR FOR THE STUDY
-SCRIPTS_DIR="${BASE_DIR}/scripts"    # PATH OF CLONED FMRI REPO
-RAW_DIR="${BASE_DIR}/bids"           # RAW BIDS-COMPLIANT DATA LOCATION
-TRIM_DIR="${BASE_DIR}/bids_trimmed"  # DESIRED DESTINATION FOR PROCESSED DATA
-WORKFLOW_LOG_DIR="${BASE_DIR}/logs/workflows"
-TEMPLATEFLOW_HOST_HOME="${HOME}/.cache/templateflow"
-FMRIPREP_HOST_CACHE="${HOME}/.cache/fmriprep"
-FREESURFER_LICENSE="${HOME}/freesurfer.txt"
+directories:
+  base_dir: '/my/project/dir'
+  scripts_dir: '${BASE_DIR}/scripts'
+  raw_dir: '${BASE_DIR}/bids'
+  trim_dir: '${BASE_DIR}/bids_trimmed'
+  workflow_log_dir: '${BASE_DIR}/logs/workflows'
+  templateflow_host_home: '${HOME}/.cache/templateflow'
+  fmriprep_host_cache: '${HOME}/.cache/fmriprep'
+  freesurfer_license: '${HOME}/freesurfer.txt'
 ```
 
-### Email Update Preference
-```bash
+### User Configuration
+```yaml
 # ============================================================================
-# (2) USER EMAIL (for slurm report updates)
+# (2) USER CONFIGURATION
 # ============================================================================
-USER_EMAIL="hello@stanford.edu"
+user:
+  email: 'hello@stanford.edu'
+  username: 'johndoe'
+  fw_group_id: 'pi'
+  fw_project_id: 'amass'
 ```
 
 ### Study Parameters
-```bash
+```yaml
 # ============================================================================
 # (3) TASK/SCAN PARAMETERS
 # ============================================================================
-task_id="SomeTaskName"   # ORIGINAL TASK NAME IN BIDS FORMAT
-new_task_id="cleanname"  # NEW TASK NAME (IF RENAMING IS NEEDED), OTHERWISE SET SAME VALUE AS $task_id
-n_dummy=5                # NUMBER OF "DUMMY" TRs to remove
-run_numbers=("01" "02" "03" "04" "05" "06" "07" "08")  # ALL TASK BOLD RUN NUMBERS
+scan:
+  task_id: 'SomeTaskName'
+  new_task_id: 'cleanname'
+  n_dummy: 5
+  run_numbers:
+    - '01'
+    - '02'
+    - '03'
+    - '04'
+    - '05'
+    - '06'
+    - '07'
+    - '08'
 ```
 
 ### Data Validation
-```bash
+```yaml
 # ============================================================================
 # (4) DATA VALIDATION VALUES FOR UNIT TESTS
 # ============================================================================
-EXPECTED_FMAP_VOLS=12   # EXPECTED NUMBER OF VOLUMES IN ORIGINAL FIELDMAP SCANS
-EXPECTED_BOLD_VOLS=220  # EXPECTED NUMBER OF VOLUMES IN BOLD SCANS
+validation:
+  expected_fmap_vols: 12
+  expected_bold_vols: 220
+  expected_bold_vols_after_trimming: 210
 ```
 
 ### Fieldmap (fmap) Mapping
-```bash
+```yaml
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
 # ============================================================================
-# example: here, each fmap covers two runs,
-#  so define the mapping as such:
-declare -A fmap_mapping=(
-    ["01"]="01"  # TASK BOLD RUN 01 USES FMAP 01
-    ["02"]="01"  # TASK BOLD RUN 02 USES FMAP 01
-    ["03"]="02"  # TASK BOLD RUN 03 USES FMAP 02
-    ["04"]="02"  # TASK BOLD RUN 04 USES FMAP 02
-    ["05"]="03"  # ...
-    ["06"]="03"
-    ["07"]="04"
-    ["08"]="04"
-)
+# Each key represents a BOLD run number, and its value is the fieldmap number
+# Example: here, each fmap covers two runs
+fmap_mapping:
+  '01': '01'  # TASK BOLD RUN 01 USES FMAP 01
+  '02': '01'  # TASK BOLD RUN 02 USES FMAP 01
+  '03': '02'  # TASK BOLD RUN 03 USES FMAP 02
+  '04': '02'  # TASK BOLD RUN 04 USES FMAP 02
+  '05': '03'
+  '06': '03'
+  '07': '04'
+  '08': '04'
 ```
 
 ### Specifying Subject IDs
-```bash
+```yaml
 # ============================================================================
-# (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING
+# (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING (OPTIONAL)
 # ============================================================================
-# by default, subjects will be pulled from the master `all-subjects.txt` file
-# however, if you want to specify different subject lists per pipeline step,
-# you may do so here by following this general template:
+# By default, subjects will be pulled from the master 'all-subjects.txt' file
+# However, if you want to specify different subject lists per pipeline step,
+# you may do so here by uncommenting and configuring the mapping below:
 #
-# declare -A subjects_mapping=(
-#     ["01-prepare"]="01-subjects.txt"  # PREPROC STEP 01 USES "01-subjects.txt"
-#     ["02-fmriprep"]="02-subjects.txt"
-# )
+# subjects_mapping:
+#   '01-fw2server': '01-subjects.txt'
+#   '02-raw2bids': '02-subjects.txt'
 #
-# note: keep in mind that we've built in checks at the beginning of each pipeline
+# Note: keep in mind that we've built in checks at the beginning of each pipeline
 # step that skip a subject if there's already a record of them being preprocessed;
 # thus, you shouldn't necessarily need separate 0x-subjects.txt files per step
 # unless this extra layer of control is useful for your needs.
 ```
 
 ### Permissions
-```bash
+```yaml
 # ============================================================================
 # (7) DEFAULT PERMISSIONS
 # ============================================================================
-DIR_PERMISSIONS=775   # DIRECTORY LEVEL
-FILE_PERMISSIONS=775  # FILE LEVEL
+permissions:
+  dir_permissions: '775'
+  file_permissions: '775'
 ```
 
 ### Slurm Job Header Configurator
-```bash
+```yaml
 # ============================================================================
 # (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
-num_subjects=$(wc -l < "all-subjects.txt")  # count number of subjects
-echo "($(date)) [INFO] Found ${num_subjects} total subjects in dataset"
-array_range="0-$((num_subjects-1))"  # compute array size (0 to num_subjects-1 since array indices start at 0)
-export SLURM_EMAIL="${USER_EMAIL}"
-export SLURM_TIME="2:00:00"
-export SLURM_MEM="8G"  # memory alloc per cpu
-export SLURM_CPUS="8"
-export SLURM_ARRAY_SIZE="${array_range}"  # use computed range
-export SLURM_ARRAY_THROTTLE="10"  # number of subjects to run concurrently
-export SLURM_LOG_DIR="${BASE_DIR}/logs/slurm"  # use BASE_DIR from main settings file
-export SLURM_PARTITION="hns,normal"  # compute resource preferences order
+slurm:
+  email: '${USER_EMAIL}'
+  time: '2:00:00'
+  dcmniix_time: '6:00:00'
+  mem: '8G'
+  cpus: '8'
+  array_throttle: '10'
+  log_dir: '${BASE_DIR}/logs/slurm'
+  partition: 'hns,normal'
 ```
 
 ### fMRIPrep Settings
-```bash
+```yaml
 # ============================================================================
 # (9) PIPELINE SETTINGS
 # ============================================================================
-FMRIPREP_VERSION="24.0.1"
-DERIVS_DIR="${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}"
-SINGULARITY_IMAGE_DIR="${BASE_DIR}/singularity_images"
-SINGULARITY_IMAGE="fmriprep-${FMRIPREP_VERSION}.simg"
-#
+pipeline:
+  fmriprep_version: '24.0.1'
+  derivs_dir: '${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}'
+  singularity_image_dir: '${BASE_DIR}/singularity_images'
+  singularity_image: 'fmriprep-${FMRIPREP_VERSION}.simg'
+  heudiconv_image: 'heudiconv_latest.sif'
+
 # ============================================================================
 # (10) FMRIPREP SPECIFIC SLURM SETTINGS
 # ============================================================================
-FMRIPREP_SLURM_JOB_NAME="fmriprep${FMRIPREP_VERSION//.}_${new_task_id}"
-FMRIPREP_SLURM_ARRAY_SIZE=1
-FMRIPREP_SLURM_TIME="12:00:00"
-FMRIPREP_SLURM_CPUS_PER_TASK="16"
-FMRIPREP_SLURM_MEM_PER_CPU="4G"
-#
+fmriprep_slurm:
+  job_name: 'fmriprep${FMRIPREP_VERSION//.}_${new_task_id}'
+  array_size: '1'
+  time: '48:00:00'
+  cpus_per_task: '16'
+  mem_per_cpu: '4G'
+
 # ============================================================================
 # (11) FMRIPREP SETTINGS
 # ============================================================================
-FMRIPREP_OMP_THREADS=8
-FMRIPREP_NTHREADS=12
-FMRIPREP_MEM_MB=30000
-FMRIPREP_FD_SPIKE_THRESHOLD=0.9
-FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
-FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+fmriprep:
+  omp_threads: 8
+  nthreads: 12
+  mem_mb: 30000
+  fd_spike_threshold: 0.9
+  dvars_spike_threshold: 3.0
+  output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
 ```
 
 ### Miscellaneous
 
-```bash
+```yaml
 # ============================================================================
 # (12) MISC SETTINGS
 # ============================================================================
-# Debug mode (0=off, 1=on)
-DEBUG=0
+misc:
+  debug: 0
 ```
 
 ---

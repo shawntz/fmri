@@ -20,7 +20,7 @@ umask 002  # modify permissions so fslroi inherits correct permissions
 # 5, 215 (since index == 5 is the starting volume, i.e., volume 6; and, 220 - 5 == 215
 # is the number of volumes that we want to extract)
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME=$1
 if [ -z "${JOB_NAME}" ]; then
