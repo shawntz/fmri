@@ -115,6 +115,9 @@ while read -r subject_id; do
   for run_bold in "${run_numbers[@]}"; do
     bold_pattern="${TRIM_DIR}/${subject}/func/${subject}_task-*_run-${run_bold}_dir-PA_bold.nii.gz"
     bold_files=( $bold_pattern )
+    
+    # Default task_name to new_task_id from settings if not found
+    task_name="${new_task_id}"
 
     if [ ${#bold_files[@]} -eq 0 ]; then
       # No matching files found

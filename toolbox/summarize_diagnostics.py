@@ -72,6 +72,9 @@ def generate_summary(csv_path, output_dir):
     # Generate summary report
     output_path = Path(output_dir) / 'diagnostic_summary.txt'
     
+    # Ensure output directory exists
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
     with open(output_path, 'w') as f:
         f.write("=" * 80 + "\n")
         f.write("FMRI DIAGNOSTIC SCAN VOLUME CHECK - SUMMARY REPORT\n")
@@ -89,7 +92,13 @@ def generate_summary(csv_path, output_dir):
         f.write(f"Total Checks Performed: {total_checks}\n")
         f.write(f"Checks Passed (OK):     {total_ok}\n")
         f.write(f"Checks Failed (ERROR):  {total_errors}\n")
-        f.write(f"Success Rate:           {(total_ok / total_checks * 100):.1f}%\n\n")
+        
+        # Calculate success rate, handling division by zero
+        if total_checks > 0:
+            success_rate = (total_ok / total_checks * 100)
+            f.write(f"Success Rate:           {success_rate:.1f}%\n\n")
+        else:
+            f.write(f"Success Rate:           N/A (no checks performed)\n\n")
         
         # Issue breakdown by scan type
         if issue_types:
