@@ -224,7 +224,7 @@ select_subjects_file() {
     if [[ -f "$subjects_file" ]]; then
         num_subjects=$(wc -l < "$subjects_file")
         echo "($(date)) [INFO] Found ${num_subjects} total subjects in $subjects_file"
-        array_range="0-$((num_subjects))"
+        array_range="0-$((num_subjects-1))"
     else
         echo "($(date)) [WARNING] $subjects_file not found, defaulting to single subject"
         num_subjects=1
