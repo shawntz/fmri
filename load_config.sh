@@ -183,7 +183,7 @@ try:
             print(f'    ["{key}"]="{value}"')
         print(")")
 except Exception as e:
-    print(f"echo 'ERROR loading fmap_mapping: {e}'" , file=sys.stderr)
+    print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
     exit(1)
 EOF
 )"
