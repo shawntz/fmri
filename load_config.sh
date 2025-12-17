@@ -142,8 +142,9 @@ try:
     for alias, source in aliases.items():
         if source in env_vars:
             value = env_vars[source]
-            # Perform additional expansion with already-set aliases
-            expanded_value = expand_var(value, expanded_env_vars)
+            # Perform additional expansion using both base env vars and already-set aliases
+            combined_env_vars = {**env_vars, **expanded_env_vars}
+            expanded_value = expand_var(value, combined_env_vars)
             expanded_env_vars[alias] = expanded_value
     
     # Merge expanded aliases back
