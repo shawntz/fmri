@@ -26,14 +26,14 @@
 # (1) SETUP DIRECTORIES
 # ============================================================================
 directories:
-  base_dir: '/my/project/dir'
-  scripts_dir: '${BASE_DIR}/scripts'
-  raw_dir: '${BASE_DIR}/bids'
-  trim_dir: '${BASE_DIR}/bids_trimmed'
-  workflow_log_dir: '${BASE_DIR}/logs/workflows'
-  templateflow_host_home: '${HOME}/.cache/templateflow'
-  fmriprep_host_cache: '${HOME}/.cache/fmriprep'
-  freesurfer_license: '${HOME}/freesurfer.txt'
+  base_dir: '/path/to/your/study'
+  scripts_dir: '/path/to/your/study/code'
+  raw_dir: '/path/to/your/study/sourcedata'
+  trim_dir: '/path/to/your/study'
+  workflow_log_dir: '/path/to/your/study/logs'
+  templateflow_host_home: '~/.cache/templateflow'
+  fmriprep_host_cache: '~/.cache/fmriprep'
+  freesurfer_license: '~/freesurfer.txt'
 
 # ============================================================================
 # (2) USER CONFIGURATION
@@ -48,14 +48,14 @@ user:
 # (3) TASK/SCAN PARAMETERS
 # ============================================================================
 scan:
-  fw_cli_api_key_file: '${HOME}/flywheel_api_key.txt'
+  fw_cli_api_key_file: '~/flywheel_api_key.txt'
   fw_url: 'cni.flywheel.io'
   config_file: 'scan-config.json'
-  experiment_type: 'advanced'
-  task_id: 'SomeTaskName'
-  new_task_id: 'cleanname'
-  n_dummy: 5
-  run_numbers:
+  experiment_type: 'advanced'  # CHOOSE BETWEEN 'basic' AND 'advanced' within scan-config.json
+  task_id: 'OriginalTaskName'  # ORIGINAL TASK NAME IN BIDS FORMAT
+  new_task_id: 'cleanname'     # NEW TASK NAME (IF RENAMING IS NEEDED), OTHERWISE SET SAME VALUE AS task_id
+  n_dummy: 5                   # NUMBER OF "DUMMY" TRs to remove
+  run_numbers:                 # ALL TASK BOLD RUN NUMBERS
     - '01'
     - '02'
     - '03'
@@ -69,9 +69,9 @@ scan:
 # (4) DATA VALIDATION VALUES FOR UNIT TESTS
 # ============================================================================
 validation:
-  expected_fmap_vols: 12
-  expected_bold_vols: 220
-  expected_bold_vols_after_trimming: 210
+  expected_fmap_vols: 12   # EXPECTED NUMBER OF VOLUMES IN ORIGINAL FIELDMAP SCANS
+  expected_bold_vols: 220  # EXPECTED NUMBER OF VOLUMES IN ORIGINAL TASK BOLD SCANS
+  expected_bold_vols_after_trimming: 215  # EXPECTED SIZE OF TRIMMED TASK VOLUMES AFTER ACCOUNTING FOR LEAD-IN
 
 # ============================================================================
 # (5) FIELDMAP <-> TASK BOLD MAPPING
@@ -79,14 +79,14 @@ validation:
 # Each key represents a BOLD run number, and its value is the fieldmap number
 # Example: here, each fmap covers two runs
 fmap_mapping:
-  '01': '01'
-  '02': '01'
-  '03': '02'
-  '04': '02'
-  '05': '03'
-  '06': '03'
-  '07': '04'
-  '08': '04'
+  '01': '01'  # TASK BOLD RUN 01 USES FMAP 01
+  '02': '01'  # TASK BOLD RUN 02 USES FMAP 01
+  '03': '02'  # TASK BOLD RUN 03 USES FMAP 02
+  '04': '02'  # TASK BOLD RUN 04 USES FMAP 02
+  '05': '03'  # TASK BOLD RUN 05 USES FMAP 03
+  '06': '03'  # TASK BOLD RUN 06 USES FMAP 03
+  '07': '04'  # TASK BOLD RUN 07 USES FMAP 04
+  '08': '04'  # TASK BOLD RUN 08 USES FMAP 04
 
 # ============================================================================
 # (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING (OPTIONAL)
@@ -108,43 +108,39 @@ fmap_mapping:
 # (7) DEFAULT PERMISSIONS
 # ============================================================================
 permissions:
-  dir_permissions: '775'
-  file_permissions: '775'
+  dir_permissions: '775'   # DIRECTORY LEVEL
+  file_permissions: '775'  # FILE LEVEL
 
 # ============================================================================
 # (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
 # ============================================================================
 slurm:
-  email: '${USER_EMAIL}'
+  email: 'your.email@institution.edu'
   time: '2:00:00'
-  dcmniix_time: '6:00:00'
-  mem: '8G'
-  cpus: '8'
-  array_throttle: '10'
-  log_dir: '${BASE_DIR}/logs/slurm'
-  partition: 'hns,normal'
+  dcmniix_time: '12:00:00'
+  mem: '4G'
+  cpus: 8
+  array_throttle: 10
+  log_dir: '/path/to/your/study/logs'
+  partition: 'partition1,partition2'
 
 # ============================================================================
 # (9) PIPELINE SETTINGS
 # ============================================================================
 pipeline:
   fmriprep_version: '24.0.1'
-  derivs_dir: '${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}'
-  singularity_image_dir: '${BASE_DIR}/singularity_images'
-  singularity_image: 'fmriprep-${FMRIPREP_VERSION}.simg'
+  derivs_dir: '/path/to/your/study/derivatives/fmriprep-24.0.1'
+  singularity_image_dir: '/path/to/your/study/containers'
+  singularity_image: 'fmriprep-24.0.1.simg'
   heudiconv_image: 'heudiconv_latest.sif'
 
 # ============================================================================
 # (10) FMRIPREP SPECIFIC SLURM SETTINGS
 # ============================================================================
 fmriprep_slurm:
-  job_name: 'fmriprep${FMRIPREP_VERSION}_${new_task_id}'
-  # NOTE: This is a static default. The actual SLURM_ARRAY_SIZE is set at
-  # runtime by select_subjects_file() in load_config.sh and should be read
-  # directly from the environment, not via YAML variable expansion.
-  array_size: '1'
+  job_name: 'fmriprep_yourproject'
   time: '48:00:00'
-  cpus_per_task: '16'
+  cpus_per_task: 16
   mem_per_cpu: '4G'
 
 # ============================================================================
@@ -162,4 +158,4 @@ fmriprep:
 # (12) MISC SETTINGS
 # ============================================================================
 misc:
-  debug: 0
+  debug: 0  # Debug mode (0=off, 1=on)
