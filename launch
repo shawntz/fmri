@@ -183,6 +183,7 @@ def get_parameters(step_choice):
                 "Subject list (comma-separated IDs or file path, press Enter to skip for tar-all/untar-all)",
                 "Keep original directories after tarballing? (only for tar operations)"
             ]
+        }
     }
 
     param_keys = step_params[step_choice]["keys"]
