@@ -7,22 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.8] - 2025-12-18
-
+## [0.2.0] - 2025-12-18
 
 ### 🚀 Features
+- **YAML Configuration System**: Replaced `settings.sh` with `config.yaml` for improved portability and cross-platform compatibility
+- **Pipeline Restructuring**: Reorganized QC steps 4 and 5 into dedicated pipeline directories (`04-qc-metadata`, `05-qc-volumes`)
+- **Unified Job Naming**: All SLURM jobs now use consistent `fmriprep-workbench-{N}` naming pattern
+- **Dynamic Configuration Loading**: New `load_config.sh` script parses YAML configuration and exports environment variables
+- **Enhanced Subject File Handling**: Automatic filtering of comment lines and blank lines in subject list files
 
 ### 🐛 Bug Fixes
+- **Subject Counting**: Fixed subject count calculation to properly skip comment lines (starting with `#`) and blank lines
+- **SLURM Array Indexing**: Fixed off-by-one errors in SLURM array task ID to subject list line mapping
+- **Subject File Selection**: Fixed scripts to use `SELECTED_SUBJECTS_FILE` instead of hardcoded step-specific files
+- **Interactive Prompts**: Fixed unwanted subject file selection prompts in steps 1 and 2 by adding `SKIP_SUBJECTS_PROMPT` flag
+- **Configuration Variable Names**: Fixed variable name mismatches between YAML flattening and shell aliases
+- **Directory Structure**: Separated `STEP_NAME` (for directories) from `JOB_NAME` (for SLURM display) to maintain log organization
 
 ### 📚 Documentation
+- **Configuration Guide**: Updated docs to reflect YAML-based configuration system
+- **Workflow Documentation**: Updated pipeline steps to include steps 4 and 5 as first-class workflow components
+- **Version Sync**: Updated documentation version to 0.2.0 to match package version
+- **CLAUDE.md**: Comprehensive updates reflecting new architecture and configuration system
 
 ### 🔧 Maintenance
+- **Template Consistency**: Aligned `config.template.yaml` with actual configuration structure
+- **Code Organization**: Improved separation of concerns between configuration loading and script execution
+- **Log Directory Management**: Standardized log directory paths across all pipeline steps
 
 ### 💥 Breaking Changes
-- No breaking changes
+- **Configuration Format**: Migration from `settings.sh` (Bash) to `config.yaml` (YAML) - requires configuration file update
+  - **Migration Path**: Copy `config.template.yaml` to `config.yaml` and configure for your study
+  - Old `settings.sh` files are no longer used
+- **QC Steps Renaming**: Toolbox-based QC steps now use dedicated directories:
+  - `toolbox/verify_nii_metadata.sh` → `04-run.sbatch` (calls `04-qc-metadata/verify_metadata.sh`)
+  - `toolbox/summarize_bold_scan_volume_counts.sh` → `05-run.sbatch` (calls `05-qc-volumes/check_volumes.sh`)
+- **SLURM Job Names**: Job names changed from step-based (e.g., `03-prep-fmriprep`) to numbered (e.g., `fmriprep-workbench-3`)
 
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.7...v0.1.8
-
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.7...v0.2.0
 
 ## [0.1.7] - 2025-12-18
 
@@ -250,4 +272,4 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 
 [0.1.7]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.7
 
-[0.1.8]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.8
+[0.2.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.2.0
