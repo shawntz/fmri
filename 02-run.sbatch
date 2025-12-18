@@ -2,12 +2,13 @@
 
 source ./load_config.sh
 
-JOB_NAME="02-dcm2niix"
+STEP_NAME="02-dcm2niix"
+JOB_NAME="fmriprep-workbench-2"
 FW_SESHID=$1
 NEW_SUBID=$2
 
 # create log dirs
-mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
+mkdir -p ${SLURM_LOG_DIR}/${STEP_NAME}
 
 array_opt="--array=0"
 
@@ -19,8 +20,8 @@ echo "  --time: ${DCMNIIX_SLURM_TIME}"
 echo "  --mem-per-cpu: ${SLURM_MEM}"
 echo "  --cpus-per-task: ${SLURM_CPUS}"
 echo "  --partition: ${SLURM_PARTITION}"
-echo "  --output: ${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out"
-echo "  --error: ${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err"
+echo "  --output: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out"
+echo "  --error: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err"
 echo "  --mail-type: BEGIN,END,FAIL"
 echo "  --mail-user: ${SLURM_EMAIL}"
 
@@ -32,8 +33,8 @@ sbatch \
     --mem-per-cpu=${SLURM_MEM} \
     --cpus-per-task=${SLURM_CPUS} \
     --partition=${SLURM_PARTITION} \
-    --output=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out \
-    --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
+    --output=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out \
+    --error=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/dcm2niix.sh ${JOB_NAME} ${FW_SESHID} ${NEW_SUBID}
+    ./${STEP_NAME}/dcm2niix.sh ${STEP_NAME} ${FW_SESHID} ${NEW_SUBID}

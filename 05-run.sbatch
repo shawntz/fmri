@@ -4,10 +4,11 @@
 export SKIP_SUBJECTS_PROMPT=true
 source ./load_config.sh
 
-JOB_NAME="05-qc-volumes"
+STEP_NAME="05-qc-volumes"
+JOB_NAME="fmriprep-workbench-5"
 
 # create log dirs
-mkdir -p ${SLURM_LOG_DIR}/${JOB_NAME}
+mkdir -p ${SLURM_LOG_DIR}/${STEP_NAME}
 
 # check if running in debug mode
 if [ "$DEBUG" = "1" ]; then
@@ -26,8 +27,8 @@ echo "  --time: ${SLURM_TIME}"
 echo "  --mem-per-cpu: ${SLURM_MEM}"
 echo "  --cpus-per-task: ${SLURM_CPUS}"
 echo "  --partition: ${SLURM_PARTITION}"
-echo "  --output: ${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out"
-echo "  --error: ${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err"
+echo "  --output: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out"
+echo "  --error: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err"
 echo "  --mail-type: BEGIN,END,FAIL"
 echo "  --mail-user: ${SLURM_EMAIL}"
 
@@ -39,8 +40,8 @@ sbatch \
     --mem-per-cpu=${SLURM_MEM} \
     --cpus-per-task=${SLURM_CPUS} \
     --partition=${SLURM_PARTITION} \
-    --output=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.out \
-    --error=${SLURM_LOG_DIR}/${JOB_NAME}/%x_%A_%a.err \
+    --output=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out \
+    --error=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${JOB_NAME}/check_volumes.sh ${JOB_NAME}
+    ./${STEP_NAME}/check_volumes.sh ${STEP_NAME}
