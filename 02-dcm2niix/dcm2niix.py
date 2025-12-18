@@ -215,7 +215,7 @@ def main():
                     f"-d /indir/{{subject}}_*.dicom/*.dcm "
                     f"-o /outdir/ -f {heu_file} -s {args.subid} -ss {session_id} -c dcm2niix -b notop --overwrite "
                     f"--grouping {args.grouping} "
-                    f"--dcmconfig '-ba n'"
+                    f"--dcmconfig \"-ba n\""
                 )
                 subprocess.run(cmd, shell=True, check=True)
 
@@ -234,7 +234,7 @@ def main():
                 f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
                 f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
                 f"--grouping {args.grouping} "
-                f"--dcmconfig '-ba n'"
+                f"--dcmconfig \"-ba n\""
             )
             subprocess.run(cmd, shell=True, check=True)
     else:
@@ -248,7 +248,7 @@ def main():
             f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
             f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
             f"--grouping {args.grouping} "
-            f"--dcmconfig '-ba n'"
+            f"--dcmconfig \"-ba n\""
         )
         subprocess.run(cmd, shell=True, check=True)
 
