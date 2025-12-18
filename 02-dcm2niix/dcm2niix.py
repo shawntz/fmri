@@ -207,13 +207,15 @@ def main():
                             shutil.move(str(dicom_dir), str(session_work_dir))
 
                 # Run heudiconv for this session
+                # Use --dcmconfig to pass flags to dcm2niix: -ba n suppresses echo entity for single-echo sequences
                 cmd = (
                     f"singularity run --cleanenv "
                     f"-B {session_work_dir}:/indir -B {bids_dir}:/outdir "
                     f"-e {args.sing_image_path} "
                     f"-d /indir/{{subject}}_*.dicom/*.dcm "
                     f"-o /outdir/ -f {heu_file} -s {args.subid} -ss {session_id} -c dcm2niix -b notop --overwrite "
-                    f"--grouping {args.grouping}"
+                    f"--grouping {args.grouping} "
+                    f"--dcmconfig '-ba n'"
                 )
                 subprocess.run(cmd, shell=True, check=True)
 
@@ -231,7 +233,8 @@ def main():
                 f"-e {args.sing_image_path} "
                 f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
                 f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
-                f"--grouping {args.grouping}"
+                f"--grouping {args.grouping} "
+                f"--dcmconfig '-ba n'"
             )
             subprocess.run(cmd, shell=True, check=True)
     else:
@@ -244,7 +247,8 @@ def main():
             f"-e {args.sing_image_path} "
             f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
             f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
-            f"--grouping {args.grouping}"
+            f"--grouping {args.grouping} "
+            f"--dcmconfig '-ba n'"
         )
         subprocess.run(cmd, shell=True, check=True)
 
