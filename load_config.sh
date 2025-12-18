@@ -235,17 +235,17 @@ select_subjects_file() {
     local subjects_file="all-subjects.txt"
     local custom_file=""
     
-    # only prompt if being sourced in an interactive shell
-    if [[ -t 0 ]]; then
+    # only prompt if being sourced in an interactive shell and SKIP_SUBJECTS_PROMPT is not set
+    if [[ -t 0 && "${SKIP_SUBJECTS_PROMPT}" != "true" ]]; then
         echo "Select subjects file to use:"
         echo "1) Use all-subjects.txt (default)"
         echo "2) Use step-specific subjects file (e.g., 04-subjects.txt)"
         read -p "Enter choice [1/2]: " choice
-        
+
         if [[ "$choice" == "2" ]]; then
             read -p "Enter step number (e.g., 04): " step_num
             custom_file="${step_num}-subjects.txt"
-            
+
             if [[ -f "$custom_file" ]]; then
                 subjects_file="$custom_file"
                 echo "Using $subjects_file"
