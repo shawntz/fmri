@@ -19,7 +19,7 @@ The preprocessing workflow is organized into numbered directories (01-07) repres
 3. **03-prep-fmriprep**: Remove dummy scans, configure fieldmap susceptibility distortion correction (SDC)
 4. **QC Step 4**: Verify DICOM → NIfTI → BIDS metadata conversion (via toolbox)
 5. **QC Step 5**: Verify scan volume counts match expected values (via toolbox)
-6. **06-run-fmriprep**: Run fMRIPrep anatomical workflows only (optional, for manual Freesurfer editing)
+6. **06-run-fmriprep**: Run fMRIPrep anatomical workflows only (optional, for manual FreeSurfer editing)
 7. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
 
 Each step directory contains the core processing script. The root directory contains `XX-run.sbatch` files that serve as Slurm job submission wrappers for each step.
