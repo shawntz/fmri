@@ -9,7 +9,7 @@ import sys
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'SML fMRI Preprocessing Template'
+project = 'fMRIPrep Workbench'
 copyright = '2025, Shawn Schwartz and Stanford Memory Lab'
 author = 'Shawn T. Schwartz'
 release = '0.2.0'
