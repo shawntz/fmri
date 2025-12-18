@@ -139,6 +139,9 @@ pipeline:
 # ============================================================================
 fmriprep_slurm:
   job_name: 'fmriprep${FMRIPREP_VERSION}_${new_task_id}'
+  # NOTE: This is a static default. The actual SLURM_ARRAY_SIZE is set at
+  # runtime by select_subjects_file() in load_config.sh and should be read
+  # directly from the environment, not via YAML variable expansion.
   array_size: '1'
   time: '48:00:00'
   cpus_per_task: '16'

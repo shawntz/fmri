@@ -46,16 +46,28 @@ def expand_var(value, env_vars):
     result = re.sub(r'\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)', replace_var, value)
     return result
 
+def is_valid_env_var_name(name):
+    """Validate that a name is a safe shell variable identifier."""
+    import re
+    # Only allow uppercase letters, digits, and underscores
+    # Must start with a letter or underscore
+    return re.match(r'^[A-Z_][A-Z0-9_]*$', name) is not None
+
 def flatten_dict(d, parent_key='', sep='_', env_vars=None):
     """Flatten nested dictionary and convert keys to uppercase environment variable names."""
     if env_vars is None:
         env_vars = {}
-    
+
     items = []
     for k, v in d.items():
         # Convert key to uppercase for environment variable
         new_key = f"{parent_key}{sep}{k}".upper() if parent_key else k.upper()
-        
+
+        # Validate that the key is a safe shell identifier
+        if not is_valid_env_var_name(new_key):
+            print(f"echo 'ERROR: Invalid environment variable name: {new_key}'", file=sys.stderr)
+            sys.exit(1)
+
         if isinstance(v, dict):
             # Recursively flatten nested dictionaries
             items.extend(flatten_dict(v, new_key, sep=sep, env_vars=env_vars).items())
@@ -70,7 +82,7 @@ def flatten_dict(d, parent_key='', sep='_', env_vars=None):
             expanded_value = expand_var(str(v), env_vars)
             env_vars[new_key] = expanded_value
             items.append((new_key, expanded_value))
-    
+
     return dict(items)
 
 try:
@@ -167,15 +179,15 @@ except Exception as e:
     sys.exit(1)
 EOF
 )"
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to load configuration from ${_YAML_CONFIG_FILE}"
+    return 1 2>/dev/null || exit 1
+fi
 
 # Parse fmap_mapping from YAML into bash associative array
 eval "$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
 import yaml
 import os
-import sys
-
-try:
-    config_path = os.environ.get('_YAML_CONFIG_FILE', 'config.yaml')
 import sys
 
 def bash_single_quote(s: str) -> str:
@@ -198,6 +210,9 @@ try:
             val_str = "" if value is None else str(value)
             print(f"    [{bash_single_quote(key_str)}]={bash_single_quote(val_str)}")
         print(")")
+    else:
+        # Ensure fmap_mapping is always defined as an associative array in Bash
+        print("declare -gA fmap_mapping=()")
 except Exception as e:
     print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
     sys.exit(1)
