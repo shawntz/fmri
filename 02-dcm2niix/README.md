@@ -30,6 +30,16 @@ To bypass this check and process all DICOMs together regardless of study identif
 ./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
 ```
 
+### For Manually Configured DICOM Directories
+
+If you have manually configured DICOM directories (not from a Flywheel tarball), use the `--skip-tar` flag to skip tar extraction and unzip steps:
+
+```bash
+./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> studyUID --skip-tar
+```
+
+When using this flag, ensure your DICOMs are already present in the expected directory structure: `/scratch/users/<user>/sub-<subid>/dcm2niix_work_dir/sub-<subid>/`
+
 ## Grouping Strategies
 
 The `--grouping` flag controls how heudiconv groups DICOM files:
@@ -37,7 +47,11 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 - **`studyUID`** (default): Groups DICOMs by StudyInstanceUID. This is the standard behavior and will fail if multiple study identifiers are found.
 - **`all`**: Processes all DICOMs together regardless of study identifiers. Use this when you have manually merged scans from different sessions.
 
-## Example
+## Optional Flags
+
+- **`--skip-tar`**: Skip tar extraction and unzip steps. Use this when working with manually configured DICOM directories that don't need extraction from Flywheel tarballs. When this flag is set, the script expects DICOMs to already be present in the target directory.
+
+## Examples
 
 ```bash
 # Standard processing
@@ -45,6 +59,9 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 
 # Processing merged sessions
 ./dcm2niix.sh 02-dcm2niix 21940 001 all
+
+# Processing manually configured DICOM directories
+./dcm2niix.sh 02-dcm2niix 21940 001 studyUID --skip-tar
 ```
 
 ## Direct Python Usage
@@ -62,5 +79,6 @@ python3 dcm2niix.py \
   --task_id task_name \
   --sing_image_path /path/to/heudiconv.sif \
   --scripts_dir /path/to/scripts \
-  --grouping all
+  --grouping all \
+  --skip-tar  # Optional: skip tar extraction
 ```

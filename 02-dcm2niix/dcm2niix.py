@@ -82,16 +82,16 @@ def main():
         with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
             tar.extractall(path=untar_dir)
 
-    # Unzip DICOMs
-    flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
-    subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
-    if not subject_dirs:
-        raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
-    subject_dir = Path(subject_dirs[0])
+        # Unzip DICOMs
+        flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+        subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
+        if not subject_dirs:
+            raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
+        subject_dir = Path(subject_dirs[0])
 
-    print(f"[INFO] Unzipping all zip files from {subject_dir}")
-    for zf in subject_dir.glob("**/*.zip"):
-        subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
+        print(f"[INFO] Unzipping all zip files from {subject_dir}")
+        for zf in subject_dir.glob("**/*.zip"):
+            subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
 
     # Delete screenshots
     for pattern in ["*2000*.dicom", "*4000*.dicom", "*_200*.dicom"]:
