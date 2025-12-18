@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2025-12-18
+
+
+### 🚀 Features
+
+### 🐛 Bug Fixes
+
+### 📚 Documentation
+
+### 🔧 Maintenance
+
+### 💥 Breaking Changes
+- No breaking changes
+
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.6...v0.1.7
+
+
 ## [0.1.6] - 2025-12-18
 
 
@@ -213,3 +230,5 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 [0.1.5]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.5
 
 [0.1.6]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.6
+
+[0.1.7]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.7
