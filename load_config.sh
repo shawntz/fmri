@@ -256,8 +256,9 @@ select_subjects_file() {
     fi
     
     # calculate number of subjects based on selected file
+    # Skip comment lines (starting with #) and blank lines
     if [[ -f "$subjects_file" ]]; then
-        num_subjects=$(wc -l < "$subjects_file")
+        num_subjects=$(grep -v '^[[:space:]]*#' "$subjects_file" | grep -v '^[[:space:]]*$' | wc -l)
         echo "($(date)) [INFO] Found ${num_subjects} total subjects in $subjects_file"
         array_range="0-$((num_subjects-1))"
     else
