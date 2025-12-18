@@ -70,20 +70,21 @@ is_first_run_for_fieldmap() {
 # set memory limit
 ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
-# determine which subjects file to use
-#if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # use step-specific subjects file from the mapping defined in config.yaml
-#  SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
-#  echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
-#else
-  # fall back to default all-subjects.txt
-  #SUBJECTS_FILE="all-subjects.txt"
-SUBJECTS_FILE="03-subjects.txt"
-echo "($(date)) [INFO] No specific subjects file mapped for ${JOB_NAME}, using default: ${SUBJECTS_FILE}" | tee -a "${log_file}"
-#fi
+# Use the subjects file that was already selected by load_config.sh
+# which is exported as SELECTED_SUBJECTS_FILE
+if [ -n "${SELECTED_SUBJECTS_FILE}" ]; then
+  SUBJECTS_FILE="${SELECTED_SUBJECTS_FILE}"
+  echo "($(date)) [INFO] Using subjects file from load_config.sh: ${SUBJECTS_FILE}"
+else
+  # Fallback to all-subjects.txt if SELECTED_SUBJECTS_FILE is not set
+  SUBJECTS_FILE="all-subjects.txt"
+  echo "($(date)) [INFO] Using default subjects file: ${SUBJECTS_FILE}"
+fi
 
-# get current subject entry from list (may include modifiers)
-subject_entry=$(sed -n "$((SLURM_ARRAY_TASK_ID))p" "${SUBJECTS_FILE}")
+# Get current subject entry from list (may include modifiers)
+# Note: SLURM_ARRAY_TASK_ID is 0-based, but sed line numbers are 1-based
+# Also need to filter out comments and blank lines like we did when counting
+subject_entry=$(grep -v '^[[:space:]]*#' "${SUBJECTS_FILE}" | grep -v '^[[:space:]]*$' | sed -n "$((SLURM_ARRAY_TASK_ID + 1))p")
 
 # parse subject ID and modifiers
 parse_subject_modifiers "${subject_entry}" "${JOB_NAME}"
