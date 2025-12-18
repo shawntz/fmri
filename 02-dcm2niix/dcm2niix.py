@@ -52,8 +52,8 @@ def main():
     scratch_base = Path(f"/scratch/users/{args.user}")
     scratch_sub_dir = scratch_base / f"sub-{args.subid}"
     untar_dir = scratch_sub_dir / f"untar_{args.exam_num}"
-    oak_base = Path(f"{args.project_dir}")
-    bids_dir = oak_base  # BASE_DIR is the BIDS directory
+    raw_dir = Path(f"{args.project_dir}")  # This receives DIRECTORIES_RAW_DIR from config (e.g., sourcedata/)
+    bids_dir = raw_dir  # Output BIDS directly to raw_dir
     scratch_work_dir = scratch_sub_dir / f"dcm2niix_work_dir"
     dicoms_dir = scratch_work_dir
     code_dir = Path(f"{args.scripts_dir}")

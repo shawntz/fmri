@@ -54,7 +54,7 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/dcm2niix.py \
   --user "${USER}" \
   --subid "${new_subid}" \
   --exam_num "${fw_seshid}" \
-  --project_dir "${BASE_DIR}" \
+  --project_dir "${DIRECTORIES_RAW_DIR}" \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
   --task_id "${new_task_id}" \
