@@ -5,7 +5,7 @@
 # @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-fmriprep")
 # @Param: ANAT_ONLY_FLAG (positional argument #2) - optional setting to speed up freesurfer before manual surface editing
 
-source ./settings.sh
+source ./load_config.sh
 source ./toolbox/parse_subject_modifiers.sh
 
 JOB_NAME=$1
@@ -17,7 +17,7 @@ fi
 
 # # determine which subjects file to use
 # if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-#   # use step-specific subjects file from the mapping defined in settings.sh
+#   # use step-specific subjects file from the mapping defined in config.yaml
 #   SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
 #   echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a "${log_file}"
 # else

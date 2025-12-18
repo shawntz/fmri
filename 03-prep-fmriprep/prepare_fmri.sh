@@ -20,7 +20,7 @@ umask 002  # modify permissions so fslroi inherits correct permissions
 # 5, 215 (since index == 5 is the starting volume, i.e., volume 6; and, 220 - 5 == 215
 # is the number of volumes that we want to extract)
 
-source ./settings.sh
+source ./load_config.sh
 source ./toolbox/parse_subject_modifiers.sh
 
 JOB_NAME=$1
@@ -72,7 +72,7 @@ ulimit -v $(( 16 * 1024 * 1024 ))  # 16GB memory limit
 
 # determine which subjects file to use
 #if [ -v subjects_mapping ] && [ ${#subjects_mapping[@]} -gt 0 ] && [ -v "subjects_mapping[$JOB_NAME]" ]; then
-  # use step-specific subjects file from the mapping defined in settings.sh
+  # use step-specific subjects file from the mapping defined in config.yaml
 #  SUBJECTS_FILE="${subjects_mapping[$JOB_NAME]}"
 #  echo "($(date)) [INFO] Using step-specific subjects file: ${SUBJECTS_FILE}" | tee -a ${log_file}
 #else

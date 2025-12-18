@@ -7,7 +7,7 @@
 # @Param: new_subid (positional argument #3) - new subject ID
 # @Param: grouping (positional argument #4) - optional grouping strategy (default: 'studyUID', use 'all' for merged sessions)
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME=$1
 

@@ -1,0 +1,165 @@
+# ============================================================================
+# FMRI Preprocessing Configuration Settings
+# ============================================================================
+#
+# This file contains all configurable parameters for the fMRI preprocessing
+# pipeline, including paths, scan parameters, and data validation settings.
+#
+# USAGE:
+# 1. Copy this template to 'config.yaml'
+# 2. Modify the variables below according to your study's requirements
+# 3. The load_config.sh script will parse this file and export environment variables
+#
+# IMPORTANT NOTES:
+# - All paths should be absolute paths
+# - Do not use spaces in path names
+# - Validate all parameters before running the pipeline
+# - Keep this file in version control but exclude any files with sensitive info
+#
+# FIELDMAP <-> TASK BOLD MAPPING INSTRUCTIONS:
+# The fmap_mapping section defines which fieldmap corresponds to which BOLD runs.
+# In the example below, fieldmap 01 covers BOLD runs 01 and 02, fieldmap 02 covers
+# runs 03 and 04, etc. Modify according to your acquisition sequence.
+#
+
+# ============================================================================
+# (1) SETUP DIRECTORIES
+# ============================================================================
+directories:
+  base_dir: '/my/project/dir'
+  scripts_dir: '${BASE_DIR}/scripts'
+  raw_dir: '${BASE_DIR}/bids'
+  trim_dir: '${BASE_DIR}/bids_trimmed'
+  workflow_log_dir: '${BASE_DIR}/logs/workflows'
+  templateflow_host_home: '${HOME}/.cache/templateflow'
+  fmriprep_host_cache: '${HOME}/.cache/fmriprep'
+  freesurfer_license: '${HOME}/freesurfer.txt'
+
+# ============================================================================
+# (2) USER CONFIGURATION
+# ============================================================================
+user:
+  email: 'johndoe@stanford.edu'
+  username: 'johndoe'
+  fw_group_id: 'pi'
+  fw_project_id: 'amass'
+
+# ============================================================================
+# (3) TASK/SCAN PARAMETERS
+# ============================================================================
+scan:
+  fw_cli_api_key_file: '${HOME}/flywheel_api_key.txt'
+  fw_url: 'cni.flywheel.io'
+  config_file: 'scan-config.json'
+  experiment_type: 'advanced'
+  task_id: 'SomeTaskName'
+  new_task_id: 'cleanname'
+  n_dummy: 5
+  run_numbers:
+    - '01'
+    - '02'
+    - '03'
+    - '04'
+    - '05'
+    - '06'
+    - '07'
+    - '08'
+
+# ============================================================================
+# (4) DATA VALIDATION VALUES FOR UNIT TESTS
+# ============================================================================
+validation:
+  expected_fmap_vols: 12
+  expected_bold_vols: 220
+  expected_bold_vols_after_trimming: 210
+
+# ============================================================================
+# (5) FIELDMAP <-> TASK BOLD MAPPING
+# ============================================================================
+# Each key represents a BOLD run number, and its value is the fieldmap number
+# Example: here, each fmap covers two runs
+fmap_mapping:
+  '01': '01'
+  '02': '01'
+  '03': '02'
+  '04': '02'
+  '05': '03'
+  '06': '03'
+  '07': '04'
+  '08': '04'
+
+# ============================================================================
+# (6) SUBJECT IDS <-> PER PREPROC STEP MAPPING (OPTIONAL)
+# ============================================================================
+# By default, subjects will be pulled from the master 'all-subjects.txt' file
+# However, if you want to specify different subject lists per pipeline step,
+# you may do so here by uncommenting and configuring the mapping below:
+#
+# subjects_mapping:
+#   '01-fw2server': '01-subjects.txt'
+#   '02-raw2bids': '02-subjects.txt'
+#
+# Note: keep in mind that we've built in checks at the beginning of each pipeline
+# step that skip a subject if there's already a record of them being preprocessed;
+# thus, you shouldn't necessarily need separate 0x-subjects.txt files per step
+# unless this extra layer of control is useful for your needs.
+
+# ============================================================================
+# (7) DEFAULT PERMISSIONS
+# ============================================================================
+permissions:
+  dir_permissions: '775'
+  file_permissions: '775'
+
+# ============================================================================
+# (8) SLURM JOB HEADER CONFIGURATOR (FOR GENERAL TASKS)
+# ============================================================================
+slurm:
+  email: '${USER_EMAIL}'
+  time: '2:00:00'
+  dcmniix_time: '6:00:00'
+  mem: '8G'
+  cpus: '8'
+  array_throttle: '10'
+  log_dir: '${BASE_DIR}/logs/slurm'
+  partition: 'hns,normal'
+
+# ============================================================================
+# (9) PIPELINE SETTINGS
+# ============================================================================
+pipeline:
+  fmriprep_version: '24.0.1'
+  derivs_dir: '${TRIM_DIR}/derivatives/fmriprep-${FMRIPREP_VERSION}'
+  singularity_image_dir: '${BASE_DIR}/singularity_images'
+  singularity_image: 'fmriprep-${FMRIPREP_VERSION}.simg'
+  heudiconv_image: 'heudiconv_latest.sif'
+
+# ============================================================================
+# (10) FMRIPREP SPECIFIC SLURM SETTINGS
+# ============================================================================
+fmriprep_slurm:
+  job_name: 'fmriprep${FMRIPREP_VERSION}_${new_task_id}'
+  # NOTE: This is a static default. The actual SLURM_ARRAY_SIZE is set at
+  # runtime by select_subjects_file() in load_config.sh and should be read
+  # directly from the environment, not via YAML variable expansion.
+  array_size: '1'
+  time: '48:00:00'
+  cpus_per_task: '16'
+  mem_per_cpu: '4G'
+
+# ============================================================================
+# (11) FMRIPREP SETTINGS
+# ============================================================================
+fmriprep:
+  omp_threads: 8
+  nthreads: 12
+  mem_mb: 30000
+  fd_spike_threshold: 0.9
+  dvars_spike_threshold: 3.0
+  output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
+
+# ============================================================================
+# (12) MISC SETTINGS
+# ============================================================================
+misc:
+  debug: 0

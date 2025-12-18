@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME="02-dcm2niix"
 FW_SESHID=$1

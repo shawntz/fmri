@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME="07-run-fmriprep"
 

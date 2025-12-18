@@ -7,7 +7,7 @@ module load python/3.9.0
 module load biology
 module load fsl/5.0.10
 
-source ./settings.sh
+source ./load_config.sh
 
 # Create timestamped output directory
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -49,8 +49,8 @@ check_volumes() {
   return 0
 }
 
-# Use the subjects file selected by settings.sh
-# The settings.sh script handles interactive prompting via select_subjects_file()
+# Use the subjects file selected by load_config.sh
+# The load_config.sh script handles interactive prompting via select_subjects_file()
 # and exports the result in SELECTED_SUBJECTS_FILE
 if [ -n "$SELECTED_SUBJECTS_FILE" ]; then
   SUBJECTS_FILE="$SELECTED_SUBJECTS_FILE"

@@ -2,7 +2,7 @@
 
 # Skip subjects file prompt since this step runs one subject at a time
 export SKIP_SUBJECTS_PROMPT=true
-source ./settings.sh
+source ./load_config.sh
 
 JOB_NAME="03-prep-fmriprep"
 

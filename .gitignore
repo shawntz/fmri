@@ -1,5 +1,6 @@
 .DS_Store
 #settings.sh
+config.yaml
 subjects.txt
 __pycache__/
 *.pyc
