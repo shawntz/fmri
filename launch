@@ -124,7 +124,10 @@ def display_menu():
         ("4", "Step 4: QC - Verify dcm -> nii -> bids metadata"),
         ("5", "Step 5: QC - Verify number of volumes per scan file"),
         ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)"),
-        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)")
+        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
+        ("12", "Utilities: Download Freesurfer outputs for manual editing"),
+        ("13", "Utilities: Upload edited Freesurfer outputs back to server"),
+        ("14", "Utilities: Tarball/Untar utility for sourcedata/ BIDS directories")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -175,7 +178,15 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "10": {  # Step 10 (Tarball/Untar utility)
+        "12": {  # Freesurfer download
+            "keys": [],
+            "prompts": []
+        },
+        "13": {  # Freesurfer upload
+            "keys": [],
+            "prompts": []
+        },
+        "14": {  # Step 14 (Tarball/Untar utility)
             "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
             "prompts": [
                 "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
@@ -270,10 +281,9 @@ def run_script(step_choice, user_inputs):
         "5": "05-run.sbatch",
         "6": "06-run.sbatch",
         "7": "07-run.sbatch",
-        "8": "08-run.sbatch",
-        "9": "toolbox/verify_nii_metadata.sh",
-        "10": "toolbox/summarize_bold_scan_volume_counts.sh",
-        "11": "toolbox/tarball_sourcedata.sh"
+        "12": "toolbox/download_freesurfer.sh",
+        "13": "toolbox/upload_freesurfer.sh",
+        "14": "toolbox/tarball_sourcedata.sh"
     }
 
     selected_script = scripts[step_choice]
