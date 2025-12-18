@@ -180,17 +180,73 @@ def main():
     # print(f"[INFO] Cleaned up temporary dir {scratch_sub_dir}")
 
     # Run heudiconv
-    print(f"[INFO] Running heudiconv for sub-{args.subid}")
-    print(f"[INFO] Using grouping strategy: {args.grouping}")
-    cmd = (
-        f"singularity run --cleanenv "
-        f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
-        f"-e {args.sing_image_path} "
-        f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
-        f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
-        f"--grouping {args.grouping}"
-    )
-    subprocess.run(cmd, shell=True, check=True)
+    # When using --skip-tar, we need to handle potentially merged exam sessions
+    # Process each exam session separately to avoid heudiconv's deduplication
+    if args.skip_tar:
+        # Find all exam directories
+        exam_dirs = sorted([d for d in dicom_extract_dir.iterdir() if d.is_dir() and d.name.startswith(tuple('0123456789'))])
+        exam_ids = sorted(set([d.name.split('_')[0] for d in exam_dirs]))
+
+        if len(exam_ids) > 1:
+            print(f"[INFO] Detected {len(exam_ids)} exam sessions: {', '.join(exam_ids)}")
+            print(f"[INFO] Processing each exam as a separate session to avoid sequence deduplication")
+
+            for session_num, exam_id in enumerate(exam_ids, start=1):
+                session_id = f"ses-{session_num:02d}"
+                print(f"\n[INFO] Processing exam {exam_id} as {session_id}")
+
+                # Create session-specific work directory
+                session_work_dir = scratch_work_dir / f"session_{exam_id}"
+                session_work_dir.mkdir(parents=True, exist_ok=True)
+
+                # Move only this exam's DICOMs to session work dir
+                for dicom_dir in dicom_extract_dir.glob(f"{exam_id}_*"):
+                    if dicom_dir.is_dir():
+                        target = session_work_dir / dicom_dir.name
+                        if not target.exists():
+                            shutil.move(str(dicom_dir), str(session_work_dir))
+
+                # Run heudiconv for this session
+                cmd = (
+                    f"singularity run --cleanenv "
+                    f"-B {session_work_dir}:/indir -B {bids_dir}:/outdir "
+                    f"-e {args.sing_image_path} "
+                    f"-d /indir/{{subject}}_*.dicom/*.dcm "
+                    f"-o /outdir/ -f {heu_file} -s {args.subid} -ss {session_id} -c dcm2niix -b notop --overwrite "
+                    f"--grouping {args.grouping}"
+                )
+                subprocess.run(cmd, shell=True, check=True)
+
+                # Move DICOMs back for cleanup
+                for dicom_dir in session_work_dir.glob(f"{exam_id}_*"):
+                    if dicom_dir.is_dir():
+                        shutil.move(str(dicom_dir), str(dicom_extract_dir))
+        else:
+            print(f"[INFO] Single exam session detected, processing normally")
+            print(f"[INFO] Running heudiconv for sub-{args.subid}")
+            print(f"[INFO] Using grouping strategy: {args.grouping}")
+            cmd = (
+                f"singularity run --cleanenv "
+                f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
+                f"-e {args.sing_image_path} "
+                f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
+                f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+                f"--grouping {args.grouping}"
+            )
+            subprocess.run(cmd, shell=True, check=True)
+    else:
+        # Normal tar-based workflow
+        print(f"[INFO] Running heudiconv for sub-{args.subid}")
+        print(f"[INFO] Using grouping strategy: {args.grouping}")
+        cmd = (
+            f"singularity run --cleanenv "
+            f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
+            f"-e {args.sing_image_path} "
+            f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
+            f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+            f"--grouping {args.grouping}"
+        )
+        subprocess.run(cmd, shell=True, check=True)
 
     print("[INFO] DICOM to BIDS conversion complete.")
 
