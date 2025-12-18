@@ -124,7 +124,11 @@ def display_menu():
         ("4", "Step 4: QC - Verify dcm -> nii -> bids metadata"),
         ("5", "Step 5: QC - Verify number of volumes per scan file"),
         ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)"),
-        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)")
+        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
+        ("8", "FSL GLM: Setup new statistical model"),
+        ("9", "FSL GLM: Run Level 1 analysis (individual runs)"),
+        ("10", "FSL GLM: Run Level 2 analysis (subject-level)"),
+        ("11", "FSL GLM: Run Level 3 analysis (group-level)")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -167,22 +171,21 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "8": {  # Step 8 (QC: Verify dcm -> nii -> bids metadata)
-            "keys": ["new_subid"],
-            "prompts": ["Assigned BIDS Subject ID?"]
-        },
-        "9": {  # Step 9 (QC: Verify number of volumes per scan file)
+        "8": {  # FSL GLM: Setup model
             "keys": [],
             "prompts": []
         },
-        "10": {  # Step 10 (Tarball/Untar utility)
-            "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
-            "prompts": [
-                "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
-                "Path to sourcedata directory",
-                "Subject list (comma-separated IDs or file path, press Enter to skip for tar-all/untar-all)",
-                "Keep original directories after tarballing? (only for tar operations)"
-            ]
+        "9": {  # FSL GLM: Level 1
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
+        },
+        "10": {  # FSL GLM: Level 2
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
+        },
+        "11": {  # FSL GLM: Level 3
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
         }
     }
 
@@ -238,6 +241,11 @@ def get_parameters(step_choice):
             response = get_user_input(prompt, yes_no=True, default=False)
             if response:
                 user_inputs.append("--skip-tar")
+        # special case for no_feat yes/no (FSL GLM)
+        elif key == "no_feat":
+            response = get_user_input(prompt, yes_no=True, default=False)
+            if response:
+                user_inputs.append("--no-feat")
         else:
             input_value = get_user_input(prompt)
             user_inputs.append(input_value)
@@ -270,10 +278,10 @@ def run_script(step_choice, user_inputs):
         "5": "05-run.sbatch",
         "6": "06-run.sbatch",
         "7": "07-run.sbatch",
-        "8": "08-run.sbatch",
-        "9": "toolbox/verify_nii_metadata.sh",
-        "10": "toolbox/summarize_bold_scan_volume_counts.sh",
-        "11": "toolbox/tarball_sourcedata.sh"
+        "8": "08-fsl-glm/setup_glm.sh",
+        "9": "08-run.sbatch",
+        "10": "09-run.sbatch",
+        "11": "10-run.sbatch"
     }
 
     selected_script = scripts[step_choice]

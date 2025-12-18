@@ -32,6 +32,7 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [x] 5. QC: Verify number of volumes per scan file
 - [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
 - [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
+- [x] 8. FSL FEAT GLM statistical analysis (Level 1, 2, 3) with SLURM integration
 - [ ] *Future:* Download Freesurfer output for manual surface editing
 - [ ] *Future:* Reupload edited Freesurfer directories
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
@@ -67,6 +68,7 @@ This will create a new repository with all the files from this template, allowin
 - BIDS-compliance
 - JSON metadata management
 - Quality control checks
+- FSL FEAT statistical analysis
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -77,6 +79,7 @@ The template provides a standardized structure and validated scripts that you ca
 - Documentation and usage guides
 - Quality control utilities
 - BIDS metadata management tools
+- FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started

@@ -12,7 +12,7 @@ The codebase is primarily Bash shell scripts orchestrated via Slurm job manager,
 
 ### Pipeline Structure
 
-The preprocessing workflow is organized into numbered directories (01-07) representing sequential pipeline steps:
+The preprocessing workflow is organized into numbered directories (01-08) representing sequential pipeline steps:
 
 1. **01-fw2server**: Download scanner acquisitions from Flywheel to server
 2. **02-dcm2niix**: Convert DICOM to NIfTI in BIDS format using heudiconv
@@ -21,8 +21,25 @@ The preprocessing workflow is organized into numbered directories (01-07) repres
 5. **05-qc-volumes**: Verify scan volume counts match expected values
 6. **06-run-fmriprep**: Run fMRIPrep anatomical workflows only (optional, for manual FreeSurfer editing)
 7. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
+8. **08-fsl-glm**: FSL FEAT statistical analysis (Level 1, 2, 3 GLM)
 
 Each step directory contains the core processing script. The root directory contains `XX-run.sbatch` files that serve as Slurm job submission wrappers for each step.
+
+### FSL GLM Statistical Analysis
+
+After completing fMRIPrep preprocessing, you can perform statistical analysis using FSL FEAT. The `08-fsl-glm` directory contains a complete pipeline for creating and executing GLM analysis:
+
+**Level 1 (Individual Runs)**: First-level analysis examining each task run separately
+**Level 2 (Subject-Level)**: Second-level analysis combining runs within subjects
+**Level 3 (Group-Level)**: Third-level analysis performing group statistics
+
+The FSL GLM pipeline:
+- Creates `.fsf` files for each analysis level
+- Runs FSL FEAT on generated `.fsf` files
+- Uses SLURM job arrays for parallel processing (or falls back to joblib/serial if SLURM unavailable)
+- Integrates with the fmriprep-workbench configuration system
+
+See `08-fsl-glm/README.md` for detailed usage instructions.
 
 ### Configuration System
 
@@ -88,6 +105,22 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 
 # Example: Run fMRIPrep (full workflows)
 ./07-run.sbatch
+
+# Example: FSL GLM - Setup new statistical model
+./launch  # Select option 8
+# Or run directly:
+./08-fsl-glm/setup_glm.sh
+
+# Example: FSL GLM - Run Level 1 analysis (individual runs)
+./08-run.sbatch <model-name>
+# Or with --no-feat to only create FSF files:
+./08-run.sbatch <model-name> --no-feat
+
+# Example: FSL GLM - Run Level 2 analysis (subject-level)
+./09-run.sbatch <model-name>
+
+# Example: FSL GLM - Run Level 3 analysis (group-level)
+./10-run.sbatch <model-name>
 ```
 
 ### fMRIPrep Execution Details
@@ -251,3 +284,21 @@ A valid Freesurfer license file is required for fMRIPrep. Set `FREESURFER_LICENS
 1. After DICOM conversion, tarball sourcedata directories
 2. Use `toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir <path>`
 3. Extract when needed with `--untar-subjects`
+
+**FSL GLM statistical analysis workflow**:
+1. Complete fMRIPrep preprocessing (steps 1-7)
+2. Setup GLM model with `./launch` (option 8) or `./08-fsl-glm/setup_glm.sh`
+3. Configure model parameters in `BASE_DIR/model/level1/model-<modelname>/`:
+   - Edit `model_params.json` for analysis parameters
+   - Edit `condition_key.json` to define experimental conditions
+   - Edit `task_contrasts.json` (optional) to define contrasts
+   - Edit `confounds.json` (optional) to select motion/confound regressors
+4. Create EV (explanatory variable) timing files in onset directories
+5. Run Level 1 analysis: `./08-run.sbatch <model-name>`
+6. After Level 1 completes, run Level 2: `./09-run.sbatch <model-name>`
+7. After Level 2 completes, run Level 3: `./10-run.sbatch <model-name>`
+8. View results in `.feat` and `.gfeat` directories
+
+Note: The `--no-feat` flag can be used to only create FSF files without running FEAT, useful for checking design matrices before full analysis.
+
+See `08-fsl-glm/README.md` for complete documentation.
