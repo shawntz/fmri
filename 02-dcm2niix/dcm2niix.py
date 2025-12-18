@@ -72,10 +72,26 @@ def main():
     if args.skip_tar:
         print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
         print(f"[INFO] Tar file already extracted to: {untar_dir}")
-        print(f"[INFO] Will proceed to unzip .dicom.zip files")
+        print(f"[INFO] Will proceed to unzip .dicom.zip files from ALL exam sessions")
 
         # For manual configurations where tar is already extracted
-        # Skip tar extraction but still unzip the .dicom.zip files
+        # Find ALL exam directories (supports manually merged multi-session scans)
+        flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+        subject_dirs = glob(f"{flywheel_base_path}/*/*")  # Get all exam directories
+
+        if not subject_dirs:
+            raise FileNotFoundError(f"No subject folders found under {flywheel_base_path}")
+
+        print(f"[INFO] Found {len(subject_dirs)} exam session(s) to process:")
+        for sd in subject_dirs:
+            print(f"  - {Path(sd).name}")
+
+        # Unzip from ALL exam directories
+        for subject_dir in subject_dirs:
+            subject_dir_path = Path(subject_dir)
+            print(f"[INFO] Unzipping files from {subject_dir_path.name}")
+            for zf in subject_dir_path.glob("**/*.zip"):
+                subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
     else:
         # Untar
         print(f"[INFO] Extracting {tar_input} -> {untar_dir}")
@@ -83,16 +99,16 @@ def main():
         with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
             tar.extractall(path=untar_dir)
 
-    # Unzip DICOMs (runs in both cases: after tar extraction OR when tar already extracted)
-    flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
-    subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
-    if not subject_dirs:
-        raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
-    subject_dir = Path(subject_dirs[0])
+        # Unzip DICOMs from single exam session
+        flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+        subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
+        if not subject_dirs:
+            raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
+        subject_dir = Path(subject_dirs[0])
 
-    print(f"[INFO] Unzipping all zip files from {subject_dir}")
-    for zf in subject_dir.glob("**/*.zip"):
-        subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
+        print(f"[INFO] Unzipping all zip files from {subject_dir}")
+        for zf in subject_dir.glob("**/*.zip"):
+            subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
 
     # Delete screenshots
     for pattern in ["*2000*.dicom", "*4000*.dicom", "*_200*.dicom"]:
