@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
+    paths:
+      - '.release-ready'
   workflow_dispatch:
     inputs:
       version_bump:
@@ -41,38 +39,47 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Read release configuration
+        id: release_config
+        run: |
+          # Check if .release-ready file exists and read version bump type
+          if [ -f .release-ready ]; then
+            BUMP_TYPE=$(cat .release-ready | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+            echo "Release flag detected with bump type: $BUMP_TYPE"
+
+            # Validate bump type
+            if [[ ! "$BUMP_TYPE" =~ ^(major|minor|patch)$ ]]; then
+              echo "Error: Invalid version bump type in .release-ready file. Must be 'major', 'minor', or 'patch'."
+              echo "Found: '$BUMP_TYPE'"
+              exit 1
+            fi
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BUMP_TYPE="${{ github.event.inputs.version_bump }}"
+            echo "Manual workflow dispatch with bump type: $BUMP_TYPE"
+          else
+            echo "Error: No .release-ready file found and not a manual workflow dispatch"
+            exit 1
+          fi
+
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+
       - name: Determine version bump
         id: version
         run: |
           # Get the latest tag, default to v0.0.0 if none exists
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "Latest tag: $LATEST_TAG"
-          
+
           # Remove 'v' prefix for version calculation
           CURRENT_VERSION=${LATEST_TAG#v}
           IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
           MAJOR="${VERSION_PARTS[0]:-0}"
           MINOR="${VERSION_PARTS[1]:-0}"
           PATCH="${VERSION_PARTS[2]:-0}"
-          
-          # Analyze commits since last tag to determine version bump
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            BUMP_TYPE="${{ github.event.inputs.version_bump }}"
-          else
-            # Analyze commit messages for conventional commits
-            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
-            
-            if echo "$COMMITS" | grep -qiE "^(BREAKING CHANGE|feat!|fix!|chore!|refactor!|perf!|build!|ci!|docs!|style!|test!):"; then
-              BUMP_TYPE="major"
-            elif echo "$COMMITS" | grep -qiE "^feat(\(.+\))?:"; then
-              BUMP_TYPE="minor"
-            else
-              BUMP_TYPE="patch"
-            fi
-          fi
-          
+
+          BUMP_TYPE="${{ steps.release_config.outputs.bump_type }}"
           echo "Bump type: $BUMP_TYPE"
-          
+
           # Calculate new version
           case $BUMP_TYPE in
             major)
@@ -88,76 +95,91 @@ jobs:
               PATCH=$((PATCH + 1))
               ;;
           esac
-          
+
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           NEW_TAG="v$NEW_VERSION"
-          
+
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "previous_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          
+
           echo "New version: $NEW_VERSION"
           echo "New tag: $NEW_TAG"
 
-      - name: Generate changelog
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: |
+          npm install -g @anthropics/claude-code
+          echo "Claude Code CLI installed"
+
+      - name: Generate changelog with AI
         id: changelog
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           PREVIOUS_TAG="${{ steps.version.outputs.previous_tag }}"
           NEW_TAG="${{ steps.version.outputs.new_tag }}"
-          
-          echo "Generating changelog from $PREVIOUS_TAG to HEAD"
-          
-          # Create changelog content
-          {
-            echo "## What's Changed"
-            echo ""
-            
-            # Get commits since last tag
-            if [ "$PREVIOUS_TAG" = "v0.0.0" ]; then
-              COMMITS=$(git log --pretty=format:"%s" --reverse)
-            else
-              COMMITS=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"%s" --reverse)
-            fi
-            
-            # Categorize commits
-            echo "### 🚀 Features"
-            echo "$COMMITS" | grep -iE "^feat(\(.+\))?:" | sed 's/^feat/- feat/' || echo "- No new features"
-            echo ""
-            
-            echo "### 🐛 Bug Fixes"
-            echo "$COMMITS" | grep -iE "^fix(\(.+\))?:" | sed 's/^fix/- fix/' || echo "- No bug fixes"
-            echo ""
-            
-            echo "### 📚 Documentation"
-            echo "$COMMITS" | grep -iE "^docs(\(.+\))?:" | sed 's/^docs/- docs/' || echo "- No documentation changes"
-            echo ""
-            
-            echo "### 🔧 Maintenance"
-            echo "$COMMITS" | grep -iE "^(chore|refactor|perf|build|ci|style|test)(\(.+\))?:" | sed 's/^\(chore\|refactor\|perf\|build\|ci\|style\|test\)/- \1/' || echo "- No maintenance changes"
-            echo ""
-            
-            echo "### 💥 Breaking Changes"
-            echo "$COMMITS" | grep -iE "^(BREAKING CHANGE|.+!:)" || echo "- No breaking changes"
-            echo ""
-            
-            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${NEW_TAG}"
-          } > release_notes.md
-          
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+
+          echo "Generating AI-powered changelog from $PREVIOUS_TAG to HEAD"
+
+          # Get commit range for the agent
+          if [ "$PREVIOUS_TAG" = "v0.0.0" ]; then
+            COMMIT_RANGE="HEAD"
+          else
+            COMMIT_RANGE="${PREVIOUS_TAG}..HEAD"
+          fi
+
+          # Create a prompt file for the changelog-drafter agent
+          cat > changelog_prompt.txt <<EOF
+Generate a human-readable changelog for version ${NEW_VERSION} based on commits from ${COMMIT_RANGE}.
+
+The changelog should be formatted in markdown with these sections:
+- 🚀 Features
+- 🐛 Bug Fixes
+- 📚 Documentation
+- 🔧 Maintenance
+- 💥 Breaking Changes
+
+Translate all commit messages into clear, user-friendly language that explains what changed and why it matters.
+Include only sections that have actual changes.
+EOF
+
+          # Use claude-code CLI with changelog-drafter agent
+          # Note: This assumes you have a .claude/agents/changelog-drafter configuration
+          claude code agent changelog-drafter --prompt "$(cat changelog_prompt.txt)" \
+            --output release_notes.md || {
+            echo "Failed to generate changelog with AI agent, falling back to simple generation"
+
+            # Fallback: Simple changelog generation
+            {
+              echo "## What's Changed"
+              echo ""
+              git log ${COMMIT_RANGE} --pretty=format:"- %s" --reverse
+              echo ""
+              echo ""
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${NEW_TAG}"
+            } > release_notes.md
+          }
+
           cat release_notes.md
-          
+
           # Update CHANGELOG.md
           if [ -f CHANGELOG.md ]; then
-            # Create new entry in CHANGELOG.md
             DATE=$(date +%Y-%m-%d)
-            
+
             # Prepare the new changelog entry
             {
-              echo "## [${{ steps.version.outputs.new_version }}] - $DATE"
+              echo "## [$NEW_VERSION] - $DATE"
               echo ""
-              cat release_notes.md | tail -n +2  # Skip "What's Changed" header
+              cat release_notes.md
               echo ""
             } > new_entry.md
-            
+
             # Insert after [Unreleased] section
             awk '/## \[Unreleased\]/{
               print
@@ -165,11 +187,11 @@ jobs:
               while(getline line < "new_entry.md") print line
               next
             }1' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
-            
+
             # Update version link at bottom of CHANGELOG.md
             echo "" >> CHANGELOG.md
-            echo "[${{ steps.version.outputs.new_version }}]: https://github.com/${{ github.repository }}/releases/tag/$NEW_TAG" >> CHANGELOG.md
-            
+            echo "[$NEW_VERSION]: https://github.com/${{ github.repository }}/releases/tag/$NEW_TAG" >> CHANGELOG.md
+
             # Commit updated CHANGELOG
             git add CHANGELOG.md
             git commit -m "chore: update CHANGELOG.md for $NEW_TAG" || echo "No changes to commit"
@@ -197,7 +219,17 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Remove release flag
+        if: success()
+        run: |
+          # Remove the .release-ready file to prevent re-triggering
+          if [ -f .release-ready ]; then
+            git rm .release-ready
+            git commit -m "chore: remove release flag after successful release"
+            git push origin main
+          fi
+
       - name: Cleanup
         if: always()
         run: |
-          rm -f release_notes.md new_entry.md
+          rm -f release_notes.md new_entry.md changelog_prompt.txt

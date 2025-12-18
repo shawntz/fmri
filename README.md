@@ -49,6 +49,7 @@ For quick reference, see:
 - [Configuration Guide](docs/configuration.rst)
 - [Usage Guide](docs/usage.rst)
 - [Changelog](CHANGELOG.md)
+- [Release Process](RELEASING.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Using this Template
