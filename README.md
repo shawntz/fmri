@@ -127,10 +127,10 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ### manually calling upon each sidecar executable
 ```bash
 # example: running step 1 (FlyWheel download)
-./01-run.sbatch
+./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # example: running step 2 (dcm2niix BIDS conversion)
-./02-run.sbatch
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [grouping] [--skip-tar]
 
 # example: running step 3 (prep for fMRIPrep)
 ./03-run.sbatch

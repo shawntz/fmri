@@ -72,7 +72,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # Example: Run step 2 (dcm2niix conversion)
-./02-run.sbatch
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [grouping] [--skip-tar]
 
 # Example: Run step 3 (prep for fMRIPrep)
 ./03-run.sbatch
