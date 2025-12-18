@@ -186,7 +186,7 @@ specify different subject lists per pipeline step in ``config.yaml``:
 
    subjects_mapping:
      '01-fw2server': '01-subjects.txt'
-     '02-raw2bids': '02-subjects.txt'
+     '02-dcm2niix': '02-subjects.txt'
      '06-run-fmriprep': '06-subjects.txt'
 
 Permissions
