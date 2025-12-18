@@ -30,15 +30,20 @@ To bypass this check and process all DICOMs together regardless of study identif
 ./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
 ```
 
-### For Manually Configured DICOM Directories
+### For Pre-Extracted Tar Files
 
-If you have manually configured DICOM directories (not from a Flywheel tarball), use the `--skip-tar` flag to skip tar extraction and unzip steps:
+If you have already extracted the Flywheel tar file manually, use the `--skip-tar` flag to skip tar extraction. The script will still unzip the `.dicom.zip` files found in the extracted directory:
 
 ```bash
 ./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> studyUID --skip-tar
 ```
 
-When using this flag, ensure your DICOMs are already present in the expected directory structure: `/scratch/users/<user>/sub-<subid>/dcm2niix_work_dir/sub-<subid>/`
+When using this flag, ensure the tar contents are already extracted to: `/scratch/users/<user>/sub-<subid>/untar_<exam_num>/`
+
+The script will then:
+1. Skip extracting the `.tar` file (already done)
+2. Find and unzip all `.dicom.zip` files in the extracted directory tree
+3. Process the unzipped DICOM files as usual
 
 ## Grouping Strategies
 
@@ -49,7 +54,7 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 
 ## Optional Flags
 
-- **`--skip-tar`**: Skip tar extraction and unzip steps. Use this when working with manually configured DICOM directories that don't need extraction from Flywheel tarballs. When this flag is set, the script expects DICOMs to already be present in the target directory.
+- **`--skip-tar`**: Skip tar extraction step only. Use this when you've already extracted the Flywheel tar file manually. The script will still unzip the `.dicom.zip` files found in the extracted directory. When this flag is set, the script expects the tar contents to be at `/scratch/users/<user>/sub-<subid>/untar_<exam_num>/`.
 
 ## Examples
 
@@ -60,7 +65,7 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 # Processing merged sessions
 ./dcm2niix.sh 02-dcm2niix 21940 001 all
 
-# Processing manually configured DICOM directories
+# Processing with pre-extracted tar file
 ./dcm2niix.sh 02-dcm2niix 21940 001 studyUID --skip-tar
 ```
 

@@ -70,11 +70,11 @@ def main():
 
     if args.skip_tar:
         print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
-        print(f"[INFO] Using manually configured scan directory: {dicom_extract_dir}")
-        print(f"[INFO] Ensure DICOMs are already present in this directory")
+        print(f"[INFO] Tar file already extracted to: {untar_dir}")
+        print(f"[INFO] Will proceed to unzip .dicom.zip files")
 
-        # For manual configurations, expect DICOMs to already be in the extract directory
-        # Skip tar extraction and unzip steps entirely
+        # For manual configurations where tar is already extracted
+        # Skip tar extraction but still unzip the .dicom.zip files
     else:
         # Untar
         print(f"[INFO] Extracting {tar_input} -> {untar_dir}")
@@ -82,16 +82,16 @@ def main():
         with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
             tar.extractall(path=untar_dir)
 
-        # Unzip DICOMs
-        flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
-        subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
-        if not subject_dirs:
-            raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
-        subject_dir = Path(subject_dirs[0])
+    # Unzip DICOMs (runs in both cases: after tar extraction OR when tar already extracted)
+    flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+    subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
+    if not subject_dirs:
+        raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
+    subject_dir = Path(subject_dirs[0])
 
-        print(f"[INFO] Unzipping all zip files from {subject_dir}")
-        for zf in subject_dir.glob("**/*.zip"):
-            subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
+    print(f"[INFO] Unzipping all zip files from {subject_dir}")
+    for zf in subject_dir.glob("**/*.zip"):
+        subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
 
     # Delete screenshots
     for pattern in ["*2000*.dicom", "*4000*.dicom", "*_200*.dicom"]:
