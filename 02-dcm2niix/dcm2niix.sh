@@ -13,8 +13,8 @@ source ./load_config.sh
 JOB_NAME=$1
 
 if [ -z "${JOB_NAME}" ]; then
-  echo "Error: Pipeline step name not provided" | tee -a "${log_file}"
-  echo "Usage: $0 <step-name> <fw_session_id> <new_subid> [--skip-tar]" | tee -a "${log_file}"
+  echo "Error: Pipeline step name not provided"
+  echo "Usage: $0 <step-name> <fw_session_id> <new_subid> [--skip-tar]"
   exit 1
 fi
 
@@ -28,7 +28,6 @@ skip_tar_flag=""
 for arg in "$@"; do
   if [ "$arg" = "--skip-tar" ]; then
     skip_tar_flag="--skip-tar"
-    echo "($(date)) [INFO] Skip tar mode enabled" | tee -a "${log_file}"
     break
   fi
 done
@@ -39,6 +38,11 @@ subject="sub-${new_subid}"
 mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
 processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
+
+# Log skip-tar mode after log_file is defined
+if [ -n "${skip_tar_flag}" ]; then
+  echo "($(date)) [INFO] Skip tar mode enabled" | tee -a "${log_file}"
+fi
 
 echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 
