@@ -17,8 +17,8 @@ The preprocessing workflow is organized into numbered directories (01-07) repres
 1. **01-fw2server**: Download scanner acquisitions from Flywheel to server
 2. **02-dcm2niix**: Convert DICOM to NIfTI in BIDS format using heudiconv
 3. **03-prep-fmriprep**: Remove dummy scans, configure fieldmap susceptibility distortion correction (SDC)
-4. **QC Step 4**: Verify DICOM → NIfTI → BIDS metadata conversion (via toolbox)
-5. **QC Step 5**: Verify scan volume counts match expected values (via toolbox)
+4. **04-qc-metadata**: Verify DICOM → NIfTI → BIDS metadata conversion
+5. **05-qc-volumes**: Verify scan volume counts match expected values
 6. **06-run-fmriprep**: Run fMRIPrep anatomical workflows only (optional, for manual FreeSurfer editing)
 7. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
 
@@ -77,11 +77,11 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 # Example: Run step 3 (prep for fMRIPrep)
 ./03-run.sbatch
 
-# Example: QC - verify metadata
-./toolbox/verify_nii_metadata.sh
+# Example: Run step 4 (QC - verify metadata)
+./04-run.sbatch
 
-# Example: QC - verify scan volumes
-./toolbox/summarize_bold_scan_volume_counts.sh
+# Example: Run step 5 (QC - verify scan volumes)
+./05-run.sbatch
 
 # Example: Run fMRIPrep (anatomical only)
 ./06-run.sbatch
@@ -125,12 +125,12 @@ This mapping determines which fieldmap is used for susceptibility distortion cor
 
 ## Toolbox Utilities
 
-Located in `toolbox/`, these are standalone utilities for QC and data management:
+Located in `toolbox/`, these are shared utilities used by pipeline steps and available for standalone use:
 
 **Quality Control**:
-- `verify_nii_metadata.py` / `verify_nii_metadata.sh`: Validate BIDS metadata in NIfTI JSON sidecars
-- `summarize_bold_scan_volume_counts.sh`: Check scan volumes match expected counts, generates timestamped diagnostic reports
-- `summarize_diagnostics.py`: Generate summary reports from diagnostic CSV files
+- `verify_nii_metadata.py`: Validate BIDS metadata in NIfTI JSON sidecars (called by step 4)
+- `summarize_diagnostics.py`: Generate summary reports from diagnostic CSV files (called by step 5)
+- `parse_subject_modifiers.sh`: Parse subject ID suffix modifiers (sourced by all steps)
 
 **Data Management**:
 - `tarball_sourcedata.sh`: Archive sourcedata directories to reduce inode usage on supercompute clusters
