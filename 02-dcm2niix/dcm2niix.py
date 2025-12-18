@@ -53,7 +53,7 @@ def main():
     scratch_sub_dir = scratch_base / f"sub-{args.subid}"
     untar_dir = scratch_sub_dir / f"untar_{args.exam_num}"
     oak_base = Path(f"{args.project_dir}")
-    bids_dir = oak_base / "bids"
+    bids_dir = oak_base  # BASE_DIR is the BIDS directory
     scratch_work_dir = scratch_sub_dir / f"dcm2niix_work_dir"
     dicoms_dir = scratch_work_dir
     code_dir = Path(f"{args.scripts_dir}")
@@ -67,6 +67,7 @@ def main():
     dicom_extract_dir = scratch_work_dir / f"sub-{args.subid}"
     dicom_extract_dir.mkdir(parents=True, exist_ok=True)
     untar_dir.mkdir(parents=True, exist_ok=True)
+    bids_dir.mkdir(parents=True, exist_ok=True)
 
     if args.skip_tar:
         print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
