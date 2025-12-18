@@ -14,7 +14,7 @@ The codebase is primarily Bash shell scripts orchestrated via Slurm job manager,
 
 The preprocessing workflow is organized into numbered directories (01-07) representing sequential pipeline steps:
 
-1. **01-fw2server**: Download scanner acquisitions from FlyWheel to server
+1. **01-fw2server**: Download scanner acquisitions from Flywheel to server
 2. **02-dcm2niix**: Convert DICOM to NIfTI in BIDS format using heudiconv
 3. **03-prep-fmriprep**: Remove dummy scans, configure fieldmap susceptibility distortion correction (SDC)
 4. **QC Step 4**: Verify DICOM → NIfTI → BIDS metadata conversion (via toolbox)
