@@ -27,7 +27,7 @@
 # ============================================================================
 directories:
   base_dir: '/path/to/your/study'
-  scripts_dir: '/path/to/your/study/code'
+  scripts_dir: '/path/to/your/study/code/fmriprep-workbench'
   raw_dir: '/path/to/your/study/sourcedata'
   trim_dir: '/path/to/your/study'
   workflow_log_dir: '/path/to/your/study/logs'
