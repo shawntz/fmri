@@ -70,11 +70,11 @@ def main():
 
     if args.skip_tar:
         print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
-        print(f"[INFO] Using manually configured scan directory: {dicom_extract_dir}")
-        print(f"[INFO] Ensure DICOMs are already present in this directory")
+        print(f"[INFO] Tar file already extracted to: {untar_dir}")
+        print(f"[INFO] Will proceed to unzip .dicom.zip files")
 
-        # For manual configurations, expect DICOMs to already be in the extract directory
-        # Skip tar extraction and unzip steps entirely
+        # For manual configurations where tar is already extracted
+        # Skip tar extraction but still unzip the .dicom.zip files
     else:
         # Untar
         print(f"[INFO] Extracting {tar_input} -> {untar_dir}")
@@ -82,7 +82,7 @@ def main():
         with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
             tar.extractall(path=untar_dir)
 
-    # Unzip DICOMs
+    # Unzip DICOMs (runs in both cases: after tar extraction OR when tar already extracted)
     flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
     subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
     if not subject_dirs:
