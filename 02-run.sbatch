@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Skip subjects file prompt since this step runs one subject at a time
+export SKIP_SUBJECTS_PROMPT=true
 source ./load_config.sh
 
 STEP_NAME="02-dcm2niix"
