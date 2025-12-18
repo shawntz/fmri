@@ -16,12 +16,15 @@ def infotodict(seqinfo):
     subject: participant id
     seqitem: run number during scanning
     subindex: sub index within group
+    session: session id (if multi-session)
     """
-    t1w = create_key('sub-{subject}/anat/sub-{subject}_T1w')
-    t2 = create_key('sub-{subject}/anat/sub-{subject}_inplaneT2')
-    mtlc = create_key('sub-{subject}/anat/sub-{subject}_mt-lc')
-    func_test = create_key('sub-{subject}/func/sub-{subject}_task-amass_run-{item:02d}_dir-PA_bold')
-    fmap = create_key('sub-{subject}/fmap/sub-{subject}_run-{item:02d}_dir-AP_epi')
+    # Templates support both session and non-session data
+    # If session is present in data, it will be populated; otherwise ignored
+    t1w = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_T1w')
+    t2 = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_inplaneT2')
+    mtlc = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_mt-lc')
+    func_test = create_key('sub-{subject}/{session}/func/sub-{subject}_{session}_task-amass_run-{item:02d}_dir-PA_bold')
+    fmap = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_run-{item:02d}_dir-AP_epi')
 
     info = {
         t1w: [],
