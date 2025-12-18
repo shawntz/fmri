@@ -72,26 +72,40 @@ def main():
     if args.skip_tar:
         print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
         print(f"[INFO] Tar file already extracted to: {untar_dir}")
-        print(f"[INFO] Will proceed to unzip .dicom.zip files from ALL exam sessions")
+        print(f"[INFO] Will search recursively for ALL .zip files (supports manually merged multi-session scans)")
 
         # For manual configurations where tar is already extracted
-        # Find ALL exam directories (supports manually merged multi-session scans)
+        # Find ALL zip files recursively (handles various manual merging strategies)
         flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
-        subject_dirs = glob(f"{flywheel_base_path}/*/*")  # Get all exam directories
 
-        if not subject_dirs:
-            raise FileNotFoundError(f"No subject folders found under {flywheel_base_path}")
+        if not flywheel_base_path.exists():
+            raise FileNotFoundError(f"Flywheel base path not found: {flywheel_base_path}")
 
-        print(f"[INFO] Found {len(subject_dirs)} exam session(s) to process:")
-        for sd in subject_dirs:
-            print(f"  - {Path(sd).name}")
+        # Recursively find all ZIP files
+        all_zip_files = list(flywheel_base_path.glob("**/*.zip"))
 
-        # Unzip from ALL exam directories
-        for subject_dir in subject_dirs:
-            subject_dir_path = Path(subject_dir)
-            print(f"[INFO] Unzipping files from {subject_dir_path.name}")
-            for zf in subject_dir_path.glob("**/*.zip"):
-                subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
+        if not all_zip_files:
+            raise FileNotFoundError(f"No .zip files found under {flywheel_base_path}")
+
+        # Group by exam ID to show user what we found
+        exam_ids = set()
+        for zf in all_zip_files:
+            # Extract exam ID from path (assumes format like .../exam_id/...)
+            path_parts = zf.parts
+            for part in path_parts:
+                if part.isdigit() and len(part) >= 4:  # Exam IDs are typically 4+ digits
+                    exam_ids.add(part)
+                    break
+
+        print(f"[INFO] Found {len(all_zip_files)} .zip file(s) across {len(exam_ids)} exam session(s):")
+        for exam_id in sorted(exam_ids):
+            exam_zip_count = sum(1 for zf in all_zip_files if exam_id in str(zf))
+            print(f"  - Exam {exam_id}: {exam_zip_count} .zip files")
+
+        # Unzip ALL found zip files
+        print(f"[INFO] Unzipping all files to {dicom_extract_dir}")
+        for zf in all_zip_files:
+            subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
     else:
         # Untar
         print(f"[INFO] Extracting {tar_input} -> {untar_dir}")

@@ -31,6 +31,12 @@ def infotodict(seqinfo):
         fmap: []
     }
 
+    # Debug: print all seqinfo to understand what we're getting
+    # This will help identify why some series are being skipped
+    print(f"\n[HEURISTIC DEBUG] Processing {len(seqinfo)} sequences:")
+    for idx, s in enumerate(seqinfo):
+        print(f"  [{idx}] series_id={s.series_id}, dcm_dir={s.dcm_dir_name}, desc={s.series_description}, dim4={s.dim4}")
+
     for s in seqinfo:
         """
         The namedtuple `s` contains the following fields:
@@ -67,5 +73,14 @@ def infotodict(seqinfo):
             info[func_test].append(s.series_id)
         if ('CAL' in s.series_description):
             info[fmap].append(s.series_id)
+
+    # Debug: print what we collected
+    print(f"\n[HEURISTIC DEBUG] Collected sequences:")
+    print(f"  T1w: {info[t1w]}")
+    print(f"  inplaneT2: {info[t2]}")
+    print(f"  mt-lc: {info[mtlc]}")
+    print(f"  func_test: {info[func_test]}")
+    print(f"  fmap: {info[fmap]}")
+    print()
 
     return info
