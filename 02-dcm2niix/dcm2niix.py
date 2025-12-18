@@ -35,8 +35,10 @@ def parse_args():
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
-    parser.add_argument("--grouping", action="store", default="studyUID", 
+    parser.add_argument("--grouping", action="store", default="studyUID",
                         help="Heudiconv grouping strategy. Use 'all' to bypass the 'Conflicting study identifiers found' assertion when working with manually merged sessions. Default: 'studyUID'")
+    parser.add_argument("--skip-tar", action="store_true", default=False,
+                        help="Skip tar extraction step. Use this flag when working with manually configured scan directories that don't need tar extraction.")
     return parser.parse_args()
 
 def main():
@@ -66,26 +68,34 @@ def main():
     dicom_extract_dir.mkdir(parents=True, exist_ok=True)
     untar_dir.mkdir(parents=True, exist_ok=True)
 
-    # Untar
-    print(f"[INFO] Extracting {tar_input} -> {untar_dir}")
-    shutil.move(str(tar_input), scratch_sub_dir / f"{args.exam_num}.tar")
-    with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
-        tar.extractall(path=untar_dir)
+    if args.skip_tar:
+        print(f"[INFO] --skip-tar flag detected: Skipping tar extraction")
+        print(f"[INFO] Using manually configured scan directory: {dicom_extract_dir}")
+        print(f"[INFO] Ensure DICOMs are already present in this directory")
 
-    # Move tar to permanent oak location
-    ## shutil.move(str(scratch_sub_dir / f"{args.exam_num}.tar"), tar_target)
-    ## print(f"[INFO] Tar archive moved to {tar_target}")
+        # For manual configurations, expect DICOMs to already be in the extract directory
+        # Skip tar extraction and unzip steps entirely
+    else:
+        # Untar
+        print(f"[INFO] Extracting {tar_input} -> {untar_dir}")
+        shutil.move(str(tar_input), scratch_sub_dir / f"{args.exam_num}.tar")
+        with tarfile.open(scratch_sub_dir / f"{args.exam_num}.tar") as tar:
+            tar.extractall(path=untar_dir)
 
-    # Unzip DICOMs
-    flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
-    subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
-    if not subject_dirs:
-        raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
-    subject_dir = Path(subject_dirs[0])
+        # Move tar to permanent oak location
+        ## shutil.move(str(scratch_sub_dir / f"{args.exam_num}.tar"), tar_target)
+        ## print(f"[INFO] Tar archive moved to {tar_target}")
 
-    print(f"[INFO] Unzipping all zip files from {subject_dir}")
-    for zf in subject_dir.glob("**/*.zip"):
-        subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
+        # Unzip DICOMs
+        flywheel_base_path = untar_dir / "scitran" / args.fw_group_id / args.fw_project_id
+        subject_dirs = glob(f"{flywheel_base_path}/*/{args.exam_num}")
+        if not subject_dirs:
+            raise FileNotFoundError(f"No matching subject folder found under {flywheel_base_path}/*/{args.exam_num}")
+        subject_dir = Path(subject_dirs[0])
+
+        print(f"[INFO] Unzipping all zip files from {subject_dir}")
+        for zf in subject_dir.glob("**/*.zip"):
+            subprocess.run(['unzip', '-qq', str(zf), '-d', str(dicom_extract_dir)], check=True)
 
     # Delete screenshots
     for pattern in ["*2000*.dicom", "*4000*.dicom", "*_200*.dicom"]:
