@@ -12,8 +12,8 @@ import sys
 project = 'SML fMRI Preprocessing Template'
 copyright = '2025, Shawn Schwartz and Stanford Memory Lab'
 author = 'Shawn T. Schwartz'
-release = '1.0.0'
-version = '1.0'
+release = '0.2.0'
+version = '0.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

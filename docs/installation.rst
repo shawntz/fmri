@@ -4,20 +4,20 @@ Installation
 Prerequisites
 -------------
 
-Before using the SML fMRI Preprocessing Template, ensure you have:
+Before using the fMRIPrep Workbench, ensure you have:
 
-- Access to a computing cluster with Slurm workload manager
+- Access to a computing cluster with SLURM workload manager
 - Singularity/Apptainer for container execution
 - FreeSurfer license file
 - Git for version control
-- Python 3.6 or higher
+- Python 3.6 or higher (with PyYAML package)
 
 Getting Started
 ---------------
 
 1. **Create Repository from Template**
 
-   Click the "Use this template" button on the `GitHub repository <https://github.com/shawntz/fmri>`_
+   Click the "Use this template" button on the `GitHub repository <https://github.com/shawntz/fmriprep-workbench>`_
    to create your own copy.
 
 2. **Clone Your Repository**
@@ -29,12 +29,37 @@ Getting Started
 
 3. **Configure Settings**
 
-   Copy the settings template and customize for your study:
+   Copy the configuration template and customize for your study:
 
    .. code-block:: bash
 
-      cp settings.template.sh settings.sh
-      # Edit settings.sh with your study-specific parameters
+      cp config.template.yaml config.yaml
+
+   Edit ``config.yaml`` with your study-specific parameters. Key sections to configure:
+
+   .. code-block:: yaml
+
+      directories:
+        base_dir: '/path/to/your/study'
+        scripts_dir: '/path/to/your/study/code'
+        raw_dir: '/path/to/your/study/sourcedata'
+        trim_dir: '/path/to/your/study'
+        freesurfer_license: '~/freesurfer.txt'
+
+      scan:
+        task_id: 'YourTaskName'
+        n_dummy: 5
+        run_numbers:
+          - '01'
+          - '02'
+
+      validation:
+        expected_fmap_vols: 12
+        expected_bold_vols: 220
+
+      slurm:
+        email: 'your.email@institution.edu'
+        partition: 'your,partitions'
 
 4. **Set Up Subject List**
 
@@ -43,16 +68,36 @@ Getting Started
    .. code-block:: bash
 
       cp all-subjects.template.txt all-subjects.txt
-      # Add your subject IDs (one per line, just the number without "sub-" prefix)
 
-5. **Verify Paths**
+   Add your subject IDs (one per line, just the number without "sub-" prefix):
 
-   Ensure all paths in ``settings.sh`` are correct and accessible:
+   .. code-block:: text
 
-   - ``BASE_DIR`` - Your study's root directory
-   - ``RAW_DIR`` - BIDS-formatted raw data location
-   - ``TRIM_DIR`` - Destination for processed data
-   - ``FREESURFER_LICENSE`` - Path to FreeSurfer license file
+      # Study subjects
+      101
+      102
+      103
+
+5. **Verify Configuration**
+
+   Test that your configuration loads correctly:
+
+   .. code-block:: bash
+
+      source ./load_config.sh
+
+   You should see a message indicating successful configuration loading and
+   the number of subjects found.
+
+6. **Verify Paths**
+
+   Ensure all paths in ``config.yaml`` are correct and accessible:
+
+   - ``directories.base_dir`` - Your study's root directory
+   - ``directories.raw_dir`` - BIDS-formatted raw data location
+   - ``directories.trim_dir`` - Destination for processed data
+   - ``directories.freesurfer_license`` - Path to FreeSurfer license file
+   - ``pipeline.singularity_image_dir`` - Path to Singularity/Apptainer containers
 
 System Requirements
 -------------------
@@ -71,14 +116,67 @@ System Requirements
 
 **Software Dependencies:**
 
-- Slurm workload manager
+- SLURM workload manager
 - Singularity/Apptainer 3.0+
 - FreeSurfer (via container)
 - fMRIPrep (via container)
-- dcm2niix (via container or installed locally)
+- dcm2niix/heudiconv (via container)
+- Python 3.6+ with PyYAML
+
+Container Setup
+---------------
+
+The pipeline uses Singularity/Apptainer containers for reproducibility.
+Configure container paths in ``config.yaml``:
+
+.. code-block:: yaml
+
+   pipeline:
+     singularity_image_dir: '/path/to/containers'
+     singularity_image: 'fmriprep-24.0.1.simg'
+     heudiconv_image: 'heudiconv_latest.sif'
+
+Ensure the containers exist at the specified paths before running the pipeline.
+
+Python Dependencies
+-------------------
+
+The configuration loader requires PyYAML. Install it if not available:
+
+.. code-block:: bash
+
+   pip install pyyaml
+
+Or using conda:
+
+.. code-block:: bash
+
+   conda install pyyaml
+
+Migration from v0.1.x
+---------------------
+
+If upgrading from a version that used ``settings.sh``:
+
+1. Create the new configuration file:
+
+   .. code-block:: bash
+
+      cp config.template.yaml config.yaml
+
+2. Transfer your settings from ``settings.sh`` to ``config.yaml``.
+   See the :ref:`migration-guide` in the Configuration documentation for
+   a detailed mapping of old to new settings.
+
+3. Note the new pipeline step numbering:
+
+   - Steps 4 and 5 are now dedicated QC steps (``04-qc-metadata``, ``05-qc-volumes``)
+   - fMRIPrep steps are now steps 6 and 7
+
+4. Remove or archive your old ``settings.sh`` file.
 
 Next Steps
 ----------
 
 After installation, proceed to the :doc:`configuration` guide to set up
-your preprocessing pipeline parameters.
+your preprocessing pipeline parameters in detail.

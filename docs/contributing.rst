@@ -89,7 +89,7 @@ Examples
    feat!: update to fMRIPrep 24.0.0
 
    BREAKING CHANGE: Update to fMRIPrep 24.0.0 which requires
-   different output space syntax. Update settings.template.sh
+   different output space syntax. Update config.template.yaml
    accordingly.
 
 Scope
@@ -143,8 +143,8 @@ Development Workflow
 
 .. code-block:: bash
 
-   git clone https://github.com/your-username/fmri.git
-   cd fmri
+   git clone https://github.com/your-username/fmriprep-workbench.git
+   cd fmriprep-workbench
    git checkout -b feat/your-feature-name
 
 2. Make Changes

@@ -2,17 +2,66 @@ Workflows
 =========
 
 This document provides detailed information about each preprocessing workflow
-in the SML fMRI template.
+in the fMRIPrep Workbench template.
+
+.. note::
+
+   **v0.2.0 Pipeline Restructuring**: QC steps 4 and 5 are now dedicated pipeline
+   steps with their own directories (``04-qc-metadata`` and ``05-qc-volumes``),
+   rather than toolbox-only utilities. The fMRIPrep steps have been renumbered
+   to steps 6 and 7.
 
 Pipeline Overview
 -----------------
 
-The preprocessing pipeline is organized into sequential steps, each handling
+The preprocessing pipeline is organized into seven sequential steps, each handling
 a specific aspect of the fMRI preprocessing workflow:
 
 .. code-block:: text
 
-   FlyWheel → BIDS → dcm2niix → Prep → fMRIPrep Anat → fMRIPrep Full
+   Step 1     Step 2       Step 3      Step 4     Step 5      Step 6        Step 7
+   FlyWheel -> dcm2niix -> Prep for -> QC Meta -> QC Vols -> fMRIPrep  -> fMRIPrep
+   Download    Conversion   fMRIPrep    Verify     Check       Anat         Full
+
+Pipeline Steps Summary
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 10 20 30 40
+
+   * - Step
+     - Directory
+     - SLURM Job Name
+     - Description
+   * - 1
+     - ``01-fw2server``
+     - ``fmriprep-workbench-1``
+     - Download scanner acquisitions from FlyWheel
+   * - 2
+     - ``02-dcm2niix``
+     - ``fmriprep-workbench-2``
+     - Convert DICOM to NIfTI in BIDS format
+   * - 3
+     - ``03-prep-fmriprep``
+     - ``fmriprep-workbench-3``
+     - Remove dummy scans, configure fieldmap SDC
+   * - 4
+     - ``04-qc-metadata``
+     - ``fmriprep-workbench-4``
+     - Verify DICOM to NIfTI to BIDS metadata conversion
+   * - 5
+     - ``05-qc-volumes``
+     - ``fmriprep-workbench-5``
+     - Verify scan volume counts match expected values
+   * - 6
+     - ``06-run-fmriprep``
+     - ``fmriprep-workbench-6``
+     - Run fMRIPrep anatomical workflows only
+   * - 7
+     - ``07-run-fmriprep``
+     - ``fmriprep-workbench-7``
+     - Run full fMRIPrep workflows (anatomical + functional)
 
 Workflow Details
 ----------------
@@ -20,31 +69,42 @@ Workflow Details
 1. FlyWheel Transfer (01-fw2server)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Purpose:** Automated transfer of scanner acquisitions from FlyWheel to Server
+**Purpose:** Automated transfer of scanner acquisitions from FlyWheel to server
+
+**Script:** ``01-fw2server/download.sh``
 
 **Inputs:**
-   - FlyWheel project ID
-   - Scanner acquisition metadata
+   - FlyWheel project ID and session information
+   - FlyWheel API credentials
 
 **Outputs:**
    - Raw DICOM files on server storage
 
-**Configuration:**
-   - FlyWheel API credentials
-   - Target directory structure
+**Configuration (config.yaml):**
 
-2. BIDS Conversion (02-bidsify)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: yaml
 
-**Purpose:** Convert raw data to BIDS-compliant format
+   user:
+     fw_group_id: 'pi'
+     fw_project_id: 'projectname'
+
+   scan:
+     fw_cli_api_key_file: '~/flywheel_api_key.txt'
+     fw_url: 'cni.flywheel.io'
+
+2. DICOM to NIfTI Conversion (02-dcm2niix)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Purpose:** Convert DICOM files to NIfTI format using heudiconv/dcm2niix
+
+**Script:** ``02-dcm2niix/dcm2niix.sh``
 
 **Inputs:**
    - Raw DICOM files
-   - Study metadata
 
 **Outputs:**
-   - BIDS-formatted dataset
-   - Sidecar JSON files with metadata
+   - BIDS-formatted NIfTI files (.nii.gz)
+   - JSON metadata sidecar files
 
 **BIDS Structure:**
 
@@ -62,64 +122,113 @@ Workflow Details
        └── fmap/
            └── sub-<subject_id>_dir-AP_epi.nii.gz
 
-3. DICOM to NIfTI (03-dcm2niix)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Purpose:** Convert DICOM files to NIfTI format using dcm2niix
-
-**Inputs:**
-   - DICOM files
-
-**Outputs:**
-   - NIfTI files (.nii.gz)
-   - JSON metadata files
-
 **Features:**
    - Automatic metadata extraction
    - BIDS naming conventions
    - Compressed output (gzip)
 
-4. Prep for fMRIPrep (04-prep-fmriprep)
+3. Prep for fMRIPrep (03-prep-fmriprep)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Purpose:** Prepare data for fMRIPrep processing
 
+**Script:** ``03-prep-fmriprep/prepare_fmri.sh``
+
 **Key Operations:**
 
 a. **Dummy Scan Removal**
-   
-   Remove initial dummy TRs (specified by ``n_dummy`` in settings):
-   
-   .. code-block:: bash
-   
-      # Configured in settings.sh
-      n_dummy=5
+
+   Remove initial dummy TRs (specified by ``n_dummy`` in config):
+
+   .. code-block:: yaml
+
+      # In config.yaml
+      scan:
+        n_dummy: 5
 
 b. **Fieldmap Setup**
-   
+
    Configure fieldmap-based susceptibility distortion correction:
-   
-   - Map fieldmaps to BOLD runs
+
+   - Map fieldmaps to BOLD runs via ``fmap_mapping``
    - Update IntendedFor fields in JSON metadata
    - Validate fieldmap parameters
 
 c. **Data Validation**
-   
+
    - Check expected volume counts
    - Verify BIDS compliance
    - Validate JSON metadata
 
 **Outputs:**
    - Trimmed BOLD files (without dummy scans)
-   - Updated JSON metadata
+   - Updated JSON metadata with IntendedFor fields
    - Validated BIDS structure
 
-5. fMRIPrep Anatomical (05-run-fmriprep)
+4. QC Metadata Verification (04-qc-metadata)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Purpose:** Verify DICOM to NIfTI to BIDS metadata conversion
+
+**Script:** ``04-qc-metadata/verify_metadata.sh``
+
+.. note::
+
+   **v0.2.0 Change**: This QC step was previously available only via the toolbox
+   (``toolbox/verify_nii_metadata.sh``). It is now a dedicated pipeline step
+   with its own sbatch wrapper for consistent SLURM job management.
+
+**Validations Performed:**
+   - JSON sidecar file existence
+   - Required BIDS metadata fields
+   - Echo time and repetition time values
+   - Phase encoding direction consistency
+   - IntendedFor field correctness in fieldmap metadata
+
+**Outputs:**
+   - Validation reports
+   - Error logs for any failed checks
+
+5. QC Volume Verification (05-qc-volumes)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Purpose:** Verify scan volume counts match expected values
+
+**Script:** ``05-qc-volumes/check_volumes.sh``
+
+.. note::
+
+   **v0.2.0 Change**: This QC step was previously available only via the toolbox
+   (``toolbox/summarize_bold_scan_volume_counts.sh``). It is now a dedicated
+   pipeline step with its own sbatch wrapper.
+
+**Validations Performed:**
+   - Fieldmap volume counts against ``validation.expected_fmap_vols``
+   - BOLD volume counts against ``validation.expected_bold_vols``
+   - Trimmed BOLD volumes against ``validation.expected_bold_vols_after_trimming``
+
+**Configuration (config.yaml):**
+
+.. code-block:: yaml
+
+   validation:
+     expected_fmap_vols: 12
+     expected_bold_vols: 220
+     expected_bold_vols_after_trimming: 215
+
+**Outputs:**
+   - Timestamped diagnostic reports
+   - Summary CSV files for batch review
+
+6. fMRIPrep Anatomical (06-run-fmriprep)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Purpose:** Run fMRIPrep anatomical workflows only
+**Purpose:** Run fMRIPrep anatomical workflows only (with ``--anat-only`` flag)
 
-**Use Case:** When manual FreeSurfer surface editing is needed
+**Script:** ``06-run-fmriprep/run_fmriprep.sh``
+
+**Use Case:** When manual FreeSurfer surface editing is needed before
+functional preprocessing
 
 **Inputs:**
    - BIDS-formatted anatomical data
@@ -130,33 +239,42 @@ c. **Data Validation**
    - Anatomical preprocessing outputs
    - Quality control reports
 
-**Configuration:**
+**Configuration (config.yaml):**
 
-.. code-block:: bash
+.. code-block:: yaml
 
-   # In settings.sh
-   FMRIPREP_VERSION="24.0.1"
-   FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+   fmriprep:
+     output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
+
+   pipeline:
+     fmriprep_version: '24.0.1'
 
 **Execution:**
 
 .. code-block:: bash
 
-   ./05-run.sbatch --anat-only
+   ./06-run.sbatch
 
-6. fMRIPrep Complete (06-run-fmriprep)
+.. note::
+
+   Step 6 automatically passes the ``--anat-only`` flag to fMRIPrep.
+   Skip this step if you do not need manual FreeSurfer editing.
+
+7. fMRIPrep Complete (07-run-fmriprep)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Purpose:** Run complete fMRIPrep preprocessing (anatomical + functional)
 
+**Script:** ``07-run-fmriprep/run_fmriprep.sh``
+
 **Inputs:**
    - BIDS-formatted data (anatomical and functional)
-   - FreeSurfer outputs (if using edited surfaces)
+   - FreeSurfer outputs (if using edited surfaces from step 6)
    - Fieldmap data
 
 **Outputs:**
-   - Preprocessed BOLD data
-   - Confound regressors
+   - Preprocessed BOLD data in configured output spaces
+   - Confound regressors (motion, CompCor, FD, DVARS)
    - HTML quality reports
    - Anatomical-functional co-registration
 
@@ -165,9 +283,9 @@ c. **Data Validation**
 1. Skull stripping
 2. Brain tissue segmentation
 3. Spatial normalization
-4. Surface reconstruction (if not using existing)
+4. Surface reconstruction (if not using existing from step 6)
 5. BOLD preprocessing:
-   
+
    - Slice timing correction
    - Motion correction
    - Susceptibility distortion correction (using fieldmaps)
@@ -176,19 +294,25 @@ c. **Data Validation**
    - Resampling to target resolution
 
 6. Confound estimation:
-   
+
    - Motion parameters
    - CompCor components
    - Framewise displacement
    - DVARS
 
-**Quality Metrics:**
+**Quality Metrics (config.yaml):**
+
+.. code-block:: yaml
+
+   fmriprep:
+     fd_spike_threshold: 0.9
+     dvars_spike_threshold: 3.0
+
+**Execution:**
 
 .. code-block:: bash
 
-   # Configured thresholds
-   FMRIPREP_FD_SPIKE_THRESHOLD=0.9
-   FMRIPREP_DVARS_SPIKE_THRESHOLD=3.0
+   ./07-run.sbatch
 
 Data Organization
 -----------------
@@ -235,19 +359,25 @@ Use subject ID modifiers for fine-grained control:
 Resource Configuration
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Adjust resources per workflow:
+Adjust resources per workflow type in ``config.yaml``:
 
-.. code-block:: bash
+**General Workflows (Steps 1-5):**
 
-   # General workflows
-   export SLURM_CPUS="8"
-   export SLURM_MEM="8G"
-   export SLURM_TIME="2:00:00"
+.. code-block:: yaml
 
-   # fMRIPrep workflows
-   FMRIPREP_SLURM_CPUS_PER_TASK="16"
-   FMRIPREP_SLURM_MEM_PER_CPU="4G"
-   FMRIPREP_SLURM_TIME="12:00:00"
+   slurm:
+     cpus: 8
+     mem: '4G'
+     time: '2:00:00'
+
+**fMRIPrep Workflows (Steps 6-7):**
+
+.. code-block:: yaml
+
+   fmriprep_slurm:
+     cpus_per_task: 16
+     mem_per_cpu: '4G'
+     time: '48:00:00'
 
 Advanced Topics
 ---------------
@@ -257,54 +387,66 @@ Parallel Processing
 
 Control concurrent job execution:
 
-.. code-block:: bash
+.. code-block:: yaml
 
-   # Number of subjects to process simultaneously
-   export SLURM_ARRAY_THROTTLE="10"
+   slurm:
+     array_throttle: 10  # Process up to 10 subjects simultaneously
 
 Output Spaces
 ~~~~~~~~~~~~~
 
 Configure target output spaces:
 
-.. code-block:: bash
+.. code-block:: yaml
 
-   # Multiple output spaces
-   FMRIPREP_OUTPUT_SPACES="MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5"
+   fmriprep:
+     output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
 
-Manual Interventions
-~~~~~~~~~~~~~~~~~~~~
+Manual FreeSurfer Editing Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For subjects requiring manual editing:
 
-1. Run anatomical workflow (step 5 with ``--anat-only``)
-2. Download FreeSurfer outputs
-3. Perform manual edits (e.g., skull strip correction)
-4. Upload edited FreeSurfer directory
-5. Run complete workflow (step 6) with edited surfaces
+1. Run step 6 (anatomical only): ``./06-run.sbatch``
+2. Download FreeSurfer outputs for manual editing
+3. Perform manual edits (e.g., skull strip correction, white matter surface)
+4. Re-upload edited FreeSurfer directory to ``derivatives/freesurfer/``
+5. Run step 7 (full workflows): ``./07-run.sbatch``
+
+Skipping Steps
+~~~~~~~~~~~~~~
+
+If you do not need manual FreeSurfer editing:
+
+- Skip step 6 entirely
+- Run step 7 directly after QC steps (4-5): ``./07-run.sbatch``
 
 Best Practices
 --------------
 
 1. **Validate Each Step**
-   
-   Review outputs after each workflow before proceeding
+
+   Review outputs after each workflow before proceeding to the next
 
 2. **Monitor Resource Usage**
-   
-   Adjust Slurm parameters based on actual usage
+
+   Adjust SLURM parameters based on actual usage (check with ``sacct``)
 
 3. **Document Deviations**
-   
+
    Keep track of any manual interventions or parameter changes
 
 4. **Regular Backups**
-   
+
    Backup critical intermediate outputs (e.g., FreeSurfer directories)
 
 5. **Version Control**
-   
+
    Track fMRIPrep version and parameter changes for reproducibility
+
+6. **Review QC Reports**
+
+   Always review fMRIPrep HTML reports after step 7 completes
 
 Next Steps
 ----------
