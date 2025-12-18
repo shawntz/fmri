@@ -8,8 +8,7 @@ STEP_NAME="02-dcm2niix"
 JOB_NAME="fmriprep-workbench-2"
 FW_SESHID=$1
 NEW_SUBID=$2
-GROUPING=$3
-SKIP_TAR_FLAG=$4
+SKIP_TAR_FLAG=$3
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${STEP_NAME}
@@ -41,4 +40,4 @@ sbatch \
     --error=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err \
     --mail-type=BEGIN,END,FAIL \
     --mail-user=${SLURM_EMAIL} \
-    ./${STEP_NAME}/dcm2niix.sh ${STEP_NAME} ${FW_SESHID} ${NEW_SUBID} ${GROUPING} ${SKIP_TAR_FLAG}
+    ./${STEP_NAME}/dcm2niix.sh ${STEP_NAME} ${FW_SESHID} ${NEW_SUBID} ${SKIP_TAR_FLAG}
