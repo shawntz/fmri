@@ -130,7 +130,7 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # example: running step 2 (dcm2niix BIDS conversion)
-./02-run.sbatch <fw_session_id> <new_bids_subject_id> [grouping] [--skip-tar]
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
 # example: running step 3 (prep for fMRIPrep)
 ./03-run.sbatch

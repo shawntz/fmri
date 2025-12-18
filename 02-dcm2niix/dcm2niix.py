@@ -35,8 +35,8 @@ def parse_args():
     parser.add_argument("--task_id", action="store", required=True, help="Task name label that will appear in BIDS files")
     parser.add_argument("--sing_image_path", action="store", required=True, help="Path to the heudiconv singularity image, should be defined in settings.sh")
     parser.add_argument("--scripts_dir", action="store", required=True, help="Root path of scripts dir (i.e., the clone of this repo), should be defined in settings.sh")
-    parser.add_argument("--grouping", action="store", default="studyUID",
-                        help="Heudiconv grouping strategy. Use 'all' to bypass the 'Conflicting study identifiers found' assertion when working with manually merged sessions. Default: 'studyUID'")
+    parser.add_argument("--grouping", action="store", default="all",
+                        help="Heudiconv grouping strategy. Use 'all' to bypass the 'Conflicting study identifiers found' assertion when working with manually merged sessions. Default: 'all'")
     parser.add_argument("--skip-tar", action="store_true", default=False,
                         help="Skip tar extraction step. Use this flag when working with manually configured scan directories that don't need tar extraction.")
     return parser.parse_args()
