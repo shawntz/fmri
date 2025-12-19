@@ -1,0 +1,8 @@
+{# Custom layout template to add Seline tracking #}
+{% extends "!layout.html" %}
+
+{# Add Seline tracking script to the head section #}
+{% block extrahead %}
+  {{ super() }}
+  <script async src="https://cdn.seline.com/seline.js" data-token="2162fe5e9da2b07"></script>
+{% endblock %}
