@@ -36,25 +36,27 @@ else
     exit 1
 fi
 
-echo "Searching for subject ${SUBJECT_ID} in ${DIAGNOSTICS_DIR}..."
+echo "Searching for subject ${SUBJECT_ID} diagnostics..."
 echo ""
 
-# Find all diagnostic files matching the subject ID
-FOUND_FILES=$(find "${DIAGNOSTICS_DIR}" -type f -name "*${SUBJECT_ID}*" 2>/dev/null)
+# Find directories matching the subject ID pattern (YYYYMMDD_HHMMSS_SUBJECTID)
+SUBJECT_DIRS=$(find "${DIAGNOSTICS_DIR}" -type d -name "*_${SUBJECT_ID}" 2>/dev/null)
 
-if [ -z "${FOUND_FILES}" ]; then
-    echo "No diagnostic files found for subject ${SUBJECT_ID}"
+if [ -z "${SUBJECT_DIRS}" ]; then
+    echo "No diagnostic directories found for subject ${SUBJECT_ID}"
     echo ""
     echo "Recent diagnostic runs:"
-    ls -1dt "${DIAGNOSTICS_DIR}"/*/ 2>/dev/null | head -5
+    ls -1dt "${DIAGNOSTICS_DIR}"/*/ 2>/dev/null | head -10
     exit 0
 fi
 
-# Display each file
-echo "${FOUND_FILES}" | while IFS= read -r file; do
+# For each matching directory, find and display all files
+echo "${SUBJECT_DIRS}" | while IFS= read -r dir; do
     echo "========================================="
-    echo "File: ${file}"
+    echo "Diagnostic run: $(basename ${dir})"
     echo "========================================="
-    head -n 20 "${file}"
     echo ""
+
+    # Find all files in this directory
+    find "${dir}" -type f -exec echo "-----------------------------------------" \; -exec echo "File: {}" \; -exec echo "-----------------------------------------" \; -exec head -n 20 {} \; -exec echo "" \;
 done
