@@ -5,8 +5,6 @@
 # @Usage: ./show_diagnostics_for <subject_id>
 # @Example: ./show_diagnostics_for 1302
 
-source ./load_config.sh
-
 # Check if subject ID was provided
 if [ $# -eq 0 ]; then
     echo "Error: Subject ID required"
@@ -16,43 +14,15 @@ if [ $# -eq 0 ]; then
 fi
 
 SUBJECT_ID=$1
-SUBJECT="sub-${SUBJECT_ID}"
 
-# Check if diagnostics directory exists
-DIAGNOSTICS_DIR="${SLURM_LOG_DIR}/diagnostics"
+# Use relative path from repo root
+DIAGNOSTICS_DIR="logs/diagnostics"
+
 if [ ! -d "${DIAGNOSTICS_DIR}" ]; then
     echo "Error: Diagnostics directory not found: ${DIAGNOSTICS_DIR}"
+    echo "Make sure you're running this from the repository root"
     exit 1
 fi
 
-echo "========================================="
-echo "Diagnostics for ${SUBJECT}"
-echo "========================================="
-echo ""
-
-# Find all diagnostic files for this subject
-# Search in timestamped subdirectories for files containing the subject ID
-FOUND_FILES=$(find "${DIAGNOSTICS_DIR}" -type f -name "*${SUBJECT_ID}*" 2>/dev/null)
-
-if [ -z "${FOUND_FILES}" ]; then
-    echo "No diagnostic files found for subject ${SUBJECT_ID}"
-    echo ""
-    echo "Searched in: ${DIAGNOSTICS_DIR}"
-    echo ""
-    echo "Available diagnostic runs:"
-    ls -1dt "${DIAGNOSTICS_DIR}"/*/ 2>/dev/null | head -5 || echo "  (none)"
-    exit 1
-fi
-
-# Display each diagnostic file
-while IFS= read -r file; do
-    echo "-----------------------------------------"
-    echo "File: ${file}"
-    echo "-----------------------------------------"
-    head -n 20 "$file"
-    echo ""
-done <<< "${FOUND_FILES}"
-
-echo "========================================="
-echo "End of diagnostics for ${SUBJECT}"
-echo "========================================="
+# Find and display diagnostic files matching the subject ID
+find "${DIAGNOSTICS_DIR}" -type f -name "*${SUBJECT_ID}*" -exec echo "=========================================" \; -exec echo "File: {}" \; -exec echo "=========================================" \; -exec head -n 20 {} \; -exec echo "" \;
