@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Skip interactive subjects file prompt (use all-subjects.txt by default)
+export SKIP_SUBJECTS_PROMPT=true
+
 source ./load_config.sh
 
 STEP_NAME="06-run-fmriprep"
@@ -14,8 +17,8 @@ if [ "$DEBUG" = "1" ]; then
     echo "($(date)) [INFO] Running in DEBUG mode with single subject"
     array_opt="--array=0"
 else
-    echo "($(date)) [INFO] Running full array: ${FMRIPREP_SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
-    array_opt="--array=${FMRIPREP_SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+    echo "($(date)) [INFO] Running full array: ${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+    array_opt="--array=${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
 fi
 
 # echo slurm job params for inline validation
