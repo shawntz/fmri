@@ -15,12 +15,24 @@ fi
 
 SUBJECT_ID=$1
 
-# Use relative path from repo root
-DIAGNOSTICS_DIR="logs/diagnostics"
+# Search for diagnostics directory in common locations
+DIAGNOSTICS_DIR=""
 
-if [ ! -d "${DIAGNOSTICS_DIR}" ]; then
-    echo "Error: Diagnostics directory not found: ${DIAGNOSTICS_DIR}"
-    echo "Make sure you're running this from the repository root"
+# Check relative path from repo root
+if [ -d "logs/diagnostics" ]; then
+    DIAGNOSTICS_DIR="logs/diagnostics"
+# Check parent directory
+elif [ -d "../logs/diagnostics" ]; then
+    DIAGNOSTICS_DIR="../logs/diagnostics"
+# Check if we're in the logs directory already
+elif [ -d "diagnostics" ]; then
+    DIAGNOSTICS_DIR="diagnostics"
+else
+    echo "Error: Diagnostics directory not found"
+    echo "Searched in:"
+    echo "  - logs/diagnostics"
+    echo "  - ../logs/diagnostics"
+    echo "  - diagnostics"
     exit 1
 fi
 
