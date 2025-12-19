@@ -40,6 +40,7 @@ Quick Start
    workflows
    contributing
    changelog
+   privacy
 
 Features
 --------
