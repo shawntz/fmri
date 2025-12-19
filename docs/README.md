@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains the Sphinx documentation for the SML fMRI Preprocessing Template.
+This directory contains the MkDocs documentation for the fMRIPrep Workbench.
 
 ## Building Documentation Locally
 
@@ -11,39 +11,69 @@ To build the documentation locally:
    pip install -r requirements.txt
    ```
 
-2. Build the HTML documentation:
+2. Serve the documentation locally (with live reload):
    ```bash
-   make html
+   cd ..  # Navigate to repository root
+   mkdocs serve
    ```
 
-3. Open the built documentation:
-   ```bash
-   open _build/html/index.html
+3. Open your browser to view the documentation:
    ```
+   http://127.0.0.1:8000
+   ```
+
+## Building Static HTML
+
+To build static HTML files:
+
+```bash
+cd ..  # Navigate to repository root
+mkdocs build
+```
+
+The built documentation will be in the `site/` directory.
+
+## Building with PDF
+
+To build documentation with PDF generation:
+
+```bash
+cd ..  # Navigate to repository root
+ENABLE_PDF_EXPORT=1 mkdocs build
+```
+
+The PDF will be available at `site/pdf/fmriprep-workbench-documentation.pdf`.
 
 ## Documentation Structure
 
-- `conf.py` - Sphinx configuration file
-- `index.rst` - Main documentation page
-- `installation.rst` - Installation guide
-- `configuration.rst` - Configuration guide
-- `usage.rst` - Usage guide
-- `workflows.rst` - Detailed workflow documentation
-- `contributing.rst` - Contributing guidelines
-- `changelog.rst` - Changelog page
+- `index.md` - Main documentation page
+- `installation.md` - Installation guide
+- `configuration.md` - Configuration guide
+- `usage.md` - Usage guide
+- `workflows.md` - Detailed workflow documentation
+- `contributing.md` - Contributing guidelines
+- `changelog.md` - Changelog page
 
-## ReadTheDocs
+## GitHub Pages
 
-Documentation is automatically built and published on ReadTheDocs when changes are pushed to the repository.
+Documentation is automatically built and published on GitHub Pages when changes are pushed to the main branch.
 
-Visit: https://fmriprep-workbench.readthedocs.io/
+Visit: https://shawntz.github.io/fmriprep-workbench/
 
 ## Adding New Pages
 
-1. Create a new `.rst` file in this directory
-2. Add the page to the `toctree` in `index.rst`
-3. Build and test locally before committing
+1. Create a new `.md` file in this directory
+2. Add the page to the `nav` section in `../mkdocs.yml`
+3. Test locally with `mkdocs serve` before committing
 
-## Markdown Support
+## Markdown Format
 
-This documentation supports both reStructuredText (`.rst`) and Markdown (`.md`) files via the MyST parser.
+This documentation uses Markdown format with Material for MkDocs extensions, including:
+
+- Fenced code blocks with syntax highlighting
+- Admonitions (`!!! note`, `!!! warning`, etc.)
+- Tables
+- Task lists
+- Definition lists
+
+For more information on supported Markdown syntax, see the [Material for MkDocs documentation](https://squidfunk.github.io/mkdocs-material/reference/).

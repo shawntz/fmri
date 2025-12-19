@@ -9,3 +9,7 @@ __pycache__/
 docs/_build/
 docs/_static/
 docs/_templates/
+
+# MkDocs build artifacts
+site/
+.cache/
