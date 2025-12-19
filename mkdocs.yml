@@ -21,6 +21,7 @@ exclude_docs: |
 # Theme configuration
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
     # Light mode
     - scheme: default
@@ -60,6 +61,9 @@ plugins:
   - search:
       lang: en
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  # Note: PDF plugin requires system dependencies (Pango, Cairo)
+  # Works in GitHub Actions CI but may fail locally without these installed
+  # To build locally without PDF: temporarily comment out this plugin
   - with-pdf:
       author: Shawn T. Schwartz and Stanford Memory Lab
       copyright: Copyright &copy; 2025 Shawn Schwartz and Stanford Memory Lab
