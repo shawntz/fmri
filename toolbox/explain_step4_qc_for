@@ -1,0 +1,160 @@
+#!/bin/bash
+# @Author: Shawn Schwartz - Stanford Memory Lab
+# @Date: December 18, 2025
+# @Description: Explain step 4 QC (metadata verification) problems for a subject
+# @Usage: ./explain_step4_qc_for <subject_id>
+# @Example: ./explain_step4_qc_for 054
+
+# Check if subject ID was provided
+if [ $# -eq 0 ]; then
+    echo "Error: Subject ID required"
+    echo "Usage: $0 <subject_id>"
+    echo "Example: $0 054"
+    exit 1
+fi
+
+SUBJECT_ID=$1
+SUBJECT="sub-${SUBJECT_ID}"
+
+# Search for QC directory in common locations
+QC_DIR=""
+if [ -d "logs/qc-verify_nii_metadata" ]; then
+    QC_DIR="logs/qc-verify_nii_metadata"
+elif [ -d "../logs/qc-verify_nii_metadata" ]; then
+    QC_DIR="../logs/qc-verify_nii_metadata"
+else
+    echo "Error: Step 4 QC directory not found"
+    echo "Searched in:"
+    echo "  - logs/qc-verify_nii_metadata"
+    echo "  - ../logs/qc-verify_nii_metadata"
+    exit 1
+fi
+
+echo "========================================="
+echo "Step 4 QC Analysis for ${SUBJECT}"
+echo "========================================="
+echo ""
+
+# Find CSV files for this subject
+BIDS_CSV="${QC_DIR}/${SUBJECT}_summary-bids.csv"
+TRIMMED_CSV="${QC_DIR}/${SUBJECT}_summary-bids_trimmed.csv"
+
+if [ ! -f "${BIDS_CSV}" ] && [ ! -f "${TRIMMED_CSV}" ]; then
+    echo "No step 4 QC results found for subject ${SUBJECT_ID}"
+    echo ""
+    echo "Available QC results:"
+    ls -1 "${QC_DIR}"/*_summary-*.csv 2>/dev/null | head -10
+    exit 1
+fi
+
+# Function to analyze a CSV file
+analyze_csv() {
+    local csv_file=$1
+    local dir_type=$2
+
+    if [ ! -f "${csv_file}" ]; then
+        echo "⚠️  No QC data found for ${dir_type} directory"
+        echo ""
+        return
+    fi
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📁 ${dir_type} Directory Analysis"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # Count total files and failures
+    local total_files=$(tail -n +2 "${csv_file}" | wc -l)
+    local total_fail=$(tail -n +2 "${csv_file}" | awk -F',' '$8 == "FAIL"' | wc -l)
+    local total_pass=$(tail -n +2 "${csv_file}" | awk -F',' '$8 == "PASS"' | wc -l)
+
+    if [ "${total_files}" -eq 0 ]; then
+        echo "⚠️  No files found in QC report"
+        echo ""
+        return
+    fi
+
+    echo "📊 Summary:"
+    echo "  Total files checked: ${total_files}"
+    echo "  ✅ Passed: ${total_pass}"
+    echo "  ❌ Failed: ${total_fail}"
+    echo ""
+
+    if [ "${total_fail}" -eq 0 ]; then
+        echo "✅ All metadata checks passed!"
+        echo ""
+        return
+    fi
+
+    echo "⚠️  ISSUES FOUND:"
+    echo ""
+
+    # Parse failures and explain them
+    tail -n +2 "${csv_file}" | awk -F',' '$8 == "FAIL" {
+        filename = $4
+        series_num = $5
+        series_desc = $6
+        matched_seq = $7
+        seq_type = $8
+        run_from_desc = $13
+        run_match = $14
+
+        print "  ❌ File: " filename
+        print "     Series Number: " series_num
+        print "     Series Description: " series_desc
+        print "     "
+
+        if (matched_seq == "FAIL") {
+            print "     ⚠️  PROBLEM: Series number not recognized in config"
+            print "     EXPLANATION: The series number from the DICOM header does not match"
+            print "                  any expected sequence in your scan-config.json file."
+            print "     ACTION: Check if this is an unexpected acquisition or update your config."
+        } else if (run_match == "FAIL") {
+            print "     ⚠️  PROBLEM: Run number mismatch"
+            print "     EXPLANATION: The run number extracted from the series description"
+            print "                  does not match the run number in the filename."
+            print "     EXTRACTED RUN: " run_from_desc
+            print "     ACTION: This usually means the heuristic incorrectly mapped the scan."
+            print "            Check dcm_heuristic.py and the series description pattern."
+        } else {
+            print "     ⚠️  PROBLEM: Unknown validation failure"
+            print "     ACTION: Review the full CSV for details."
+        }
+        print "     "
+        print "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print "  "
+    }'
+
+    echo ""
+}
+
+# Analyze raw BIDS directory
+if [ -f "${BIDS_CSV}" ]; then
+    analyze_csv "${BIDS_CSV}" "RAW (sourcedata)"
+fi
+
+# Analyze trimmed directory
+if [ -f "${TRIMMED_CSV}" ]; then
+    analyze_csv "${TRIMMED_CSV}" "TRIMMED (processed)"
+fi
+
+echo "========================================="
+echo "💡 Common Fixes:"
+echo "========================================="
+echo ""
+echo "1. Series Number Not Recognized:"
+echo "   → Update scan-config.json to include the series number"
+echo ""
+echo "2. Run Number Mismatch (Fieldmaps):"
+echo "   → Check if fieldmap series descriptions contain run info"
+echo "   → Update dcm_heuristic.py pattern matching logic"
+echo "   → Verify the filename_template in scan-config.json"
+echo ""
+echo "3. Missing JSON Files:"
+echo "   → Re-run step 2 (dcm2niix conversion)"
+echo ""
+echo "========================================="
+echo "📄 Full CSV files:"
+echo "   ${BIDS_CSV}"
+echo "   ${TRIMMED_CSV}"
+echo "========================================="
