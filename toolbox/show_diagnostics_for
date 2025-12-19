@@ -57,6 +57,6 @@ echo "${SUBJECT_DIRS}" | while IFS= read -r dir; do
     echo "========================================="
     echo ""
 
-    # Find all files in this directory
-    find "${dir}" -type f -exec echo "-----------------------------------------" \; -exec echo "File: {}" \; -exec echo "-----------------------------------------" \; -exec head -n 20 {} \; -exec echo "" \;
+    # Find all files in this directory and display complete contents
+    find "${dir}" -type f -exec echo "-----------------------------------------" \; -exec echo "File: {}" \; -exec echo "-----------------------------------------" \; -exec cat {} \; -exec echo "" \;
 done
