@@ -223,27 +223,27 @@ def main():
                         shutil.move(str(dicom_dir), str(dicom_extract_dir))
         else:
             print(f"[INFO] Single exam session detected, processing normally")
-            print(f"[INFO] Running heudiconv for sub-{args.subid}")
+            print(f"[INFO] Running heudiconv for sub-{args.subid} as ses-01")
             print(f"[INFO] Using grouping strategy: {args.grouping}")
             cmd = (
                 f"singularity run --cleanenv "
                 f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
                 f"-e {args.sing_image_path} "
                 f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
-                f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+                f"-o /outdir/ -f {heu_file} -s {args.subid} -ss ses-01 -c dcm2niix -b notop --overwrite "
                 f"--grouping {args.grouping}"
             )
             subprocess.run(cmd, shell=True, check=True)
     else:
         # Normal tar-based workflow
-        print(f"[INFO] Running heudiconv for sub-{args.subid}")
+        print(f"[INFO] Running heudiconv for sub-{args.subid} as ses-01")
         print(f"[INFO] Using grouping strategy: {args.grouping}")
         cmd = (
             f"singularity run --cleanenv "
             f"-B {dicoms_dir}:/indir -B {bids_dir}:/outdir "
             f"-e {args.sing_image_path} "
             f"-d /indir/sub-{{subject}}/*.dicom/*.dcm "
-            f"-o /outdir/ -f {heu_file} -s {args.subid} -c dcm2niix -b notop --overwrite "
+            f"-o /outdir/ -f {heu_file} -s {args.subid} -ss ses-01 -c dcm2niix -b notop --overwrite "
             f"--grouping {args.grouping}"
         )
         subprocess.run(cmd, shell=True, check=True)
