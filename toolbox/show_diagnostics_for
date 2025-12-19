@@ -36,5 +36,25 @@ else
     exit 1
 fi
 
-# Find and display diagnostic files matching the subject ID
-find "${DIAGNOSTICS_DIR}" -type f -name "*${SUBJECT_ID}*" -exec echo "=========================================" \; -exec echo "File: {}" \; -exec echo "=========================================" \; -exec head -n 20 {} \; -exec echo "" \;
+echo "Searching for subject ${SUBJECT_ID} in ${DIAGNOSTICS_DIR}..."
+echo ""
+
+# Find all diagnostic files matching the subject ID
+FOUND_FILES=$(find "${DIAGNOSTICS_DIR}" -type f -name "*${SUBJECT_ID}*" 2>/dev/null)
+
+if [ -z "${FOUND_FILES}" ]; then
+    echo "No diagnostic files found for subject ${SUBJECT_ID}"
+    echo ""
+    echo "Recent diagnostic runs:"
+    ls -1dt "${DIAGNOSTICS_DIR}"/*/ 2>/dev/null | head -5
+    exit 0
+fi
+
+# Display each file
+echo "${FOUND_FILES}" | while IFS= read -r file; do
+    echo "========================================="
+    echo "File: ${file}"
+    echo "========================================="
+    head -n 20 "${file}"
+    echo ""
+done
