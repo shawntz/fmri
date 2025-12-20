@@ -33,10 +33,12 @@ import argparse
 from collections import OrderedDict
 import inspect
 import json
+import os
 import subprocess as sub
 import sys
 
-import openfmri_utils as _openfmri_utils
+from openfmri_utils import load_condkey, load_contrasts
+
 
 # Re-export public names from openfmri_utils without using a wildcard import.
 for _name in dir(_openfmri_utils):

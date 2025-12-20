@@ -33,9 +33,11 @@ import argparse
 from collections import OrderedDict
 import inspect
 import json
+import os
+import sys
 
-from directory_struct_utils import *
-from openfmri_utils import *
+from directory_struct_utils import get_all_subs
+from openfmri_utils import load_condkey, load_contrasts
 
 
 def parse_command_line(argv):
