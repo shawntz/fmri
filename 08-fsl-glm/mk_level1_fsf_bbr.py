@@ -269,7 +269,8 @@ def mk_level1_fsf_bbr(a):
     cond_key_txt = os.path.join(a.basedir,a.studyid,'model/level1/model-%s/condition_key.txt' % a.modelname)
     if os.path.exists(cond_key_json):
         try:
-            conddict = json.load(open(cond_key_json), object_pairs_hook=OrderedDict)
+            with open(cond_key_json) as f:
+                conddict = json.load(f, object_pairs_hook=OrderedDict)
             # keep the order of the keys as they were in the json file
         except ValueError:
             print("\nERROR: Could not read the %s file. Make sure it is formatted correctly." % cond_key_json)
@@ -328,7 +329,8 @@ def mk_level1_fsf_bbr(a):
     # if it's a txt file
     contrastsfile_txt=os.path.join(a.basedir,a.studyid,'model/level1/model-%s/task_contrasts.txt' % a.modelname)
     if os.path.exists(contrastsfile_json):
-        contrasts_all = json.load(open(contrastsfile_json), object_pairs_hook=OrderedDict)
+        with open(contrastsfile_json) as f:
+            contrasts_all = json.load(f, object_pairs_hook=OrderedDict)
         contrasts_keys=[]
         for contrast,value in contrasts_all.items():
             contrasts_keys.append(contrast)

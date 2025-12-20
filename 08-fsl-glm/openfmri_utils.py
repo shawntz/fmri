@@ -33,66 +33,61 @@ z2r = lambda z: (N.exp(2.0 * z) - 1) / (N.exp(2.0 * z) + 1)
 
 
 def load_condkey(condkeyfile):
-    f = open(condkeyfile)
     cond_info = {}
-    for l in f.readlines():
-        l_s = l.strip().replace('\t', ' ').split(' ')
-        if len(l_s) < 2:
-            continue
-        t = int(l_s[0].replace('task', ''))
-        cond = int(l_s[1].replace('cond', ''))
-        condname = ' '.join(l_s[2:])
-        if t not in cond_info:
-            cond_info[t] = {}
-        cond_info[t][cond] = condname
-    f.close()
+    with open(condkeyfile) as f:
+        for l in f.readlines():
+            l_s = l.strip().replace('\t', ' ').split(' ')
+            if len(l_s) < 2:
+                continue
+            t = int(l_s[0].replace('task', ''))
+            cond = int(l_s[1].replace('cond', ''))
+            condname = ' '.join(l_s[2:])
+            if t not in cond_info:
+                cond_info[t] = {}
+            cond_info[t][cond] = condname
     return cond_info
 
 
 def load_scankey(scankeyfile):
-    f = open(scankeyfile)
     scankey = {}
-    for l in f.readlines():
-        l_split = l.strip().replace('\t', ' ').split(' ')
-        scankey[l_split[0]] = l_split[1]
-    f.close()
+    with open(scankeyfile) as f:
+        for l in f.readlines():
+            l_split = l.strip().replace('\t', ' ').split(' ')
+            scankey[l_split[0]] = l_split[1]
     return scankey
 
 
 def load_taskkey(taskkeyfile):
-    f = open(taskkeyfile)
     taskkey = {}
-    for l in f.readlines():
-        l_split = l.strip().replace('\t', ' ').split(' ')
-        taskkey[l_split[0]] = '_'.join(l_split[1:])
-    f.close()
+    with open(taskkeyfile) as f:
+        for l in f.readlines():
+            l_split = l.strip().replace('\t', ' ').split(' ')
+            taskkey[l_split[0]] = '_'.join(l_split[1:])
     return taskkey
 
 
 def load_contrastkey(contrastkeyfile):
-    f = open(contrastkeyfile)
     contrastkey = {}
-    for l in f.readlines():
-        l_split = l.strip().replace('\t', ' ').split(' ')
-        if l_split[1] not in contrastkey:
-            contrastkey[l_split[1]] = {}
+    with open(contrastkeyfile) as f:
+        for l in f.readlines():
+            l_split = l.strip().replace('\t', ' ').split(' ')
+            if l_split[1] not in contrastkey:
+                contrastkey[l_split[1]] = {}
 
-        contrastkey[l_split[1]][l_split[2]] = l_split[3:]
-    f.close()
+            contrastkey[l_split[1]][l_split[2]] = l_split[3:]
     return contrastkey
 
 
 def load_contrasts(contrastfile):
     if not os.path.exists(contrastfile):
         return {}
-    f = open(contrastfile)
     contrasts = {}
-    for l in f.readlines():
-        l_split = l.strip().replace('\t', ' ').split(' ')
-        if l_split[0] not in contrasts:
-            contrasts[l_split[0]] = {}
-        contrasts[l_split[0]][l_split[1]] = l_split[2:]
-    f.close()
+    with open(contrastfile) as f:
+        for l in f.readlines():
+            l_split = l.strip().replace('\t', ' ').split(' ')
+            if l_split[0] not in contrasts:
+                contrasts[l_split[0]] = {}
+            contrasts[l_split[0]][l_split[1]] = l_split[2:]
     return contrasts
 
 
@@ -108,9 +103,8 @@ def check_featdir(featdir, verbose=0):
 
     # does report.log exist?  if so, grab its contents
     if os.path.exists(featdir + '/report.log'):
-        f = open(featdir + '/report.log')
-        feat_info['report.log'] = f.readlines()
-        f.close()
+        with open(featdir + '/report.log') as f:
+            feat_info['report.log'] = f.readlines()
         feat_info['problem'] = 1
         if verbose == 1:
             print(feat_info['report.log'])
@@ -148,8 +142,8 @@ def check_featdir(featdir, verbose=0):
 
 
 def load_fsl_design_con(featdir):
-    f = open(featdir + '/design.con', 'r')
-    l = f.readlines()
+    with open(featdir + '/design.con', 'r') as f:
+        l = f.readlines()
     dcon = {'contrasts': {}}
     for line in l:
         l_split = line.strip().split('\t')
@@ -188,9 +182,8 @@ def get_openfmri_contrasts(dataset):
 
 
 def load_fsl_design_con(infile):
-    f = open(infile)
-    data = [i for i in f.readlines() if i.find('/ContrastName') == 0]
-    f.close()
+    with open(infile) as f:
+        data = [i for i in f.readlines() if i.find('/ContrastName') == 0]
 
     contrasts = {}
     for c in data:

@@ -33,8 +33,10 @@ import argparse
 from collections import OrderedDict
 import inspect
 import json
+import os
+import sys
 
-from directory_struct_utils import *
+from directory_struct_utils import get_all_subs
 from openfmri_utils import load_condkey, load_contrasts
 
 
@@ -90,8 +92,9 @@ def mk_level3_fsf(a):
     cond_key_txt = os.path.join(a.basedir, a.studyid, 'model/level1/model-%s/condition_key.txt' % a.modelname)
     if os.path.exists(cond_key_json):
         try:
-            cond_key = json.load(open(cond_key_json),
-                                 object_pairs_hook=OrderedDict)  # keep the order of the keys as they were in the json file
+            with open(cond_key_json) as f:
+                cond_key = json.load(f,
+                                     object_pairs_hook=OrderedDict)  # keep the order of the keys as they were in the json file
         except ValueError:
             print("\nERROR: Could not read the %s file. Make sure it is formatted correctly." % cond_key_json)
             sys.exit(-1)
@@ -121,7 +124,8 @@ def mk_level3_fsf(a):
     contrastsfile_txt = os.path.join(a.basedir, a.studyid, 'model/level1/model-%s/task_contrasts.txt' % a.modelname)
     if os.path.exists(contrastsfile_json):
         try:
-            all_addl_contrasts = json.load(open(contrastsfile_json), object_pairs_hook=OrderedDict)
+            with open(contrastsfile_json) as f:
+                all_addl_contrasts = json.load(f, object_pairs_hook=OrderedDict)
         except ValueError:
             print("\nERROR: Could not read the %s file. Make sure it is formatted correctly." % contrastsfile_json)
             sys.exit(-1)
