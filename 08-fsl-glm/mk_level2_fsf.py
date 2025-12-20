@@ -145,9 +145,8 @@ def mk_level2_fsf(a):
         except ValueError:
             print("\nERROR: Could not read the %s file. Make sure it is formatted correctly." % contrastsfile_json)
             sys.exit(-1)
-        # all_addl_contrasts = dict(all_addl_contrasts)
-        # for contrast in all_addl_contrasts:
-        #    all_addl_contrasts[contrast] = dict(all_addl_contrasts[contrast])
+        # Keep contrasts as ordered mappings as loaded from JSON; no additional
+        # conversion to plain dicts is required here.
     elif os.path.exists(contrastsfile_txt):
         all_addl_contrasts = load_contrasts(contrastsfile_txt)
     else:
