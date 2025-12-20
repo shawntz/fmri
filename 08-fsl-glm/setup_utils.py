@@ -386,12 +386,10 @@ def generate_confounds_files(studyid, basedir, specificruns, modelname, hasSessi
             foundConfounds = False
             for stem in possible_confounds_filepath_stems:
                 potential_confounds_filepath = os.path.join(funcdir, fileprefix + stem)
-                try:
-                    df = pd.read_csv(potential_confounds_filepath, delim_whitespace=True)
+                if os.path.exists(potential_confounds_filepath):
                     foundConfounds = True
                     confounds_filepath = potential_confounds_filepath
-                except FileNotFoundError:
-                    continue
+                    break
 
             if foundConfounds:
                 confounds_tsv = pd.read_csv(confounds_filepath, delim_whitespace=True)
