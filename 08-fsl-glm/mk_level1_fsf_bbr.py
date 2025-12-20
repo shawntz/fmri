@@ -108,7 +108,6 @@ def mk_level1_fsf_bbr(a):
     tasknum = 1
 
     # Create the folders that are needed
-    projdir=os.path.join(a.basedir,a.studyid)
     subid='sub-%s'%(a.subid)
     subid_ses=subid
     if a.sesname!="":
@@ -319,11 +318,6 @@ def mk_level1_fsf_bbr(a):
     else:
         print('no orthogonalization found')
         
-    # not tested yet
-    # check for QA dir
-    #qadir='%s/BOLD/task%03d_run%03d/QA'%(fmriprep_subdir,tasknum,a.runname)
-
-
     # Get task contrasts
     print('loading contrasts')
     # if it's a json file
@@ -492,9 +486,9 @@ def mk_level1_fsf_bbr(a):
                     outfile.write('set fmri(custom%d) "%s"\n' % (ev+1,condfile))
                 # if the EV file is missing
                 else:
-                     outfile.write('set fmri(shape%d) 10\n' % (ev+1))
-                     print('%s is missing, using empty EV' % condfile)
-                     empty_evs.append(ev+1)
+                    outfile.write('set fmri(shape%d) 10\n' % (ev+1))
+                    print('%s is missing, using empty EV' % condfile)
+                    empty_evs.append(ev+1)
          
                 outfile.write('set fmri(convolve%d) 3\n' % (ev+1))
                 outfile.write('set fmri(convolve_phase%d) 0\n' % (ev+1))
@@ -533,10 +527,10 @@ def mk_level1_fsf_bbr(a):
                 
         # to deal with missing EVs
         if len(empty_evs)>0:
-                with open('%s/onsets/%s_task-%s_run-%s_empty_evs.txt' %
-                          (model_subdir, subid_ses, a.taskname, a.runname),'w') as empty_ev_file:
-                    for eev in empty_evs:
-                        empty_ev_file.write('%d\n'%eev)
+            with open('%s/onsets/%s_task-%s_run-%s_empty_evs.txt' %
+                    (model_subdir, subid_ses, a.taskname, a.runname),'w') as empty_ev_file:
+                for eev in empty_evs:
+                    empty_ev_file.write('%d\n'%eev)
 
         # make one additional contrast across all conditions
         outfile.write('set fmri(conpic_real.%d) 1\n' % (ev+2))
