@@ -35,7 +35,7 @@ import inspect
 import json
 
 from directory_struct_utils import *
-from openfmri_utils import *
+from openfmri_utils import load_condkey, load_contrasts
 
 
 def parse_command_line(argv):
