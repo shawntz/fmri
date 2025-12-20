@@ -33,8 +33,8 @@ z2r = lambda z: (N.exp(2.0 * z) - 1) / (N.exp(2.0 * z) + 1)
 
 
 def load_condkey(condkeyfile):
-    cond_info = {}
     with open(condkeyfile) as f:
+        cond_info = {}
         for l in f.readlines():
             l_s = l.strip().replace('\t', ' ').split(' ')
             if len(l_s) < 2:
@@ -49,8 +49,8 @@ def load_condkey(condkeyfile):
 
 
 def load_scankey(scankeyfile):
-    scankey = {}
     with open(scankeyfile) as f:
+        scankey = {}
         for l in f.readlines():
             l_split = l.strip().replace('\t', ' ').split(' ')
             scankey[l_split[0]] = l_split[1]
@@ -58,8 +58,8 @@ def load_scankey(scankeyfile):
 
 
 def load_taskkey(taskkeyfile):
-    taskkey = {}
     with open(taskkeyfile) as f:
+        taskkey = {}
         for l in f.readlines():
             l_split = l.strip().replace('\t', ' ').split(' ')
             taskkey[l_split[0]] = '_'.join(l_split[1:])
@@ -67,8 +67,8 @@ def load_taskkey(taskkeyfile):
 
 
 def load_contrastkey(contrastkeyfile):
-    contrastkey = {}
     with open(contrastkeyfile) as f:
+        contrastkey = {}
         for l in f.readlines():
             l_split = l.strip().replace('\t', ' ').split(' ')
             if l_split[1] not in contrastkey:
@@ -81,8 +81,8 @@ def load_contrastkey(contrastkeyfile):
 def load_contrasts(contrastfile):
     if not os.path.exists(contrastfile):
         return {}
-    contrasts = {}
     with open(contrastfile) as f:
+        contrasts = {}
         for l in f.readlines():
             l_split = l.strip().replace('\t', ' ').split(' ')
             if l_split[0] not in contrasts:
