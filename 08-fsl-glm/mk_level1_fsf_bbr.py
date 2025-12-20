@@ -108,7 +108,6 @@ def mk_level1_fsf_bbr(a):
     tasknum = 1
 
     # Create the folders that are needed
-    projdir=os.path.join(a.basedir,a.studyid)
     subid='sub-%s'%(a.subid)
     subid_ses=subid
     if a.sesname!="":
