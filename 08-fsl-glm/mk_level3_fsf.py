@@ -158,7 +158,7 @@ def mk_level3_fsf(a):
                     setting = llist[1]
                     value = llist[2]
                     customsettings[setting] = value
-                    customsettings[setting] = True
+                    customsettings_fromstub[setting] = True
 
     if a.randomise:
         if 'fmri(mixed_yn)' in customsettings and customsettings['fmri(mixed_yn'] == 4:

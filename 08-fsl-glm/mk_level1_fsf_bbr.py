@@ -357,6 +357,9 @@ def mk_level1_fsf_bbr(a):
     
     # Get fsf template with default values
     stubfilename=os.path.join(_thisDir,'design_level1_fsl5.stub')
+    customstubfilename=os.path.join(a.basedir,a.studyid,'model/level1/model-%s/design_level1_custom.stub' % a.modelname)
+    # Name of fsf file to create
+    outfilename='%s/%s_task-%s_run-%s.fsf'%(model_subdir,subid_ses,a.taskname,a.runname)
     print('outfilename: %s\n'%outfilename)
     
     # Get settings from custom stub file, store in customsettings dictionary
