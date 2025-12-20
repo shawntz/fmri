@@ -8,6 +8,7 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'CHANGELOG.md'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:
