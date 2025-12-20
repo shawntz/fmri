@@ -5,10 +5,17 @@ import csv
 import re
 from glob import glob
 import argparse
+import yaml
 
 def load_config(config_path):
+    """Load scan config JSON file."""
     with open(config_path, "r") as f:
         return json.load(f)
+
+def load_project_config(config_path):
+    """Load project config YAML file to get directory paths."""
+    with open(config_path, "r") as f:
+        return yaml.safe_load(f)
 
 def get_expected_series_map(config):
     mapping = {}
@@ -164,15 +171,34 @@ if __name__ == "__main__":
     parser.add_argument("--new_task_id", required=True, help="Updated task name (same as --task_id if no changes desired)")
     parser.add_argument("--config_path", required=True, help="Path to expected scan config JSON")
     parser.add_argument("--log_out_dir", required=True, help="Path to save out csv log file")
+    parser.add_argument("--project_config", help="Path to project config YAML (optional, defaults to config.yaml in CWD)")
 
     args = parser.parse_args()
+
+    # Load project config to get actual directory paths
+    project_config_path = args.project_config if args.project_config else os.path.join(os.getcwd(), "config.yaml")
+    if not os.path.exists(project_config_path):
+        print(f"⚠️  Warning: Project config not found at {project_config_path}")
+        print(f"   Falling back to legacy directory structure (bids/ and bids_trimmed/)")
+        raw_dir = os.path.join(args.project_dir, "bids")
+        trim_dir = os.path.join(args.project_dir, "bids_trimmed")
+    else:
+        project_config = load_project_config(project_config_path)
+        raw_dir = project_config["directories"]["raw_dir"]
+        trim_dir = project_config["directories"]["trim_dir"]
+
+    # Map directory types to actual paths
+    dir_paths = {
+        "bids": raw_dir,
+        "bids_trimmed": trim_dir
+    }
 
     bids_dir_types = ["bids", "bids_trimmed"]
     task_id_names = [args.task_id, args.new_task_id]
 
     for dir_type in bids_dir_types:
         subject = f"sub-{args.subid}"
-        subject_dir = os.path.join(args.project_dir, dir_type, subject)
+        subject_dir = os.path.join(dir_paths[dir_type], subject)
         output_dir = os.path.join(args.log_out_dir, "qc-verify_nii_metadata")
         output_csv = os.path.join(output_dir, f"{subject}_summary-{dir_type}.csv")
         os.makedirs(output_dir, exist_ok=True)

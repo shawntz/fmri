@@ -76,7 +76,8 @@ if [ "$subject_count" -eq 0 ]; then
 fi
 echo "[INFO] Found ${subject_count} subjects in ${SUBJECTS_FILE}"
 
-while read -r subject_id; do
+# Filter out comments (lines starting with #) and empty lines before processing
+grep -v '^[[:space:]]*#' "${SUBJECTS_FILE}" | grep -v '^[[:space:]]*$' | while read -r subject_id; do
   subject="sub-${subject_id}"
   echo "[INFO] Processing subject ${subject_id}"
 
@@ -104,7 +105,7 @@ while read -r subject_id; do
       task_name=$(basename "$bold_file" | sed -n 's/.*_task-\([^_]*\)_.*/\1/p')
       check_volumes "${bold_file}" "${EXPECTED_BOLD_VOLS}" "BOLD-${task_name}" "${run_bold}" "${subject_id}"
     fi
-    
+
     # Check corresponding fieldmap based on mapping
     run_fmap=${fmap_mapping[$run_bold]}
     fieldmap_file="${RAW_DIR}/${subject}/fmap/${subject}_run-${run_fmap}_dir-AP_epi.nii.gz"
@@ -115,7 +116,7 @@ while read -r subject_id; do
   for run_bold in "${run_numbers[@]}"; do
     bold_pattern="${TRIM_DIR}/${subject}/func/${subject}_task-*_run-${run_bold}_dir-PA_bold.nii.gz"
     bold_files=( $bold_pattern )
-    
+
     # Default task_name to new_task_id from settings if not found
     task_name="${new_task_id}"
 
@@ -138,7 +139,7 @@ while read -r subject_id; do
       task_name=$(basename "$bold_file" | sed -n 's/.*_task-\([^_]*\)_.*/\1/p')
       check_volumes "${bold_file}" "${EXPECTED_BOLD_VOLS_AFTER_TRIMMING}" "BOLD-${task_name}" "${run_bold}" "${subject_id}"
     fi
-    
+
     # Check corresponding fieldmap based on mapping
     run_fmap=${fmap_mapping[$run_bold]}
     fieldmap_file="${TRIM_DIR}/${subject}/fmap/${subject}_acq-${task_name}_run-${run_fmap}_dir-AP_epi.nii.gz"
@@ -147,7 +148,7 @@ while read -r subject_id; do
   done
 
   echo "[INFO] Completed volume check for subject ${subject_id}"
-done < "${SUBJECTS_FILE}"
+done
 
 echo ""
 echo "[INFO] All subjects processed. Generating summary report..."

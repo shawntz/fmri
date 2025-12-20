@@ -72,7 +72,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # Example: Run step 2 (dcm2niix conversion)
-./02-run.sbatch
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
 # Example: Run step 3 (prep for fMRIPrep)
 ./03-run.sbatch
@@ -195,13 +195,15 @@ scancel <job_id>
 
 ### DICOM Conversion (Step 2)
 
-The `02-dcm2niix` step uses heudiconv with a custom heuristic (`dcm_heuristic.py`). If you manually merged scans from multiple acquisition sessions with different study identifiers, use the `all` grouping strategy to bypass the study identifier check:
+The `02-dcm2niix` step uses heudiconv with a custom heuristic (`dcm_heuristic.py`). The grouping strategy is hardcoded to `all` to avoid conflicts from manually merged scans with different study identifiers. This is the more permissive option that bypasses the 'Conflicting study identifiers found' assertion.
 
 ```bash
-./02-dcm2niix/dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
-```
+# Basic usage
+./02-run.sbatch <fw_session_id> <subject_id>
 
-Default grouping is `studyUID` which will fail on conflicting study identifiers.
+# Skip tar extraction for manually configured directories
+./02-run.sbatch <fw_session_id> <subject_id> --skip-tar
+```
 
 ### Subject ID Modifiers
 
