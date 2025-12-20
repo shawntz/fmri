@@ -73,7 +73,6 @@ def main(argv=None):
     time = args.time
     nodes = args.nodes
     mem = args.mem
-    subids = args.subids
     nofeat = args.nofeat
     outdir = args.outdir
 
