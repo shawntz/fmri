@@ -135,7 +135,7 @@ jobs:
           fi
 
           # Create a prompt file for the changelog-drafter agent
-          cat > changelog_prompt.txt <<EOF
+cat > changelog_prompt.txt <<EOF
 Generate a human-readable changelog for version ${NEW_VERSION} based on commits from ${COMMIT_RANGE}.
 
 The changelog should be formatted in markdown with these sections:
