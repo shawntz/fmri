@@ -26,7 +26,8 @@ def model_params_json_to_namespace(studyid, basedir, modelname):
     model_params_json_path = modeldir + '/model_params.json'
     if os.path.exists(model_params_json_path):
         try:
-            params = json.load(open(model_params_json_path, 'r'))
+            with open(model_params_json_path, 'r') as f:
+                params = json.load(f)
         except ValueError:
             print("\nERROR: Could not read the %s file. Make sure it is formatted correctly." % model_params_json_path)
             sys.exit(-1)
