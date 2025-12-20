@@ -397,89 +397,81 @@ def mk_level1_fsf_bbr(a):
                 l='set ' + setting + ' ' + customsettings[setting]
                 outfile.write(l)
 
+        # figure out how many timepoints there are 
+        p = sub.Popen(['fslinfo', '%s/func/%s'%(fmriprep_subdir,func_preproc_file)], stdout=sub.PIPE, stderr=sub.PIPE,
+                      encoding='utf8')
+        output, errors = p.communicate()
 
-            # if there are other settings that haven't been replaced and still need to be added
-            if len(customsettings) > 0:
-                outfile.write('\n### Additional settings from custom stub file ###\n')
-                for setting in customsettings:
-                    l='set ' + setting + ' ' + customsettings[setting]
-                    outfile.write(l)
+        ntp=int(output.split('\n')[4].split()[1])
 
-            # figure out how many timepoints there are 
-            p = sub.Popen(['fslinfo', '%s/func/%s'%(fmriprep_subdir,func_preproc_file)], stdout=sub.PIPE, stderr=sub.PIPE,
-                          encoding='utf8')
-            output, errors = p.communicate()
-
-            ntp=int(output.split('\n')[4].split()[1])
-
-            #img=nibabel.load('%s/BOLD/task%03d_run%03d/bold_mcf_brain.nii.gz'%(fmriprep_subdir,tasknum,a.runname))
-            #h=img.get_header()
-            #ntp=h.get_data_shape()[3]
+        #img=nibabel.load('%s/BOLD/task%03d_run%03d/bold_mcf_brain.nii.gz'%(fmriprep_subdir,tasknum,a.runname))
+        #h=img.get_header()
+        #ntp=h.get_data_shape()[3]
     
-            outfile.write('\n\n### AUTOMATICALLY GENERATED PART###\n\n')
-            # now add custom lines
-            outfile.write( 'set fmri(regstandard_nonlinear_yn) %d\n' % a.nonlinear)
+        outfile.write('\n\n### AUTOMATICALLY GENERATED PART###\n\n')
+        # now add custom lines
+        outfile.write( 'set fmri(regstandard_nonlinear_yn) %d\n' % a.nonlinear)
 
-            # not tested - used to be read from scan_key.txt 
-            # Delete volumes
-            nskip=0
-            outfile.write('set fmri(ndelete) %d\n' % nskip)
+        # not tested - used to be read from scan_key.txt 
+        # Delete volumes
+        nskip=0
+        outfile.write('set fmri(ndelete) %d\n' % nskip)
 
-            # do or don't do registration
-            outfile.write('set fmri(reg_yn) %d\n' % a.doreg)
-            outfile.write('set fmri(reginitial_highres_yn) %d\n' % a.doreg)
-            outfile.write('set fmri(reghighres_yn) %d\n' % a.doreg)
-            outfile.write('set fmri(regstandard_yn) %d\n' % a.doreg)
+        # do or don't do registration
+        outfile.write('set fmri(reg_yn) %d\n' % a.doreg)
+        outfile.write('set fmri(reginitial_highres_yn) %d\n' % a.doreg)
+        outfile.write('set fmri(reghighres_yn) %d\n' % a.doreg)
+        outfile.write('set fmri(regstandard_yn) %d\n' % a.doreg)
 
-            # look for standard brain fsl provides
-            env = os.environ.copy()
-            FSLDIR='/usr/local/fsl'
-            if 'FSLDIR' in env.keys():
+        # look for standard brain fsl provides
+        env = os.environ.copy()
+        FSLDIR='/usr/local/fsl'
+        if 'FSLDIR' in env.keys():
                 FSLDIR=env["FSLDIR"]
-            elif 'FSL_DIR' in env.keys():
+        elif 'FSL_DIR' in env.keys():
                 FSLDIR=env["FSL_DIR"]
-            regstandard=os.path.join(FSLDIR,'data/standard/MNI152_T1_2mm_brain')
-            outfile.write('set fmri(regstandard) "%s"\n' % regstandard)
+        regstandard=os.path.join(FSLDIR,'data/standard/MNI152_T1_2mm_brain')
+        outfile.write('set fmri(regstandard) "%s"\n' % regstandard)
 
-            outfile.write('set fmri(outputdir) "%s/%s_task-%s_run-%s.feat"\n' % (model_subdir,subid_ses,a.taskname,a.runname))
-            if not a.usebrainmask:
+        outfile.write('set fmri(outputdir) "%s/%s_task-%s_run-%s.feat"\n' % (model_subdir,subid_ses,a.taskname,a.runname))
+        if not a.usebrainmask:
                 outfile.write('set feat_files(1) "%s"\n' % (os.path.join(funcdir,func_preproc_file)))
-            else:
+        else:
                 outfile.write('set feat_files(1) "%s"\n' % (os.path.join(funcdir,fslmaths_preproc_brainmask)))
 
-            if a.use_inplane==1:
+        if a.use_inplane==1:
                 outfile.write('set fmri(reginitial_highres_yn) 1\n')
                 outfile.write('set initial_highres_files(1) "%s"\n' % (initial_highres_file))
-            else:
+        else:
                 outfile.write('set fmri(reginitial_highres_yn) 0\n')
 
-            if a.whiten:
+        if a.whiten:
                 outfile.write('set fmri(prewhiten_yn) 1\n')
-            else:
+        else:
                 outfile.write('set fmri(prewhiten_yn) 0\n')
        
-            if a.hpf:
+        if a.hpf:
                 outfile.write('set fmri(temphp_yn) 1\n')
-            else:
+        else:
                 outfile.write('set fmri(temphp_yn) 0\n')
 
-            outfile.write('set highres_files(1) "%s"\n' % anatimg)
-            outfile.write('set fmri(npts) %d\n' % ntp)
-            outfile.write('set fmri(tr) %0.2f\n' % tr)
-            nevs=len(conditions)
-            outfile.write('set fmri(evs_orig) %d\n' % nevs)
-            outfile.write('set fmri(evs_real) %d\n' % (2*nevs))
-            outfile.write('set fmri(smooth) %d\n' % a.smoothing)
-            outfile.write('set fmri(ncon_orig) %d\n' % (len(conditions)+1+len(contrasts)))
-            outfile.write('set fmri(ncon_real) %d\n' % (len(conditions)+1+len(contrasts)))
+        outfile.write('set highres_files(1) "%s"\n' % anatimg)
+        outfile.write('set fmri(npts) %d\n' % ntp)
+        outfile.write('set fmri(tr) %0.2f\n' % tr)
+        nevs=len(conditions)
+        outfile.write('set fmri(evs_orig) %d\n' % nevs)
+        outfile.write('set fmri(evs_real) %d\n' % (2*nevs))
+        outfile.write('set fmri(smooth) %d\n' % a.smoothing)
+        outfile.write('set fmri(ncon_orig) %d\n' % (len(conditions)+1+len(contrasts)))
+        outfile.write('set fmri(ncon_real) %d\n' % (len(conditions)+1+len(contrasts)))
 
-            # loop through EVs
-            convals_real=N.zeros(nevs*2)
-            convals_orig=N.zeros(nevs)
-            empty_evs=[]
+        # loop through EVs
+        convals_real=N.zeros(nevs*2)
+        convals_orig=N.zeros(nevs)
+        empty_evs=[]
 
-            # iterate through the EVs
-            for ev in range(len(conditions)):
+        # iterate through the EVs
+        for ev in range(len(conditions)):
                 outfile.write('\n\nset fmri(evtitle%d) "%s"\n' % (ev+1,conditions[ev]))
 
                 ## get the full path of the EV file
@@ -501,7 +493,7 @@ def mk_level1_fsf_bbr(a):
                      outfile.write('set fmri(shape%d) 10\n' % (ev+1))
                      print('%s is missing, using empty EV' % condfile)
                      empty_evs.append(ev+1)
-             
+         
                 outfile.write('set fmri(convolve%d) 3\n' % (ev+1))
                 outfile.write('set fmri(convolve_phase%d) 0\n' % (ev+1))
                 outfile.write('set fmri(tempfilt_yn%d) 1\n' % (ev+1))
@@ -537,29 +529,29 @@ def mk_level1_fsf_bbr(a):
                     if (evt==ev):
                         convals_orig[evt]=1
                 
-            # to deal with missing EVs
-            if len(empty_evs)>0:
+        # to deal with missing EVs
+        if len(empty_evs)>0:
                 with open('%s/onsets/%s_task-%s_run-%s_empty_evs.txt' %
                           (model_subdir, subid_ses, a.taskname, a.runname),'w') as empty_ev_file:
                     for eev in empty_evs:
                         empty_ev_file.write('%d\n'%eev)
 
-            # make one additional contrast across all conditions
-            outfile.write('set fmri(conpic_real.%d) 1\n' % (ev+2))
-            outfile.write('set fmri(conname_real.%d) "all"\n' % (ev+2))
-            outfile.write('set fmri(conname_orig.%d) "all"\n' % (ev+2))
+        # make one additional contrast across all conditions
+        outfile.write('set fmri(conpic_real.%d) 1\n' % (ev+2))
+        outfile.write('set fmri(conname_real.%d) "all"\n' % (ev+2))
+        outfile.write('set fmri(conname_orig.%d) "all"\n' % (ev+2))
 
-            for evt in range(nevs*2):
+        for evt in range(nevs*2):
                 outfile.write('set fmri(con_real%d.%d) %d\n' % (ev+2,evt+1,convals_real[evt]))
-            for evt in range(nevs):
+        for evt in range(nevs):
                 outfile.write('set fmri(con_orig%d.%d) %d\n' % (ev+2,evt+1,convals_orig[evt]))
 
-            # add custom contrasts
-            if len(contrasts)>0:
+        # add custom contrasts
+        if len(contrasts)>0:
                 print(contrasts)
                 contrastctr=ev+3;
                 for c in contrasts.keys():
-            
+        
                     outfile.write('set fmri(conpic_real.%d) 1\n' % contrastctr)
                     outfile.write('set fmri(conname_real.%d) "%s"\n' % (contrastctr,c))
                     outfile.write('set fmri(conname_orig.%d) "%s"\n' % (contrastctr,c))
@@ -578,18 +570,16 @@ def mk_level1_fsf_bbr(a):
 
                     contrastctr+=1
     
-            # Add confound EVs text file
-            confoundfile='%s/onsets/%s_task-%s_run-%s_ev-confounds.tsv' % (model_subdir,subid_ses,a.taskname,a.runname)
-            if not os.path.exists(confoundfile):
+        # Add confound EVs text file
+        confoundfile='%s/onsets/%s_task-%s_run-%s_ev-confounds.tsv' % (model_subdir,subid_ses,a.taskname,a.runname)
+        if not os.path.exists(confoundfile):
                 confoundfile='%s/onsets/%s_task-%s_run-%s_ev-confounds.txt' % (model_subdir,subid_ses,a.taskname,a.runname)
-            if os.path.exists(confoundfile) and a.confound:
+        if os.path.exists(confoundfile) and a.confound:
                 outfile.write('set fmri(confoundevs) 1\n')
                 outfile.write('set confoundev_files(1) "%s"\n' % confoundfile)
-            else:
-                print("No confounds file found")
-                outfile.write('set fmri(confoundevs) 0\n')
-        
-            outfile.close()
+        else:
+            print("No confounds file found")
+            outfile.write('set fmri(confoundevs) 0\n')
 
     if a.callfeat:
         if a.usebrainmask:
