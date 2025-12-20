@@ -33,10 +33,11 @@ import argparse
 from collections import OrderedDict
 import inspect
 import json
+import os
 import subprocess as sub
 import sys
 
-from openfmri_utils import *
+from openfmri_utils import load_condkey, load_contrasts
 
 
 def parse_command_line(argv):
