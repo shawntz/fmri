@@ -321,9 +321,6 @@ def mk_level1_fsf_bbr(a):
     # not tested yet
     # check for QA dir
     #qadir='%s/BOLD/task%03d_run%03d/QA'%(fmriprep_subdir,tasknum,a.runname)
-    qadir='%s/QA'%(fmriprep_subdir)
-
-
     # Get task contrasts
     print('loading contrasts')
     # if it's a json file
