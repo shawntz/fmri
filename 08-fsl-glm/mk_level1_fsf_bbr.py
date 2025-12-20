@@ -379,7 +379,7 @@ def mk_level1_fsf_bbr(a):
         llist=l.split(' ')
         if len(l)>3 and llist[0]=='set':
             setting=llist[1]
-            value=llist[2]
+            # llist[2] contains the value for this setting; it is used directly below
             # check if setting in default stub file shows up in custom stub file
             if setting in customsettings.keys():
                 outfile.write('# From custom stub file\n')
