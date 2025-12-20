@@ -9,7 +9,7 @@ Called by run_level3_feat.py
 import argparse
 import json
 
-from directory_struct_utils import *
+import directory_struct_utils
 import mk_level3_fsf
 import setup_utils
 
