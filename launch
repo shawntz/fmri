@@ -68,7 +68,7 @@ def print_header():
     columns, _ = get_terminal_size()
     print('\n')
     print('=' * columns)
-    print_centered("META-FMRIPREP INTERACTIVE PIPELINE: MENU", Colors.BOLD + Colors.BLUE)
+    print_centered("FMRIPREP WORKBENCH: Main Menu", Colors.BOLD + Colors.BLUE)
     print('=' * columns)
     print('\n')
 
