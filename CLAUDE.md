@@ -89,7 +89,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # Example: Run step 2 (dcm2niix conversion)
-./02-run.sbatch
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
 # Example: Run step 3 (prep for fMRIPrep)
 ./03-run.sbatch
@@ -172,6 +172,22 @@ Located in `toolbox/`, these are shared utilities used by pipeline steps and ava
 - `pull_fmriprep_reports.sh`: Download fMRIPrep HTML reports from server
 - `dir_checksum_compare.py`: Compare directories using checksums
 
+**Freesurfer Manual Editing**:
+- `download_freesurfer.sh`: Download Freesurfer outputs from remote server for manual surface editing
+  - Interactive and non-interactive modes
+  - Supports downloading all subjects or specific subject lists
+  - Uses rsync for efficient transfer
+  - Default download location: `~/freesurfer_edits`
+
+- `upload_freesurfer.sh`: Upload edited Freesurfer outputs back to server
+  - Automatic timestamped backups of original surfaces before upload
+  - Multiple safety confirmations to prevent accidental data loss
+  - Verifies local files exist before uploading
+  - Supports uploading all subjects or specific subject lists
+  - Provides revert instructions after upload
+
+See `toolbox/FREESURFER_EDITING.md` for complete workflow documentation.
+
 **Parsing Utilities**:
 - `parse_subject_modifiers.sh`: Parse subject ID suffix modifiers (sourced by pipeline scripts)
 
@@ -228,13 +244,15 @@ scancel <job_id>
 
 ### DICOM Conversion (Step 2)
 
-The `02-dcm2niix` step uses heudiconv with a custom heuristic (`dcm_heuristic.py`). If you manually merged scans from multiple acquisition sessions with different study identifiers, use the `all` grouping strategy to bypass the study identifier check:
+The `02-dcm2niix` step uses heudiconv with a custom heuristic (`dcm_heuristic.py`). The grouping strategy is hardcoded to `all` to avoid conflicts from manually merged scans with different study identifiers. This is the more permissive option that bypasses the 'Conflicting study identifiers found' assertion.
 
 ```bash
-./02-dcm2niix/dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
-```
+# Basic usage
+./02-run.sbatch <fw_session_id> <subject_id>
 
-Default grouping is `studyUID` which will fail on conflicting study identifiers.
+# Skip tar extraction for manually configured directories
+./02-run.sbatch <fw_session_id> <subject_id> --skip-tar
+```
 
 ### Subject ID Modifiers
 
@@ -275,10 +293,49 @@ A valid Freesurfer license file is required for fMRIPrep. Set `FREESURFER_LICENS
 2. Rerun the desired step
 
 **Manual Freesurfer editing workflow**:
-1. Run step 6 (anatomical only)
-2. Download Freesurfer outputs for manual editing
-3. Re-upload edited Freesurfer directories
-4. Run step 7 (full workflows) using edited surfaces
+1. Run step 6 (anatomical only): `./06-run.sbatch`
+2. Download Freesurfer outputs for manual editing:
+   ```bash
+   ./launch  # Select option 12
+   # Or run directly:
+   ./toolbox/download_freesurfer.sh \
+     --server login.sherlock.stanford.edu \
+     --user mysunetid \
+     --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+     --subjects sub-001,sub-002
+   ```
+3. Edit surfaces locally using Freeview or other tools:
+   ```bash
+   cd ~/freesurfer_edits/sub-001
+   freeview -v mri/T1.mgz -v mri/brainmask.mgz \
+     -f surf/lh.white:edgecolor=blue \
+     -f surf/lh.pial:edgecolor=red \
+     -f surf/rh.white:edgecolor=blue \
+     -f surf/rh.pial:edgecolor=red
+   # Make edits to brainmask, white matter, or surfaces
+   # Rerun Freesurfer if needed after brainmask/WM edits:
+   recon-all -autorecon2-cp -autorecon3 -s sub-001 -sd ~/freesurfer_edits
+   ```
+4. Upload edited Freesurfer outputs back to server (with automatic backup):
+   ```bash
+   ./launch  # Select option 13
+   # Or run directly:
+   ./toolbox/upload_freesurfer.sh \
+     --server login.sherlock.stanford.edu \
+     --user mysunetid \
+     --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+     --subjects sub-001,sub-002
+   ```
+5. Run step 7 (full workflows) which will use edited surfaces: `./07-run.sbatch`
+
+**Important Freesurfer Editing Notes**:
+- Only edit after Step 6 (anatomical-only fMRIPrep) completes
+- Backups are automatically created on server as `{subject}.backup.{timestamp}`
+- Download location defaults to `~/freesurfer_edits/` but can be customized
+- Use `--no-backup` flag cautiously (not recommended)
+- Common edits: brainmask (skull stripping), white matter, pial/white surfaces
+- After brainmask or WM edits, rerun `recon-all -autorecon2-cp -autorecon3`
+- Surface edits are typically final and don't require reprocessing
 
 **Optimizing inode usage**:
 1. After DICOM conversion, tarball sourcedata directories

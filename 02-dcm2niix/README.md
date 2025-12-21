@@ -30,6 +30,21 @@ To bypass this check and process all DICOMs together regardless of study identif
 ./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> all
 ```
 
+### For Pre-Extracted Tar Files
+
+If you have already extracted the Flywheel tar file manually, use the `--skip-tar` flag to skip tar extraction. The script will still unzip the `.dicom.zip` files found in the extracted directory:
+
+```bash
+./dcm2niix.sh 02-dcm2niix <fw_session_id> <subject_id> studyUID --skip-tar
+```
+
+When using this flag, ensure the tar contents are already extracted to: `/scratch/users/<user>/sub-<subid>/untar_<exam_num>/`
+
+The script will then:
+1. Skip extracting the `.tar` file (already done)
+2. Find and unzip all `.dicom.zip` files in the extracted directory tree
+3. Process the unzipped DICOM files as usual
+
 ## Grouping Strategies
 
 The `--grouping` flag controls how heudiconv groups DICOM files:
@@ -37,7 +52,11 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 - **`studyUID`** (default): Groups DICOMs by StudyInstanceUID. This is the standard behavior and will fail if multiple study identifiers are found.
 - **`all`**: Processes all DICOMs together regardless of study identifiers. Use this when you have manually merged scans from different sessions.
 
-## Example
+## Optional Flags
+
+- **`--skip-tar`**: Skip tar extraction step only. Use this when you've already extracted the Flywheel tar file manually. The script will still unzip the `.dicom.zip` files found in the extracted directory. When this flag is set, the script expects the tar contents to be at `/scratch/users/<user>/sub-<subid>/untar_<exam_num>/`.
+
+## Examples
 
 ```bash
 # Standard processing
@@ -45,6 +64,9 @@ The `--grouping` flag controls how heudiconv groups DICOM files:
 
 # Processing merged sessions
 ./dcm2niix.sh 02-dcm2niix 21940 001 all
+
+# Processing with pre-extracted tar file
+./dcm2niix.sh 02-dcm2niix 21940 001 studyUID --skip-tar
 ```
 
 ## Direct Python Usage
@@ -62,5 +84,6 @@ python3 dcm2niix.py \
   --task_id task_name \
   --sing_image_path /path/to/heudiconv.sif \
   --scripts_dir /path/to/scripts \
-  --grouping all
+  --grouping all \
+  --skip-tar  # Optional: skip tar extraction
 ```

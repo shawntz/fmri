@@ -33,8 +33,8 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
 - [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
 - [x] 8. FSL FEAT GLM statistical analysis (Level 1, 2, 3) with SLURM integration
-- [ ] *Future:* Download Freesurfer output for manual surface editing
-- [ ] *Future:* Reupload edited Freesurfer directories
+- [x] 9. Download Freesurfer outputs for manual surface editing (with automatic backup on upload)
+- [x] 10. Upload edited Freesurfer outputs back to server (with safety confirmations)
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]
@@ -69,6 +69,7 @@ This will create a new repository with all the files from this template, allowin
 - JSON metadata management
 - Quality control checks
 - FSL FEAT statistical analysis
+- Freesurfer manual editing workflows
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -80,6 +81,7 @@ The template provides a standardized structure and validated scripts that you ca
 - Quality control utilities
 - BIDS metadata management tools
 - FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
+- Freesurfer manual editing utilities (download/upload with safety features)
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started
@@ -130,10 +132,10 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ### manually calling upon each sidecar executable
 ```bash
 # example: running step 1 (FlyWheel download)
-./01-run.sbatch
+./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
 # example: running step 2 (dcm2niix BIDS conversion)
-./02-run.sbatch
+./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
 # example: running step 3 (prep for fMRIPrep)
 ./03-run.sbatch
@@ -149,6 +151,12 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 # example: running step 7 (fMRIPrep full workflows)
 ./07-run.sbatch
+
+# example: downloading Freesurfer outputs for manual editing
+./toolbox/download_freesurfer.sh
+
+# example: uploading edited Freesurfer outputs back to server
+./toolbox/upload_freesurfer.sh
 ```
 
 ## Configuration Steps
@@ -469,6 +477,56 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 - Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
 - Easy to extract subjects back when needed for reprocessing or analysis
 
+### Freesurfer Manual Editing Utilities
+
+The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing Freesurfer surface reconstructions.
+
+**Features:**
+- Download Freesurfer outputs from remote server via rsync
+- Upload edited surfaces back to server with automatic backups
+- Interactive and non-interactive modes
+- Support for individual subjects or batch downloads/uploads
+- Multiple safety confirmations before destructive operations
+- Automatic timestamped backups of original surfaces
+
+**Usage Examples:**
+
+```bash
+# Download Freesurfer outputs interactively
+./toolbox/download_freesurfer.sh
+
+# Download specific subjects non-interactively
+./toolbox/download_freesurfer.sh \
+  --server login.sherlock.stanford.edu \
+  --user mysunetid \
+  --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+  --subjects sub-001,sub-002
+
+# Upload edited outputs with automatic backup
+./toolbox/upload_freesurfer.sh
+
+# Upload specific subjects non-interactively
+./toolbox/upload_freesurfer.sh \
+  --server login.sherlock.stanford.edu \
+  --user mysunetid \
+  --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+  --subjects sub-001,sub-002
+```
+
+**Complete Workflow:**
+1. Run fMRIPrep anatomical workflows only (Step 6): `./06-run.sbatch`
+2. Download Freesurfer outputs: `./toolbox/download_freesurfer.sh`
+3. Edit surfaces locally using Freeview or other tools
+4. Upload edited surfaces: `./toolbox/upload_freesurfer.sh`
+5. Run full fMRIPrep workflows (Step 7): `./07-run.sbatch`
+
+See `toolbox/FREESURFER_EDITING.md` for complete documentation including:
+- When to perform manual edits
+- Freeview editing instructions
+- Common editing tasks (brainmask, white matter, surfaces)
+- Troubleshooting guide
+- Best practices
+
 ### Other Utilities
 
 - `verify_nii_metadata.py` - Quality control for converted NIfTI metadata
@@ -481,30 +539,10 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 > [!NOTE]
 > ### Comments, suggestions, questions, issues?
 >
-> Please use the issues tab (<https://github.com/shawntz/fmri/issues>) to make note of any bugs, comments, suggestions, feedback, etc… all are welcomed and appreciated, thanks!
+> Please use the issues tab (<https://github.com/shawntz/fmriprep-workbench/issues>) to make note of any bugs, comments, suggestions, feedback, etc… all are welcomed and appreciated, thanks!
 >
-> cheers,
-> shawn
+> -Shawn
 
 ---
 
-<div align="center">
-
-## SML fMRI Dev Team
-
-|    | Team Member | Role |
-| :----------: |  :-------------: | :-------------: |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/shawn_sf_ggb_2022_square_0.jpg?h=a11293b4&itok=XexnOeUL" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/shawn-schwartz-ms-ma" target="_blank">Shawn Schwartz, M.S., M.A.</a> <br> (Ph.D. Candidate) | `Lead Developer` <br> `Maintainer` <br> `Project Conception` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/jintao_photo_0.jpg?h=5d522a5b&itok=hihL4GJO" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/jintao-sheng-phd" target="_blank">Jintao Sheng, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/mostrecent_0.jpg?h=f926125a&itok=fiqkxKMx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/haopei-yang-phd" target="_blank">Haopei Yang, Ph.D.</a> <br> (Postdoc) | `Core Developer` <br> `Project Conception` <br> `Technical Reviewer` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/douglas_photo_3.jpg?h=816b21b2&itok=52F62G61" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/douglas-miller" target="_blank">Douglas Miller, B.A.</a> <br> (Ph.D. Candidate) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/subbu_photo_0.jpeg?h=2a9f3bd2&itok=eukzENYx" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/subbulakshmi-s-phd" target="_blank">Subbulakshmi S, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/img_1581_0.jpg?h=1f7c1d57&itok=V666sxOZ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/mingjian-he-phd" target="_blank">Mingjian (Alex) He, Ph.D.</a> <br> (Postdoc) | `Core Contributor` <br> `Code Reviewer` <br> `Technical Reviewer` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/image/thumbnail_atrelle_0.jpg?h=8234d0a0&itok=lg9VP9wQ" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/ali-trelle-phd" target="_blank">Ali Trelle, Ph.D.</a> <br> (Instructor, SoM) | `Core Contributor` |
-| <img src="https://memorylab.stanford.edu/sites/memorylab/files/styles/hs_medium_square_360x360/public/media/people/screen_shot_2019-07-23_at_9.19.36_pm_copy.png?h=5fbe367e&itok=N4uE8LH4" width="100" height="100"> | <a href="https://memorylab.stanford.edu/people/anthony-d-wagner-phd" target="_blank">Anthony Wagner, Ph.D.</a> <br> (PI) | `Lab Director` <br> `Conceptual Reviewer` |
-
-### Want to Be Listed?
-Make significant contributions to the project and get listed here! <br> See our [Contributing Guidelines](CONTRIBUTING.md) for how to get involved.
-
-</div>
-
+See our [Contributing Guidelines](CONTRIBUTING.md) for how to get involved.

@@ -5,29 +5,29 @@
 # @Param: JOB_NAME (positional argument #1) - required job name string (e.g., "02-dcm2niix")
 # @Param: fw_seshid (positional argument #2) - flywheel session ID
 # @Param: new_subid (positional argument #3) - new subject ID
-# @Param: grouping (positional argument #4) - optional grouping strategy (default: 'studyUID', use 'all' for merged sessions)
-# @Param: skip_tar (positional argument #5) - optional flag to skip tar extraction (pass '--skip-tar' for manually configured dirs)
+# @Param: skip_tar (optional flag) - pass '--skip-tar' to skip tar extraction (for manually configured dirs)
+# @Note: Grouping is hardcoded to 'all' to avoid conflicts from manually merged sessions
 
 source ./load_config.sh
 
 JOB_NAME=$1
 
 if [ -z "${JOB_NAME}" ]; then
-  echo "Error: Pipeline step name not provided" | tee -a "${log_file}"
-  echo "Usage: $0 <step-name> <fw_session_id> <new_subid> [grouping] [--skip-tar]" | tee -a "${log_file}"
+  echo "Error: Pipeline step name not provided"
+  echo "Usage: $0 <step-name> <fw_session_id> <new_subid> [--skip-tar]"
   exit 1
 fi
 
 fw_seshid=$2
 new_subid=$3
-grouping=${4:-studyUID}  # Optional 4th argument, defaults to 'studyUID'
+# Hardcoded to 'all' to avoid grouping errors from manually merged sessions
+grouping="all"
 skip_tar_flag=""
 
 # Check if any argument is --skip-tar
 for arg in "$@"; do
   if [ "$arg" = "--skip-tar" ]; then
     skip_tar_flag="--skip-tar"
-    echo "($(date)) [INFO] Skip tar mode enabled" | tee -a "${log_file}"
     break
   fi
 done
@@ -39,6 +39,11 @@ mkdir -p "${SLURM_LOG_DIR}/subjects"
 log_file="${SLURM_LOG_DIR}/subjects/${subject}_processing.log"
 processed_file="${SLURM_LOG_DIR}/02-processed_subjects.txt"
 
+# Log skip-tar mode after log_file is defined
+if [ -n "${skip_tar_flag}" ]; then
+  echo "($(date)) [INFO] Skip tar mode enabled" | tee -a "${log_file}"
+fi
+
 echo "($(date)) [INFO] Processing subject: ${subject}" | tee -a "${log_file}"
 
 module load python/3.9.0
@@ -49,7 +54,7 @@ python3 "${SCRIPTS_DIR}"/"${JOB_NAME}"/dcm2niix.py \
   --user "${USER}" \
   --subid "${new_subid}" \
   --exam_num "${fw_seshid}" \
-  --project_dir "${BASE_DIR}" \
+  --project_dir "${DIRECTORIES_RAW_DIR}" \
   --fw_group_id "${FW_GROUP_ID}" \
   --fw_project_id "${FW_PROJECT_ID}" \
   --task_id "${new_task_id}" \

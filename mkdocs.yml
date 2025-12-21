@@ -1,0 +1,173 @@
+# MkDocs configuration for fMRIPrep Workbench
+
+# Site metadata
+site_name: fMRIPrep Workbench Documentation
+site_description: Generalizable fMRI preprocessing workflow from scanner acquisition to fMRIPrep execution
+site_author: Shawn T. Schwartz and Stanford Memory Lab
+site_url: https://shawntz.github.io/fmriprep-workbench/
+
+# Repository
+repo_name: shawntz/fmriprep-workbench
+repo_url: https://github.com/shawntz/fmriprep-workbench
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 Shawn Schwartz and Stanford Memory Lab
+
+# Exclude docs/README.md (developer guide, not part of site)
+exclude_docs: |
+  README.md
+
+# Theme configuration
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant       # Instant loading
+    - navigation.tracking      # URL updates with scroll
+    - navigation.tabs          # Top-level navigation tabs
+    - navigation.sections      # Section headers in navigation
+    - navigation.expand        # Expand navigation by default
+    - navigation.top           # Back to top button
+    - navigation.indexes       # Section index pages
+    - toc.follow               # Table of contents follows scroll
+    - toc.integrate            # Integrate TOC into navigation
+    - search.suggest           # Search suggestions
+    - search.highlight         # Highlight search results
+    - search.share             # Share search results
+    - content.code.copy        # Copy button for code blocks
+    - content.code.annotate    # Annotations in code blocks
+    - content.tabs.link        # Link content tabs
+  icon:
+    repo: fontawesome/brands/github
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  # Note: PDF plugin requires system dependencies (Pango, Cairo)
+  # Works in GitHub Actions CI but may fail locally without these installed
+  # To build locally without PDF: temporarily comment out this plugin
+  - with-pdf:
+      author: Shawn T. Schwartz and Stanford Memory Lab
+      copyright: Copyright &copy; 2025 Shawn Schwartz and Stanford Memory Lab
+      cover_title: fMRIPrep Workbench
+      cover_subtitle: Version 0.2.0 Documentation
+      output_path: pdf/fmriprep-workbench-documentation.pdf
+      enabled_if_env: ENABLE_PDF_EXPORT
+      exclude_pages:
+        - 'index'
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      fallback_to_build_date: true
+  - include-markdown:
+      opening_tag: "{!"
+      closing_tag: "!}"
+
+# Markdown extensions
+markdown_extensions:
+  # Code highlighting
+  - pymdownx.highlight:
+      anchor_linenums: false
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      check_paths: true
+      base_path: ['.']
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  # Admonitions
+  - pymdownx.details
+  - admonition
+  # Tables
+  - tables
+  # Attributes
+  - attr_list
+  - md_in_html
+  # Emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  # Tabs
+  - pymdownx.tabbed:
+      alternate_style: true
+  # Task lists
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # Table of contents with 4-level depth (matching Sphinx config)
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section
+      toc_depth: 4
+
+# Navigation structure (matching current Sphinx toctree)
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Usage: usage.md
+  - Workflows: workflows.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+# Extra configuration
+extra:
+  version:
+    provider: mike
+    default: stable
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/shawntz/fmriprep-workbench
+      name: GitHub Repository
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: Thanks for your feedback! Help us improve by opening an issue on GitHub.
+
+# Validation
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+# Custom CSS (if needed in future)
+# extra_css:
+#   - stylesheets/extra.css
+
+# Custom JavaScript (if needed in future)
+# extra_javascript:
+#   - javascripts/extra.js
