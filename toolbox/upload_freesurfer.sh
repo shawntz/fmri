@@ -262,9 +262,13 @@ for subject in $SUBJECTS; do
     # Create backup on server if requested
     if [ "$BACKUP_ORIGINALS" = true ]; then
         echo "  Creating backup of original..."
+        # Escape variables for safe remote execution
+        ESCAPED_REMOTE_DIR=$(printf '%q' "$REMOTE_FREESURFER_DIR")
+        ESCAPED_SUBJECT=$(printf '%q' "$subject")
+        ESCAPED_TIMESTAMP=$(printf '%q' "$BACKUP_TIMESTAMP")
         if ssh "${REMOTE_USER}@${REMOTE_SERVER}" "
-            if [ -d '${REMOTE_FREESURFER_DIR}/${subject}' ]; then
-                cp -r '${REMOTE_FREESURFER_DIR}/${subject}' '${REMOTE_FREESURFER_DIR}/${subject}.backup.${BACKUP_TIMESTAMP}'
+            if [ -d ${ESCAPED_REMOTE_DIR}/${ESCAPED_SUBJECT} ]; then
+                cp -r ${ESCAPED_REMOTE_DIR}/${ESCAPED_SUBJECT} ${ESCAPED_REMOTE_DIR}/${ESCAPED_SUBJECT}.backup.${ESCAPED_TIMESTAMP}
                 echo '  ✓ Backup created'
             else
                 echo '  ℹ No existing directory to backup'
@@ -280,7 +284,7 @@ for subject in $SUBJECTS; do
     echo "  Uploading edited surfaces..."
     if rsync -avz --progress \
         "${LOCAL_FREESURFER_DIR}/${subject}/" \
-        "${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_FREESURFER_DIR}/${subject}/"; then
+        "${REMOTE_USER}@${REMOTE_SERVER}:'${REMOTE_FREESURFER_DIR}/${subject}/'"; then
 
         echo -e "${GREEN}✓ ${subject} uploaded successfully${NC}"
         ((SUCCESS_COUNT++))
