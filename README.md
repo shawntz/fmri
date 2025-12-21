@@ -32,8 +32,9 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [x] 5. QC: Verify number of volumes per scan file
 - [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
 - [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
-- [ ] *Future:* Download Freesurfer output for manual surface editing
-- [ ] *Future:* Reupload edited Freesurfer directories
+- [x] 8. FSL FEAT GLM statistical analysis (Level 1, 2, 3) with SLURM integration
+- [x] 9. Download Freesurfer outputs for manual surface editing (with automatic backup on upload)
+- [x] 10. Upload edited Freesurfer outputs back to server (with safety confirmations)
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]
@@ -67,6 +68,8 @@ This will create a new repository with all the files from this template, allowin
 - BIDS-compliance
 - JSON metadata management
 - Quality control checks
+- FSL FEAT statistical analysis
+- Freesurfer manual editing workflows
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -77,6 +80,8 @@ The template provides a standardized structure and validated scripts that you ca
 - Documentation and usage guides
 - Quality control utilities
 - BIDS metadata management tools
+- FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
+- Freesurfer manual editing utilities (download/upload with safety features)
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started
@@ -146,6 +151,12 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 # example: running step 7 (fMRIPrep full workflows)
 ./07-run.sbatch
+
+# example: downloading Freesurfer outputs for manual editing
+./toolbox/download_freesurfer.sh
+
+# example: uploading edited Freesurfer outputs back to server
+./toolbox/upload_freesurfer.sh
 ```
 
 ## Configuration Steps
@@ -465,6 +476,56 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 - Each subject's sourcedata directory may contain thousands of DICOM files
 - Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
 - Easy to extract subjects back when needed for reprocessing or analysis
+
+### Freesurfer Manual Editing Utilities
+
+The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing Freesurfer surface reconstructions.
+
+**Features:**
+- Download Freesurfer outputs from remote server via rsync
+- Upload edited surfaces back to server with automatic backups
+- Interactive and non-interactive modes
+- Support for individual subjects or batch downloads/uploads
+- Multiple safety confirmations before destructive operations
+- Automatic timestamped backups of original surfaces
+
+**Usage Examples:**
+
+```bash
+# Download Freesurfer outputs interactively
+./toolbox/download_freesurfer.sh
+
+# Download specific subjects non-interactively
+./toolbox/download_freesurfer.sh \
+  --server login.sherlock.stanford.edu \
+  --user mysunetid \
+  --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+  --subjects sub-001,sub-002
+
+# Upload edited outputs with automatic backup
+./toolbox/upload_freesurfer.sh
+
+# Upload specific subjects non-interactively
+./toolbox/upload_freesurfer.sh \
+  --server login.sherlock.stanford.edu \
+  --user mysunetid \
+  --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+  --subjects sub-001,sub-002
+```
+
+**Complete Workflow:**
+1. Run fMRIPrep anatomical workflows only (Step 6): `./06-run.sbatch`
+2. Download Freesurfer outputs: `./toolbox/download_freesurfer.sh`
+3. Edit surfaces locally using Freeview or other tools
+4. Upload edited surfaces: `./toolbox/upload_freesurfer.sh`
+5. Run full fMRIPrep workflows (Step 7): `./07-run.sbatch`
+
+See `toolbox/FREESURFER_EDITING.md` for complete documentation including:
+- When to perform manual edits
+- Freeview editing instructions
+- Common editing tasks (brainmask, white matter, surfaces)
+- Troubleshooting guide
+- Best practices
 
 ### Other Utilities
 

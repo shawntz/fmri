@@ -123,8 +123,11 @@ def display_menu():
         ("3", "Step 3: Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
         ("4", "Step 4: QC - Verify dcm -> nii -> bids metadata"),
         ("5", "Step 5: QC - Verify number of volumes per scan file"),
-        ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)"),
-        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)")
+        ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 9)"),
+        ("7", "Step 7: Download Freesurfer outputs for manual editing"),
+        ("8", "Step 8: Upload edited Freesurfer outputs back to server"),
+        ("9", "Step 9: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
+        ("10", "Utilities: Tarball/Untar utility for sourcedata/ BIDS directories")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -163,19 +166,19 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "7": {  # Step 7 (fmriprep full)
+        "7": {  # Freesurfer download
             "keys": [],
             "prompts": []
         },
-        "8": {  # Step 8 (QC: Verify dcm -> nii -> bids metadata)
-            "keys": ["new_subid"],
-            "prompts": ["Assigned BIDS Subject ID?"]
-        },
-        "9": {  # Step 9 (QC: Verify number of volumes per scan file)
+        "8": {  # Freesurfer upload
             "keys": [],
             "prompts": []
         },
-        "10": {  # Step 10 (Tarball/Untar utility)
+        "9": {  # Step 9 (fmriprep full)
+            "keys": [],
+            "prompts": []
+        },
+        "10": {  # Tarball/Untar utility
             "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
             "prompts": [
                 "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
@@ -192,7 +195,7 @@ def get_parameters(step_choice):
     user_inputs = []
 
     # Special handling for tarball utility
-    if step_choice == "11":
+    if step_choice == "10":
         # Get operation type
         operation = get_user_input(param_prompts[0], options=["1", "2", "3", "4"])
         operation_map = {
@@ -269,11 +272,10 @@ def run_script(step_choice, user_inputs):
         "4": "04-run.sbatch",
         "5": "05-run.sbatch",
         "6": "06-run.sbatch",
-        "7": "07-run.sbatch",
-        "8": "08-run.sbatch",
-        "9": "toolbox/verify_nii_metadata.sh",
-        "10": "toolbox/summarize_bold_scan_volume_counts.sh",
-        "11": "toolbox/tarball_sourcedata.sh"
+        "7": "toolbox/download_freesurfer.sh",
+        "8": "toolbox/upload_freesurfer.sh",
+        "9": "07-run.sbatch",
+        "10": "toolbox/tarball_sourcedata.sh"
     }
 
     selected_script = scripts[step_choice]
