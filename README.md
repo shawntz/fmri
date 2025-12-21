@@ -79,7 +79,7 @@ This will create a new repository with all the files from this template, allowin
 - JSON metadata management
 - Quality control checks
 - FSL FEAT statistical analysis
-- Freesurfer manual editing workflows
+- FreeSurfer manual editing workflows
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -91,7 +91,7 @@ The template provides a standardized structure and validated scripts that you ca
 - Quality control utilities
 - BIDS metadata management tools
 - FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
-- Freesurfer manual editing utilities (download/upload with safety features)
+- FreeSurfer manual editing utilities (download/upload with safety features)
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started
@@ -503,12 +503,12 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 - Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
 - Easy to extract subjects back when needed for reprocessing or analysis
 
-### Freesurfer Manual Editing Utilities
+### FreeSurfer Manual Editing Utilities
 
-The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing Freesurfer surface reconstructions.
+The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing FreeSurfer surface reconstructions.
 
 **Features:**
-- Download Freesurfer outputs from remote server via rsync
+- Download FreeSurfer outputs from remote server via rsync
 - Upload edited surfaces back to server with automatic backups
 - Interactive and non-interactive modes
 - Support for individual subjects or batch downloads/uploads
@@ -518,7 +518,7 @@ The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complet
 **Usage Examples:**
 
 ```bash
-# Download Freesurfer outputs interactively
+# Download FreeSurfer outputs interactively
 ./toolbox/download_freesurfer.sh
 
 # Download specific subjects non-interactively
@@ -541,7 +541,7 @@ The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complet
 
 **Complete Workflow:**
 1. Run fMRIPrep anatomical workflows only (Step 6): `./06-run.sbatch`
-2. Download Freesurfer outputs: `./toolbox/download_freesurfer.sh`
+2. Download FreeSurfer outputs: `./toolbox/download_freesurfer.sh`
 3. Edit surfaces locally using Freeview or other tools
 4. Upload edited surfaces: `./toolbox/upload_freesurfer.sh`
 5. Run full fMRIPrep workflows (Step 7): `./07-run.sbatch`
