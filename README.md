@@ -68,11 +68,8 @@ This will create a new repository with all the files from this template, allowin
 - BIDS-compliance
 - JSON metadata management
 - Quality control checks
-<<<<<<< Updated upstream
-=======
 - FSL FEAT statistical analysis
 - Freesurfer manual editing workflows
->>>>>>> Stashed changes
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -83,11 +80,8 @@ The template provides a standardized structure and validated scripts that you ca
 - Documentation and usage guides
 - Quality control utilities
 - BIDS metadata management tools
-<<<<<<< Updated upstream
-=======
 - FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
 - Freesurfer manual editing utilities (download/upload with safety features)
->>>>>>> Stashed changes
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started

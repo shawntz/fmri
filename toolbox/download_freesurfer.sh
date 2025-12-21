@@ -128,7 +128,7 @@ echo -e "${GREEN}✓ Remote directory found${NC}"
 if [ "$DOWNLOAD_ALL" = true ]; then
     echo ""
     echo -e "${BLUE}Fetching all subjects from remote...${NC}"
-    SUBJECTS=$(ssh "${REMOTE_USER}@${REMOTE_SERVER}" "ls -d ${REMOTE_FREESURFER_DIR}/sub-* 2>/dev/null | xargs -n 1 basename")
+    SUBJECTS=$(ssh "${REMOTE_USER}@${REMOTE_SERVER}" "ls -d '${ESCAPED_REMOTE_FREESURFER_DIR}'/sub-* 2>/dev/null | xargs -n 1 basename")
 
     if [ -z "$SUBJECTS" ]; then
         echo -e "${RED}Error: No subjects found in ${REMOTE_FREESURFER_DIR}${NC}"
@@ -151,7 +151,7 @@ elif [ -z "$SUBJECTS_LIST" ]; then
     read -p "> " SUBJECTS_INPUT
 
     if [ "$SUBJECTS_INPUT" = "all" ]; then
-        SUBJECTS=$(ssh "${REMOTE_USER}@${REMOTE_SERVER}" "ls -d ${REMOTE_FREESURFER_DIR}/sub-* 2>/dev/null | xargs -n 1 basename")
+        SUBJECTS=$(ssh "${REMOTE_USER}@${REMOTE_SERVER}" "ls -d '${ESCAPED_REMOTE_FREESURFER_DIR}'/sub-* 2>/dev/null | xargs -n 1 basename")
     elif [ -f "$SUBJECTS_INPUT" ]; then
         # Read from file, filter comments and blank lines
         SUBJECTS=$(grep -v '^[[:space:]]*#' "$SUBJECTS_INPUT" | grep -v '^[[:space:]]*$' | cut -d: -f1)
@@ -214,7 +214,7 @@ for subject in $SUBJECTS; do
 
     # Use rsync to download
     if rsync -avz --progress \
-        "${REMOTE_USER}@${REMOTE_SERVER}:${REMOTE_FREESURFER_DIR}/${subject}/" \
+        "${REMOTE_USER}@${REMOTE_SERVER}:'${REMOTE_FREESURFER_DIR}/${subject}/'" \
         "${LOCAL_DOWNLOAD_DIR}/${subject}/"; then
 
         echo -e "${GREEN}✓ ${subject} downloaded successfully${NC}"
