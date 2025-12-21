@@ -112,11 +112,13 @@ fi
 
 # Construct remote Freesurfer directory path
 REMOTE_FREESURFER_DIR="${REMOTE_BASE_DIR}/freesurfer"
+# Escape path for safe use in remote shell
+ESCAPED_REMOTE_FREESURFER_DIR=$(printf '%q' "$REMOTE_FREESURFER_DIR")
 
 # Check if remote directory exists
 echo ""
 echo -e "${BLUE}Checking remote Freesurfer directory...${NC}"
-if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" "[ -d '${REMOTE_FREESURFER_DIR}' ]"; then
+if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" "[ -d '${ESCAPED_REMOTE_FREESURFER_DIR}' ]"; then
     echo -e "${RED}Error: Remote Freesurfer directory does not exist: ${REMOTE_FREESURFER_DIR}${NC}"
     exit 1
 fi

@@ -32,14 +32,9 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 - [x] 5. QC: Verify number of volumes per scan file
 - [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
 - [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
-<<<<<<< Updated upstream
-- [ ] *Future:* Download Freesurfer output for manual surface editing
-- [ ] *Future:* Reupload edited Freesurfer directories
-=======
 - [x] 8. FSL FEAT GLM statistical analysis (Level 1, 2, 3) with SLURM integration
 - [x] 9. Download Freesurfer outputs for manual surface editing (with automatic backup on upload)
 - [x] 10. Upload edited Freesurfer outputs back to server (with safety confirmations)
->>>>>>> Stashed changes
 - [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
 
 > [!NOTE]

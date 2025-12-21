@@ -129,7 +129,7 @@ REMOTE_FREESURFER_DIR="${REMOTE_BASE_DIR}/freesurfer"
 # Check if remote directory exists
 echo ""
 echo -e "${BLUE}Checking remote Freesurfer directory...${NC}"
-if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" "[ -d '${REMOTE_FREESURFER_DIR}' ]"; then
+if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" 'test -d "$1"' _ "$REMOTE_FREESURFER_DIR"; then
     echo -e "${RED}Error: Remote Freesurfer directory does not exist: ${REMOTE_FREESURFER_DIR}${NC}"
     exit 1
 fi
@@ -317,11 +317,16 @@ echo "2. fMRIPrep will automatically use the edited Freesurfer outputs"
 echo "   instead of rerunning Freesurfer reconstruction"
 echo ""
 echo -e "${BLUE}Note: To revert to original surfaces (if backups were created):${NC}"
+shown_count=0
 for subject in $SUBJECTS; do
     if [ "$BACKUP_ORIGINALS" = true ]; then
         echo "  ssh ${REMOTE_USER}@${REMOTE_SERVER} \"rm -rf ${REMOTE_FREESURFER_DIR}/${subject} && mv ${REMOTE_FREESURFER_DIR}/${subject}.backup.${BACKUP_TIMESTAMP} ${REMOTE_FREESURFER_DIR}/${subject}\""
+        shown_count=$((shown_count + 1))
+        if [ "$shown_count" -ge 3 ]; then
+            break
+        fi
     fi
-done | head -3
+done
 if [ $(echo $SUBJECTS | wc -w) -gt 3 ]; then
     echo "  ... (and similar for other subjects)"
 fi
