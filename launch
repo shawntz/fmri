@@ -127,7 +127,11 @@ def display_menu():
         ("7", "Step 7: Download Freesurfer outputs for manual editing"),
         ("8", "Step 8: Upload edited Freesurfer outputs back to server"),
         ("9", "Step 9: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
-        ("10", "Utilities: Tarball/Untar utility for sourcedata/ BIDS directories")
+        ("10", "FSL GLM: Setup new statistical model"),
+        ("11", "FSL GLM: Run Level 1 analysis (individual runs)"),
+        ("12", "FSL GLM: Run Level 2 analysis (subject-level)"),
+        ("13", "FSL GLM: Run Level 3 analysis (group-level)"),
+        ("14", "Utilities: Tarball/Untar utility for sourcedata/ BIDS directories")
     ]
 
     print(f"{Colors.BOLD}Select the prep step you want to run:{Colors.ENDC}\n")
@@ -178,7 +182,23 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "10": {  # Tarball/Untar utility
+        "10": {  # FSL GLM: Setup model
+            "keys": [],
+            "prompts": []
+        },
+        "11": {  # FSL GLM: Level 1
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
+        },
+        "12": {  # FSL GLM: Level 2
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
+        },
+        "13": {  # FSL GLM: Level 3
+            "keys": ["model_name", "no_feat"],
+            "prompts": ["Model name?", "Only create FSF files without running FEAT?"]
+        },
+        "14": {  # Tarball/Untar utility
             "keys": ["operation", "sourcedata_dir", "subjects_spec", "keep_original"],
             "prompts": [
                 "Operation (1=tar-all, 2=tar-subjects, 3=untar-all, 4=untar-subjects)",
@@ -241,6 +261,11 @@ def get_parameters(step_choice):
             response = get_user_input(prompt, yes_no=True, default=False)
             if response:
                 user_inputs.append("--skip-tar")
+        # special case for no_feat yes/no (FSL GLM)
+        elif key == "no_feat":
+            response = get_user_input(prompt, yes_no=True, default=False)
+            if response:
+                user_inputs.append("--no-feat")
         else:
             input_value = get_user_input(prompt)
             user_inputs.append(input_value)
@@ -275,7 +300,11 @@ def run_script(step_choice, user_inputs):
         "7": "toolbox/download_freesurfer.sh",
         "8": "toolbox/upload_freesurfer.sh",
         "9": "07-run.sbatch",
-        "10": "toolbox/tarball_sourcedata.sh"
+        "10": "08-fsl-glm/setup_glm.sh",
+        "11": "08-run.sbatch",
+        "12": "09-run.sbatch",
+        "13": "10-run.sbatch",
+        "14": "toolbox/tarball_sourcedata.sh"
     }
 
     selected_script = scripts[step_choice]
