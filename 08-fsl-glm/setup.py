@@ -7,7 +7,17 @@ Creates empty_condition_key, task_contrasts, and model_params files
 # Created by Alice Xue, 06/2018
 # https://github.com/alicexue/fmri-pipeline
 
-from setup_utils import *
+import sys
+import os
+from setup_utils import (
+    create_model_level1_dir,
+    create_empty_condition_key,
+    create_empty_task_contrasts_file,
+    create_level1_model_params_json,
+    check_model_params_cli,
+    model_params_json_to_namespace,
+    create_default_confounds_json,
+)
 
 
 def main():
