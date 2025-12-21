@@ -32,7 +32,7 @@ Use the interactive launcher:
 
 Or run directly:
 ```bash
-./08-fsl-glm/setup_glm.sh
+./10-fsl-glm/setup_glm.sh
 ```
 
 This will create the model directory structure and template configuration files in:
@@ -278,7 +278,7 @@ Check logs:
 ls logs/slurm/fsl-glm/
 
 # Job array output
-ls logs/slurm/08-fsl-glm/
+ls logs/slurm/10-fsl-glm/
 ```
 
 ## Troubleshooting

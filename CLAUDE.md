@@ -27,10 +27,10 @@ The preprocessing workflow consists of 14 steps organized as follows:
 8. **toolbox/upload_freesurfer.sh**: Upload edited FreeSurfer outputs back to server
 
 **Step 9: Full fMRIPrep**
-9. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
+9. **09-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
 
 **Steps 10-13: FSL GLM Statistical Analysis**
-10. **08-fsl-glm/setup_glm.sh**: Setup new statistical model
+10. **10-fsl-glm/setup_glm.sh**: Setup new statistical model
 11. **08-run.sbatch**: FSL GLM Level 1 analysis (individual runs)
 12. **09-run.sbatch**: FSL GLM Level 2 analysis (subject-level)
 13. **10-run.sbatch**: FSL GLM Level 3 analysis (group-level)
@@ -38,11 +38,11 @@ The preprocessing workflow consists of 14 steps organized as follows:
 **Step 14: Data Management Utility**
 14. **toolbox/tarball_sourcedata.sh**: Tarball/untar utility for sourcedata directories
 
-Each numbered step that has its own directory (1-6, 9) includes both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 share the `08-fsl-glm/` directory for statistical model setup; their execution is driven by three separate Slurm wrappers: `08-run.sbatch` for Step 11 (Level 1), `09-run.sbatch` for Step 12 (Level 2), and `10-run.sbatch` for Step 13 (Level 3).
+Each numbered step that has its own directory (1-6, 9) includes both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 share the `10-fsl-glm/` directory for statistical model setup; their execution is driven by three separate Slurm wrappers: `08-run.sbatch` for Step 11 (Level 1), `09-run.sbatch` for Step 12 (Level 2), and `10-run.sbatch` for Step 13 (Level 3).
 
 ### FSL GLM Statistical Analysis
 
-After completing fMRIPrep preprocessing, you can perform statistical analysis using FSL FEAT. The `08-fsl-glm` directory contains a complete pipeline for creating and executing GLM analysis:
+After completing fMRIPrep preprocessing, you can perform statistical analysis using FSL FEAT. The `10-fsl-glm` directory contains a complete pipeline for creating and executing GLM analysis:
 
 **Level 1 (Individual Runs)**: First-level analysis examining each task run separately
 **Level 2 (Subject-Level)**: Second-level analysis combining runs within subjects
@@ -54,7 +54,7 @@ The FSL GLM pipeline:
 - Uses SLURM job arrays for parallel processing (or falls back to joblib/serial if SLURM unavailable)
 - Integrates with the fmriprep-workbench configuration system
 
-See `08-fsl-glm/README.md` for detailed usage instructions.
+See `10-fsl-glm/README.md` for detailed usage instructions.
 
 ### Configuration System
 
@@ -130,7 +130,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 # Step 10: FSL GLM - Setup new statistical model
 ./launch  # Select option 10
 # Or run directly:
-./08-fsl-glm/setup_glm.sh
+./10-fsl-glm/setup_glm.sh
 
 # Step 11: FSL GLM - Run Level 1 analysis (individual runs)
 ./08-run.sbatch <model-name>
@@ -150,7 +150,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 ### fMRIPrep Execution Details
 
 - **Step 6** (`06-run.sbatch` / `06-run-fmriprep/`): Runs fMRIPrep with `--anat-only` flag. Use this when you plan to manually edit FreeSurfer surfaces before functional preprocessing.
-- **Step 9** (`07-run.sbatch` / `07-run-fmriprep/`): Runs full fMRIPrep (anatomical + functional workflows). Skip step 6 if not doing manual edits.
+- **Step 9** (`07-run.sbatch` / `09-run-fmriprep/`): Runs full fMRIPrep (anatomical + functional workflows). Skip step 6 if not doing manual edits.
 
 Both steps use subject lists (default: `06-subjects.txt` for step 6, `all-subjects.txt` for step 9) and respect subject modifiers.
 
@@ -369,7 +369,7 @@ A valid FreeSurfer license file is required for fMRIPrep. Set `directories.frees
 
 **FSL GLM statistical analysis workflow**:
 1. Complete fMRIPrep preprocessing (steps 1-9, or steps 1-6 + 9 if skipping manual FreeSurfer edits)
-2. Setup GLM model (step 10) with `./launch` (option 10) or `./08-fsl-glm/setup_glm.sh`
+2. Setup GLM model (step 10) with `./launch` (option 10) or `./10-fsl-glm/setup_glm.sh`
 3. Configure model parameters in `BASE_DIR/model/level1/model-<modelname>/`:
    - Edit `model_params.json` for analysis parameters
    - Edit `condition_key.json` to define experimental conditions
@@ -383,4 +383,4 @@ A valid FreeSurfer license file is required for fMRIPrep. Set `directories.frees
 
 Note: The `--no-feat` flag can be used to only create FSF files without running FEAT, useful for checking design matrices before full analysis.
 
-See `08-fsl-glm/README.md` for complete documentation.
+See `10-fsl-glm/README.md` for complete documentation.

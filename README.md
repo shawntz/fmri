@@ -170,7 +170,7 @@ The preprocessing pipeline requires proper configuration of several parameters t
 ./07-run.sbatch
 
 # Step 10: FSL GLM - Setup new statistical model
-./08-fsl-glm/setup_glm.sh
+./10-fsl-glm/setup_glm.sh
 
 # Step 11: FSL GLM - Run Level 1 analysis (individual runs)
 ./08-run.sbatch <model-name> [--no-feat]

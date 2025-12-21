@@ -4,7 +4,7 @@
 # @Description: SLURM job submission wrapper for FSL FEAT Level 1 GLM analysis
 # @Usage: ./08-run.sbatch <model-name> [--no-feat]
 
-STEP_NAME="08-fsl-glm"
+STEP_NAME="10-fsl-glm"
 JOB_NAME="fmriprep-workbench-8"
 
 # Source configuration
@@ -17,7 +17,7 @@ if [ -z "$MODEL_NAME" ]; then
     echo "Error: Model name is required"
     echo "Usage: $0 <model-name> [--no-feat]"
     echo ""
-    echo "If you haven't created a model yet, run: ./08-fsl-glm/setup_glm.sh"
+    echo "If you haven't created a model yet, run: ./10-fsl-glm/setup_glm.sh"
     exit 1
 fi
 

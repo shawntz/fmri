@@ -60,7 +60,7 @@ For more control, you can manually execute each sbatch script:
 ./07-run.sbatch
 
 # Step 10: FSL GLM model setup
-./08-fsl-glm/setup_glm.sh
+./10-fsl-glm/setup_glm.sh
 
 # Step 11: FSL Level 1 analysis
 ./08-run.sbatch <model-name>
@@ -108,7 +108,7 @@ The preprocessing and analysis pipeline consists of 14 steps:
 **Step 9: fMRIPrep Complete** (`07-run.sbatch`)
 :   Run full fMRIPrep workflows (anatomical + functional)
 
-**Step 10: FSL GLM Setup** (`08-fsl-glm/setup_glm.sh`)
+**Step 10: FSL GLM Setup** (`10-fsl-glm/setup_glm.sh`)
 :   Setup new statistical model for FSL FEAT analysis
 
 **Step 11: FSL Level 1** (`08-run.sbatch`)
@@ -175,7 +175,7 @@ The preprocessing and analysis pipeline consists of 14 steps:
 ./01-run.sbatch  # through ./07-run.sbatch
 
 # Step 10: Setup FSL GLM model
-./08-fsl-glm/setup_glm.sh
+./10-fsl-glm/setup_glm.sh
 # (Configure model_params.json, condition_key.json, task_contrasts.json)
 # (Create EV timing files)
 
@@ -205,11 +205,11 @@ The preprocessing and analysis pipeline consists of 14 steps:
 | 6    | `fmriprep-workbench-6` | `06-run-fmriprep` | fMRIPrep anat-only |
 | 7    | N/A | `toolbox/` | FreeSurfer download (no SLURM) |
 | 8    | N/A | `toolbox/` | FreeSurfer upload (no SLURM) |
-| 9    | `fmriprep-workbench-9` | `07-run-fmriprep` | fMRIPrep full |
-| 10   | N/A | `08-fsl-glm/` | FSL GLM setup (no SLURM) |
-| 11   | `fmriprep-workbench-11` | `08-fsl-glm/` | FSL Level 1 |
-| 12   | `fmriprep-workbench-12` | `08-fsl-glm/` | FSL Level 2 |
-| 13   | `fmriprep-workbench-13` | `08-fsl-glm/` | FSL Level 3 |
+| 9    | `fmriprep-workbench-9` | `09-run-fmriprep` | fMRIPrep full |
+| 10   | N/A | `10-fsl-glm/` | FSL GLM setup (no SLURM) |
+| 11   | `fmriprep-workbench-11` | `10-fsl-glm/` | FSL Level 1 |
+| 12   | `fmriprep-workbench-12` | `10-fsl-glm/` | FSL Level 2 |
+| 13   | `fmriprep-workbench-13` | `10-fsl-glm/` | FSL Level 3 |
 | 14   | N/A | `toolbox/` | Tarball utility (no SLURM) |
 
 The `JOB_NAME` is used for SLURM display (visible in `squeue`), while
