@@ -32,31 +32,52 @@ For more control, you can manually execute each sbatch script:
 ### Basic Usage
 
 ```bash
-# Run step 1: FlyWheel to Server transfer
+# Step 1: FlyWheel to Server transfer
 ./01-run.sbatch
 
-# Run step 2: dcm2niix conversion
+# Step 2: dcm2niix conversion
 ./02-run.sbatch
 
-# Run step 3: Prep for fMRIPrep (dummy scan removal, fieldmap setup)
+# Step 3: Prep for fMRIPrep (dummy scan removal, fieldmap setup)
 ./03-run.sbatch
 
-# Run step 4: QC metadata verification
+# Step 4: QC metadata verification
 ./04-run.sbatch
 
-# Run step 5: QC volume verification
+# Step 5: QC volume verification
 ./05-run.sbatch
 
-# Run step 6: fMRIPrep anatomical workflows only
+# Step 6: fMRIPrep anatomical workflows only (optional)
 ./06-run.sbatch
 
-# Run step 7: fMRIPrep complete workflows
+# Step 7: Download FreeSurfer outputs (optional)
+./toolbox/download_freesurfer.sh
+
+# Step 8: Upload edited FreeSurfer outputs (optional)
+./toolbox/upload_freesurfer.sh
+
+# Step 9: fMRIPrep complete workflows
 ./07-run.sbatch
+
+# Step 10: FSL GLM model setup
+./08-fsl-glm/setup_glm.sh
+
+# Step 11: FSL Level 1 analysis
+./08-run.sbatch <model-name>
+
+# Step 12: FSL Level 2 analysis
+./09-run.sbatch <model-name>
+
+# Step 13: FSL Level 3 analysis
+./10-run.sbatch <model-name>
+
+# Step 14: Tarball utility
+./toolbox/tarball_sourcedata.sh
 ```
 
 ## Pipeline Steps
 
-The preprocessing pipeline consists of seven steps:
+The preprocessing and analysis pipeline consists of 14 steps:
 
 **Step 1: FlyWheel Transfer** (`01-run.sbatch`)
 :   Automated transfer of scanner acquisitions from FlyWheel to server
@@ -76,56 +97,96 @@ The preprocessing pipeline consists of seven steps:
 :   Verify scan volume counts match expected values
 
 **Step 6: fMRIPrep Anatomical** (`06-run.sbatch`)
-:   Run fMRIPrep anatomical workflows only (for manual FreeSurfer editing)
+:   Run fMRIPrep anatomical workflows only (optional, for manual FreeSurfer editing)
 
-**Step 7: fMRIPrep Complete** (`07-run.sbatch`)
+**Step 7: Download FreeSurfer** (`toolbox/download_freesurfer.sh`)
+:   Download FreeSurfer outputs for manual surface editing (optional)
+
+**Step 8: Upload FreeSurfer** (`toolbox/upload_freesurfer.sh`)
+:   Upload edited FreeSurfer outputs back to server with automatic backup (optional)
+
+**Step 9: fMRIPrep Complete** (`07-run.sbatch`)
 :   Run full fMRIPrep workflows (anatomical + functional)
 
-!!! note "v0.2.0 Change"
+**Step 10: FSL GLM Setup** (`08-fsl-glm/setup_glm.sh`)
+:   Setup new statistical model for FSL FEAT analysis
 
-    Steps 4 and 5 are now dedicated pipeline steps with their own sbatch wrappers, rather than toolbox-only utilities. The fMRIPrep steps have been renumbered to 6 and 7.
+**Step 11: FSL Level 1** (`08-run.sbatch`)
+:   Run Level 1 GLM analysis (individual task runs)
+
+**Step 12: FSL Level 2** (`09-run.sbatch`)
+:   Run Level 2 GLM analysis (subject-level, combining runs)
+
+**Step 13: FSL Level 3** (`10-run.sbatch`)
+:   Run Level 3 GLM analysis (group-level statistics)
+
+**Step 14: Tarball Utility** (`toolbox/tarball_sourcedata.sh`)
+:   Optimize inode usage by archiving sourcedata directories
+
+!!! note "v0.2.0+ Changes"
+
+    The pipeline has been expanded to 14 steps, including dedicated FreeSurfer editing utilities (steps 7-8), FSL FEAT statistical analysis (steps 10-13), and data management tools (step 14).
 
 ## Typical Workflow
 
-### Standard Processing (No Manual FreeSurfer Editing)
+### Standard Processing (No Manual FreeSurfer Editing or Statistical Analysis)
 
 ```bash
-# 1. Download data from FlyWheel
-./01-run.sbatch
+# Steps 1-5: Data acquisition and QC
+./01-run.sbatch  # FlyWheel download
+./02-run.sbatch  # DICOM conversion
+./03-run.sbatch  # Prep for fMRIPrep
+./04-run.sbatch  # QC metadata
+./05-run.sbatch  # QC volumes
 
-# 2. Convert DICOM to NIfTI
-./02-run.sbatch
-
-# 3. Prepare for fMRIPrep
-./03-run.sbatch
-
-# 4. Verify metadata
-./04-run.sbatch
-
-# 5. Verify volume counts
-./05-run.sbatch
-
-# 6. Skip step 6, run full fMRIPrep directly
-./07-run.sbatch
+# Step 9: Skip step 6, run full fMRIPrep directly (steps 7-8 are for FreeSurfer editing)
+./07-run.sbatch  # Full fMRIPrep workflows
 ```
 
 ### Processing with Manual FreeSurfer Editing
 
 ```bash
-# Steps 1-5 same as above...
+# Steps 1-5: Data acquisition and QC
 ./01-run.sbatch
 ./02-run.sbatch
 ./03-run.sbatch
 ./04-run.sbatch
 ./05-run.sbatch
 
-# 6. Run anatomical-only fMRIPrep
+# Step 6: Run anatomical-only fMRIPrep
 ./06-run.sbatch
 
-# 7. Download, edit FreeSurfer surfaces, re-upload
+# Step 7: Download FreeSurfer outputs
+./toolbox/download_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
 
-# 8. Run full fMRIPrep with edited surfaces
+# (Manual editing with Freeview)
+
+# Step 8: Upload edited surfaces
+./toolbox/upload_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
+
+# Step 9: Run full fMRIPrep with edited surfaces
 ./07-run.sbatch
+```
+
+### Complete Workflow with FSL FEAT Analysis
+
+```bash
+# Steps 1-9: Preprocessing (as above)
+./01-run.sbatch  # through ./07-run.sbatch
+
+# Step 10: Setup FSL GLM model
+./08-fsl-glm/setup_glm.sh
+# (Configure model_params.json, condition_key.json, task_contrasts.json)
+# (Create EV timing files)
+
+# Step 11: Run Level 1 analysis
+./08-run.sbatch <model-name>
+
+# Step 12: Run Level 2 analysis
+./09-run.sbatch <model-name>
+
+# Step 13: Run Level 3 analysis
+./10-run.sbatch <model-name>
 ```
 
 ## SLURM Job Naming
@@ -134,18 +195,26 @@ The preprocessing pipeline consists of seven steps:
 
     All SLURM jobs now use the unified naming pattern `fmriprep-workbench-{N}` where N is the step number.
 
-| Step | Job Name | Directory (STEP_NAME) |
-|------|----------|----------------------|
-| 1    | `fmriprep-workbench-1` | `01-fw2server` |
-| 2    | `fmriprep-workbench-2` | `02-dcm2niix` |
-| 3    | `fmriprep-workbench-3` | `03-prep-fmriprep` |
-| 4    | `fmriprep-workbench-4` | `04-qc-metadata` |
-| 5    | `fmriprep-workbench-5` | `05-qc-volumes` |
-| 6    | `fmriprep-workbench-6` | `06-run-fmriprep` |
-| 7    | `fmriprep-workbench-7` | `07-run-fmriprep` |
+| Step | Job Name | Directory (STEP_NAME) | Notes |
+|------|----------|----------------------|-------|
+| 1    | `fmriprep-workbench-1` | `01-fw2server` | FlyWheel download |
+| 2    | `fmriprep-workbench-2` | `02-dcm2niix` | DICOM conversion |
+| 3    | `fmriprep-workbench-3` | `03-prep-fmriprep` | Prep for fMRIPrep |
+| 4    | `fmriprep-workbench-4` | `04-qc-metadata` | QC metadata |
+| 5    | `fmriprep-workbench-5` | `05-qc-volumes` | QC volumes |
+| 6    | `fmriprep-workbench-6` | `06-run-fmriprep` | fMRIPrep anat-only |
+| 7    | N/A | `toolbox/` | FreeSurfer download (no SLURM) |
+| 8    | N/A | `toolbox/` | FreeSurfer upload (no SLURM) |
+| 9    | `fmriprep-workbench-9` | `07-run-fmriprep` | fMRIPrep full |
+| 10   | N/A | `08-fsl-glm/` | FSL GLM setup (no SLURM) |
+| 11   | `fmriprep-workbench-11` | `08-fsl-glm/` | FSL Level 1 |
+| 12   | `fmriprep-workbench-12` | `08-fsl-glm/` | FSL Level 2 |
+| 13   | `fmriprep-workbench-13` | `08-fsl-glm/` | FSL Level 3 |
+| 14   | N/A | `toolbox/` | Tarball utility (no SLURM) |
 
 The `JOB_NAME` is used for SLURM display (visible in `squeue`), while
-`STEP_NAME` is used for log directory organization.
+`STEP_NAME` is used for log directory organization. Steps 7, 8, 10, and 14 are
+utility scripts that run directly without SLURM job submission.
 
 ## Monitoring Jobs
 

@@ -161,10 +161,14 @@ If upgrading from a version that used `settings.sh`:
    See the [migration guide](configuration.md#migration-from-settingssh-v01x-to-v020) in the Configuration documentation for
    a detailed mapping of old to new settings.
 
-3. Note the new pipeline step numbering:
+3. Note the new pipeline step numbering (14 steps total):
 
-   - Steps 4 and 5 are now dedicated QC steps (`04-qc-metadata`, `05-qc-volumes`)
-   - fMRIPrep steps are now steps 6 and 7
+   - Steps 1-5: FlyWheel download, DICOM conversion, prep, and QC
+   - Step 6: fMRIPrep anatomical-only (optional, for manual FreeSurfer editing)
+   - Steps 7-8: FreeSurfer download/upload utilities (optional)
+   - Step 9: fMRIPrep full workflows
+   - Steps 10-13: FSL FEAT statistical analysis (Level 1, 2, 3 GLM)
+   - Step 14: Tarball utility for data management
 
 4. Remove or archive your old `settings.sh` file.
 

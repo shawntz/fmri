@@ -12,23 +12,39 @@ The codebase is primarily Bash shell scripts orchestrated via Slurm job manager,
 
 ### Pipeline Structure
 
-The preprocessing workflow is organized into numbered directories (01-07) representing sequential pipeline steps:
+The preprocessing workflow consists of 14 steps organized as follows:
 
+**Steps 1-6: Initial Preprocessing**
 1. **01-fw2server**: Download scanner acquisitions from Flywheel to server
 2. **02-dcm2niix**: Convert DICOM to NIfTI in BIDS format using heudiconv
 3. **03-prep-fmriprep**: Remove dummy scans, configure fieldmap susceptibility distortion correction (SDC)
 4. **04-qc-metadata**: Verify DICOM → NIfTI → BIDS metadata conversion
 5. **05-qc-volumes**: Verify scan volume counts match expected values
 6. **06-run-fmriprep**: Run fMRIPrep anatomical workflows only (optional, for manual FreeSurfer editing)
-7. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
 
-Each step directory contains the core processing script. The root directory contains `XX-run.sbatch` files that serve as Slurm job submission wrappers for each step.
+**Steps 7-8: FreeSurfer Manual Editing (Toolbox Utilities)**
+7. **toolbox/download_freesurfer.sh**: Download FreeSurfer outputs for manual editing
+8. **toolbox/upload_freesurfer.sh**: Upload edited FreeSurfer outputs back to server
+
+**Step 9: Full fMRIPrep**
+9. **07-run-fmriprep**: Run full fMRIPrep workflows (anatomical + functional)
+
+**Steps 10-13: FSL GLM Statistical Analysis**
+10. **08-fsl-glm/setup_glm.sh**: Setup new statistical model
+11. **08-run.sbatch**: FSL GLM Level 1 analysis (individual runs)
+12. **09-run.sbatch**: FSL GLM Level 2 analysis (subject-level)
+13. **10-run.sbatch**: FSL GLM Level 3 analysis (group-level)
+
+**Step 14: Data Management Utility**
+14. **toolbox/tarball_sourcedata.sh**: Tarball/untar utility for sourcedata directories
+
+Each numbered step (1-6, 9) has both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 use the `08-fsl-glm/` directory for setup and separate `XX-run.sbatch` files (08-10) for execution.
 
 ### Configuration System
 
-**Central Configuration**: `settings.sh` (created from `settings.template.sh`)
+**Central Configuration**: `config.yaml` (created from `config.template.yaml`)
 
-This file controls all pipeline behavior including:
+This YAML file controls all pipeline behavior including:
 - Directory paths (BASE_DIR, RAW_DIR, TRIM_DIR, etc.)
 - Study parameters (task names, run numbers, dummy scan count)
 - Data validation values (expected volume counts)
@@ -51,7 +67,7 @@ Subject list files support suffix modifiers for granular control:
 
 **Skip Logic**: Each step checks `XX-processed_subjects.txt` files to avoid reprocessing. The `force` modifier overrides this.
 
-**Settings Sourcing**: All scripts source `./settings.sh` at the top to inherit configuration.
+**Settings Loading**: All scripts source `./load_config.sh` which parses the YAML configuration and exports environment variables.
 
 **Modular Utilities**: The `toolbox/` directory contains reusable QC and diagnostic scripts.
 
@@ -68,42 +84,67 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 ### Manual Execution
 
 ```bash
-# Example: Run step 1 (FlyWheel download)
+# Step 1: Download from FlyWheel -> Server
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
-# Example: Run step 2 (dcm2niix conversion)
+# Step 2: Run dcm2niix (DICOM -> BIDS format conversion)
 ./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
-# Example: Run step 3 (prep for fMRIPrep)
+# Step 3: Prep for fMRIPrep (remove dummy scans, update fmap JSON, config SDC)
 ./03-run.sbatch
 
-# Example: Run step 4 (QC - verify metadata)
+# Step 4: QC - Verify dcm -> nii -> bids metadata
 ./04-run.sbatch
 
-# Example: Run step 5 (QC - verify scan volumes)
+# Step 5: QC - Verify number of volumes per scan file
 ./05-run.sbatch
 
-# Example: Run fMRIPrep (anatomical only)
+# Step 6: Run fMRIPrep anatomical workflows only (for manual edits)
 ./06-run.sbatch
 
-# Example: Run fMRIPrep (full workflows)
+# Step 7: Download Freesurfer outputs for manual editing
+./toolbox/download_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
+
+# Step 8: Upload edited Freesurfer outputs back to server
+./toolbox/upload_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
+
+# Step 9: Run remaining fMRIPrep steps (full anatomical + functional workflows)
 ./07-run.sbatch
+
+# Step 10: FSL GLM - Setup new statistical model
+./launch  # Select option 10
+# Or run directly:
+./08-fsl-glm/setup_glm.sh
+
+# Step 11: FSL GLM - Run Level 1 analysis (individual runs)
+./08-run.sbatch <model-name>
+# Or with --no-feat to only create FSF files:
+./08-run.sbatch <model-name> --no-feat
+
+# Step 12: FSL GLM - Run Level 2 analysis (subject-level)
+./09-run.sbatch <model-name>
+
+# Step 13: FSL GLM - Run Level 3 analysis (group-level)
+./10-run.sbatch <model-name>
+
+# Step 14: Tarball/Untar utility for sourcedata directories
+./toolbox/tarball_sourcedata.sh [--tar-all|--tar-subjects|--untar-all|--untar-subjects] --sourcedata-dir <dir>
 ```
 
 ### fMRIPrep Execution Details
 
-- **Step 6** (`06-run-fmriprep`): Runs fMRIPrep with `--anat-only` flag. Use this when you plan to manually edit Freesurfer surfaces before functional preprocessing.
-- **Step 7** (`07-run-fmriprep`): Runs full fMRIPrep (anatomical + functional workflows). Skip step 6 if not doing manual edits.
+- **Step 6** (`06-run.sbatch` / `06-run-fmriprep/`): Runs fMRIPrep with `--anat-only` flag. Use this when you plan to manually edit Freesurfer surfaces before functional preprocessing.
+- **Step 9** (`07-run.sbatch` / `07-run-fmriprep/`): Runs full fMRIPrep (anatomical + functional workflows). Skip step 6 if not doing manual edits.
 
-Both steps use subject lists (default: `06-subjects.txt` for step 6, `all-subjects.txt` for step 7) and respect subject modifiers.
+Both steps use subject lists (default: `06-subjects.txt` for step 6, `all-subjects.txt` for step 9) and respect subject modifiers.
 
-fMRIPrep is executed via Singularity/Apptainer container specified by `SINGULARITY_IMAGE` in settings.
+fMRIPrep is executed via Singularity/Apptainer container specified by `SINGULARITY_IMAGE` in config.yaml.
 
 ## Critical Configuration Requirements
 
-Before running any pipeline step, you MUST configure `settings.sh`:
+Before running any pipeline step, you MUST configure `config.yaml`:
 
-1. Copy template: `cp settings.template.sh settings.sh`
+1. Copy template: `cp config.template.yaml config.yaml`
 2. Set all directory paths (BASE_DIR, RAW_DIR, TRIM_DIR, etc.)
 3. Configure study parameters (task_id, run_numbers, n_dummy)
 4. Set expected volume counts for validation (EXPECTED_FMAP_VOLS, EXPECTED_BOLD_VOLS, EXPECTED_BOLD_VOLS_AFTER_TRIMMING)
@@ -147,8 +188,8 @@ Located in `toolbox/`, these are shared utilities used by pipeline steps and ava
 ### Testing Configuration
 
 ```bash
-# Validate settings.sh loads without errors
-source ./settings.sh
+# Validate config.yaml loads without errors
+source ./load_config.sh
 
 # Check subject count
 wc -l < all-subjects.txt
@@ -215,7 +256,7 @@ When you need fine-grained control over which subjects run in which steps:
 
 ### Singularity/Apptainer Images
 
-fMRIPrep and heudiconv are run via Singularity/Apptainer containers. Ensure images exist at paths specified in `settings.sh`:
+fMRIPrep and heudiconv are run via Singularity/Apptainer containers. Ensure images exist at paths specified in `config.yaml`:
 - `${SINGULARITY_IMAGE_DIR}/${SINGULARITY_IMAGE}` for fMRIPrep
 - `${SINGULARITY_IMAGE_DIR}/${HEUDICONV_IMAGE}` for dcm2niix conversion
 
@@ -228,28 +269,86 @@ fMRIPrep requires templateflow templates. The pipeline uses:
 
 ### Freesurfer License
 
-A valid Freesurfer license file is required for fMRIPrep. Set `FREESURFER_LICENSE` in settings.sh to the path of your license file.
+A valid Freesurfer license file is required for fMRIPrep. Set `directories.freesurfer_license` in config.yaml to the path of your license file.
 
 ## Common Workflows
 
 **Starting a new study**:
 1. Create repository from template
-2. Configure `settings.sh` with study-specific parameters
+2. Configure `config.yaml` with study-specific parameters
 3. Create `all-subjects.txt` with subject IDs
 4. Test on single subject before batch processing
-5. Run pipeline steps sequentially (1 → 2 → 3 → QC → 6/7)
+5. Run pipeline steps sequentially (1 → 2 → 3 → 4 → 5 → 6/9)
+   - Use step 6 only if planning manual FreeSurfer edits (steps 7-8), otherwise skip to step 9
 
 **Rerunning specific subjects**:
 1. Add subject IDs with `:force` modifier to subject list
 2. Rerun the desired step
 
 **Manual Freesurfer editing workflow**:
-1. Run step 6 (anatomical only)
-2. Download Freesurfer outputs for manual editing
-3. Re-upload edited Freesurfer directories
-4. Run step 7 (full workflows) using edited surfaces
+1. Run step 6 (anatomical only): `./06-run.sbatch`
+2. Download Freesurfer outputs for manual editing (step 7):
+   ```bash
+   ./launch  # Select option 7
+   # Or run directly:
+   ./toolbox/download_freesurfer.sh \
+     --server login.sherlock.stanford.edu \
+     --user mysunetid \
+     --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+     --subjects sub-001,sub-002
+   ```
+3. Edit surfaces locally using Freeview or other tools:
+   ```bash
+   cd ~/freesurfer_edits/sub-001
+   freeview -v mri/T1.mgz -v mri/brainmask.mgz \
+     -f surf/lh.white:edgecolor=blue \
+     -f surf/lh.pial:edgecolor=red \
+     -f surf/rh.white:edgecolor=blue \
+     -f surf/rh.pial:edgecolor=red
+   # Make edits to brainmask, white matter, or surfaces
+   # Rerun Freesurfer if needed after brainmask/WM edits:
+   recon-all -autorecon2-cp -autorecon3 -s sub-001 -sd ~/freesurfer_edits
+   ```
+4. Upload edited Freesurfer outputs back to server (step 8, with automatic backup):
+   ```bash
+   ./launch  # Select option 8
+   # Or run directly:
+   ./toolbox/upload_freesurfer.sh \
+     --server login.sherlock.stanford.edu \
+     --user mysunetid \
+     --remote-dir /oak/stanford/groups/mylab/projects/mystudy \
+     --subjects sub-001,sub-002
+   ```
+5. Run step 9 (full workflows) which will use edited surfaces: `./07-run.sbatch`
+
+**Important Freesurfer Editing Notes**:
+- Only edit after Step 6 (anatomical-only fMRIPrep) completes
+- Backups are automatically created on server as `{subject}.backup.{timestamp}`
+- Download location defaults to `~/freesurfer_edits/` but can be customized
+- Use `--no-backup` flag cautiously (not recommended)
+- Common edits: brainmask (skull stripping), white matter, pial/white surfaces
+- After brainmask or WM edits, rerun `recon-all -autorecon2-cp -autorecon3`
+- Surface edits are typically final and don't require reprocessing
 
 **Optimizing inode usage**:
 1. After DICOM conversion, tarball sourcedata directories
 2. Use `toolbox/tarball_sourcedata.sh --tar-all --sourcedata-dir <path>`
 3. Extract when needed with `--untar-subjects`
+
+**FSL GLM statistical analysis workflow**:
+1. Complete fMRIPrep preprocessing (steps 1-9, or steps 1-6 + 9 if skipping manual FreeSurfer edits)
+2. Setup GLM model (step 10) with `./launch` (option 10) or `./08-fsl-glm/setup_glm.sh`
+3. Configure model parameters in `BASE_DIR/model/level1/model-<modelname>/`:
+   - Edit `model_params.json` for analysis parameters
+   - Edit `condition_key.json` to define experimental conditions
+   - Edit `task_contrasts.json` (optional) to define contrasts
+   - Edit `confounds.json` (optional) to select motion/confound regressors
+4. Create EV (explanatory variable) timing files in onset directories
+5. Run Level 1 analysis (step 11): `./08-run.sbatch <model-name>`
+6. After Level 1 completes, run Level 2 (step 12): `./09-run.sbatch <model-name>`
+7. After Level 2 completes, run Level 3 (step 13): `./10-run.sbatch <model-name>`
+8. View results in `.feat` and `.gfeat` directories
+
+Note: The `--no-feat` flag can be used to only create FSF files without running FEAT, useful for checking design matrices before full analysis.
+
+See `08-fsl-glm/README.md` for complete documentation.

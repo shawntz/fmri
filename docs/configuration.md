@@ -220,7 +220,7 @@ pipeline:
 
 ## fMRIPrep SLURM Settings
 
-Configure SLURM parameters specifically for fMRIPrep jobs (steps 6 and 7):
+Configure SLURM parameters specifically for fMRIPrep jobs (steps 6 and 9):
 
 ```yaml
 fmriprep_slurm:
@@ -281,12 +281,18 @@ Map your old Bash variables to the new YAML structure:
 
 ### 3. Update step references
 
-Note the new QC step numbering:
+Note the expanded 14-step workflow:
 
-- Old step 4 (toolbox QC metadata) is now step 4 (`04-qc-metadata`)
-- Old step 5 (toolbox QC volumes) is now step 5 (`05-qc-volumes`)
-- Old step 5/6 (fMRIPrep anat) is now step 6 (`06-run-fmriprep`)
-- Old step 6/7 (fMRIPrep full) is now step 7 (`07-run-fmriprep`)
+- Steps 1-5: FlyWheel download, DICOM conversion, prep, and QC (unchanged)
+- Step 6: fMRIPrep anatomical-only workflows (`06-run-fmriprep`, optional for manual FreeSurfer editing)
+- Step 7: Download FreeSurfer outputs (`toolbox/download_freesurfer.sh`, optional)
+- Step 8: Upload edited FreeSurfer outputs (`toolbox/upload_freesurfer.sh`, optional)
+- Step 9: fMRIPrep full workflows (`07-run-fmriprep`, previously step 7)
+- Step 10: FSL GLM model setup (`08-fsl-glm/setup_glm.sh`, new)
+- Step 11: FSL Level 1 analysis (`08-run.sbatch`, new)
+- Step 12: FSL Level 2 analysis (`09-run.sbatch`, new)
+- Step 13: FSL Level 3 analysis (`10-run.sbatch`, new)
+- Step 14: Tarball utility (`toolbox/tarball_sourcedata.sh`, new)
 
 ### 4. Remove old settings.sh
 
