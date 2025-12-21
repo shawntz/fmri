@@ -136,18 +136,18 @@ jobs:
 
           # Create a prompt file for the changelog-drafter agent
           cat > changelog_prompt.txt <<EOF
-Generate a human-readable changelog for version ${NEW_VERSION} based on commits from ${COMMIT_RANGE}.
-
-The changelog should be formatted in markdown with these sections:
-- 🚀 Features
-- 🐛 Bug Fixes
-- 📚 Documentation
-- 🔧 Maintenance
-- 💥 Breaking Changes
-
-Translate all commit messages into clear, user-friendly language that explains what changed and why it matters.
-Include only sections that have actual changes.
-EOF
+          Generate a human-readable changelog for version ${NEW_VERSION} based on commits from ${COMMIT_RANGE}.
+          
+          The changelog should be formatted in markdown with these sections:
+          - 🚀 Features
+          - 🐛 Bug Fixes
+          - 📚 Documentation
+          - 🔧 Maintenance
+          - 💥 Breaking Changes
+          
+          Translate all commit messages into clear, user-friendly language that explains what changed and why it matters.
+          Include only sections that have actual changes.
+          EOF
 
           # Use claude-code CLI with changelog-drafter agent
           # Note: This assumes you have a .claude/agents/changelog-drafter configuration

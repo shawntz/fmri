@@ -40,6 +40,22 @@ The preprocessing workflow consists of 14 steps organized as follows:
 
 Each numbered step (1-6, 9) has both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 use the `08-fsl-glm/` directory for setup and separate `XX-run.sbatch` files (08-10) for execution.
 
+### FSL GLM Statistical Analysis
+
+After completing fMRIPrep preprocessing, you can perform statistical analysis using FSL FEAT. The `08-fsl-glm` directory contains a complete pipeline for creating and executing GLM analysis:
+
+**Level 1 (Individual Runs)**: First-level analysis examining each task run separately
+**Level 2 (Subject-Level)**: Second-level analysis combining runs within subjects
+**Level 3 (Group-Level)**: Third-level analysis performing group statistics
+
+The FSL GLM pipeline:
+- Creates `.fsf` files for each analysis level
+- Runs FSL FEAT on generated `.fsf` files
+- Uses SLURM job arrays for parallel processing (or falls back to joblib/serial if SLURM unavailable)
+- Integrates with the fmriprep-workbench configuration system
+
+See `08-fsl-glm/README.md` for detailed usage instructions.
+
 ### Configuration System
 
 **Central Configuration**: `config.yaml` (created from `config.template.yaml`)
@@ -179,6 +195,22 @@ Located in `toolbox/`, these are shared utilities used by pipeline steps and ava
   - Useful when dealing with thousands of DICOM files per subject
 - `pull_fmriprep_reports.sh`: Download fMRIPrep HTML reports from server
 - `dir_checksum_compare.py`: Compare directories using checksums
+
+**Freesurfer Manual Editing**:
+- `download_freesurfer.sh`: Download Freesurfer outputs from remote server for manual surface editing
+  - Interactive and non-interactive modes
+  - Supports downloading all subjects or specific subject lists
+  - Uses rsync for efficient transfer
+  - Default download location: `~/freesurfer_edits`
+
+- `upload_freesurfer.sh`: Upload edited Freesurfer outputs back to server
+  - Automatic timestamped backups of original surfaces before upload
+  - Multiple safety confirmations to prevent accidental data loss
+  - Verifies local files exist before uploading
+  - Supports uploading all subjects or specific subject lists
+  - Provides revert instructions after upload
+
+See `toolbox/FREESURFER_EDITING.md` for complete workflow documentation.
 
 **Parsing Utilities**:
 - `parse_subject_modifiers.sh`: Parse subject ID suffix modifiers (sourced by pipeline scripts)
