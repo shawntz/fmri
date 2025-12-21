@@ -1,4 +1,4 @@
-<h2 align="center">SML fMRI Preprocessing Template<br />(<em>aka, meta fmriprep</em>)</h2>
+<h2 align="center">fMRIPrep Workbench<br />(<em>aka, the Stanford Memory Lab's fMRI Preproc/Analysis Toolbox</em>)</h2>
 
 <p align="center">
   <a href="https://github.com/shawntz/fmri/releases"><img src="https://img.shields.io/github/v/release/shawntz/fmri?label=version" alt="Release Version"></a>
@@ -6,36 +6,45 @@
   <a href="https://fmriprep-workbench.readthedocs.io/"><img src="https://readthedocs.org/projects/fmriprep-workbench/badge/?version=latest" alt="Documentation Status"></a>
   <a href="https://github.com/shawntz/fmri/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-available-blue" alt="Changelog"></a>
 </p>
+    
+   ▄████████   ▄▄▄▄███▄▄▄▄      ▄████████  ▄█     ▄███████▄    ▄████████    ▄████████    ▄███████▄            
+  ███    ███ ▄██▀▀▀███▀▀▀██▄   ███    ███ ███    ███    ███   ███    ███   ███    ███   ███    ███            
+  ███    █▀  ███   ███   ███   ███    ███ ███▌   ███    ███   ███    ███   ███    █▀    ███    ███            
+ ▄███▄▄▄     ███   ███   ███  ▄███▄▄▄▄██▀ ███▌   ███    ███  ▄███▄▄▄▄██▀  ▄███▄▄▄       ███    ███            
+▀▀███▀▀▀     ███   ███   ███ ▀▀███▀▀▀▀▀   ███▌ ▀█████████▀  ▀▀███▀▀▀▀▀   ▀▀███▀▀▀     ▀█████████▀             
+  ███        ███   ███   ███ ▀███████████ ███    ███        ▀███████████   ███    █▄    ███                   
+  ███        ███   ███   ███   ███    ███ ███    ███          ███    ███   ███    ███   ███                   
+  ███         ▀█   ███   █▀    ███    ███ █▀    ▄████▀        ███    ███   ██████████  ▄████▀                 
+                               ███    ███                     ███    ███                                      
+ ▄█     █▄   ▄██████▄     ▄████████    ▄█   ▄█▄ ▀█████████▄     ▄████████ ███▄▄▄▄    ▄████████    ▄█    █▄    
+███     ███ ███    ███   ███    ███   ███ ▄███▀   ███    ███   ███    ███ ███▀▀▀██▄ ███    ███   ███    ███   
+███     ███ ███    ███   ███    ███   ███▐██▀     ███    ███   ███    █▀  ███   ███ ███    █▀    ███    ███   
+███     ███ ███    ███  ▄███▄▄▄▄██▀  ▄█████▀     ▄███▄▄▄██▀   ▄███▄▄▄     ███   ███ ███         ▄███▄▄▄▄███▄▄ 
+███     ███ ███    ███ ▀▀███▀▀▀▀▀   ▀▀█████▄    ▀▀███▀▀▀██▄  ▀▀███▀▀▀     ███   ███ ███        ▀▀███▀▀▀▀███▀  
+███     ███ ███    ███ ▀███████████   ███▐██▄     ███    ██▄   ███    █▄  ███   ███ ███    █▄    ███    ███   
+███ ▄█▄ ███ ███    ███   ███    ███   ███ ▀███▄   ███    ███   ███    ███ ███   ███ ███    ███   ███    ███   
+ ▀███▀███▀   ▀██████▀    ███    ███   ███   ▀█▀ ▄█████████▀    ██████████  ▀█   █▀  ████████▀    ███    █▀    
+                         ███    ███   ▀                                                                       
 
-    ███████╗███╗   ███╗██████╗ ██╗
-    ██╔════╝████╗ ████║██╔══██╗██║
-    █████╗  ██╔████╔██║██████╔╝██║
-    ██╔══╝  ██║╚██╔╝██║██╔══██╗██║
-    ██║     ██║ ╚═╝ ██║██║  ██║██║
-    ╚═╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝
-
-    ██████╗ ██╗██████╗ ███████╗██╗     ██╗███╗   ██╗███████╗
-    ██╔══██╗██║██╔══██╗██╔════╝██║     ██║████╗  ██║██╔════╝
-    ██████╔╝██║██████╔╝█████╗  ██║     ██║██╔██╗ ██║█████╗
-    ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║     ██║██║╚██╗██║██╔══╝
-    ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗
-    ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
-
-This repo is a work in progress intended to transform the [Stanford Memory Lab's](https://memorylab.stanford.edu/) (SML) internal fMRI preprocessing scripts into a generalizable workflow for consistency within and across lab projects.
+This WIP repo transforms the [Stanford Memory Lab's](https://memorylab.stanford.edu/) (SML) internal fMRI preprocessing scripts into a generalizable toolbox for consistency within and across lab projects.
 
 As such, this repo is intended to be used as a **GitHub template** for setting up fMRI preprocessing pipelines that handle:
 
-- [x] 1. automated transfer of scanner acquisitions from FlyWheel -> Server
-- [x] 2. `dcm2niix` DICOM to NIfTI converter (converts raw DICOM -> BIDS format)
-- [x] 3. dummy scan removal + setup files for fieldmap-based susceptibility distortion correction in fMRIPrep
-- [x] 4. QC: Verify dcm -> nii -> bids metadata
-- [x] 5. QC: Verify number of volumes per scan file
-- [x] 6. Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)
-- [x] 7. Run remaining fMRIPrep steps (full anatomical + functional workflows)
-- [x] 8. FSL FEAT GLM statistical analysis (Level 1, 2, 3) with SLURM integration
-- [x] 9. Download Freesurfer outputs for manual surface editing (with automatic backup on upload)
-- [x] 10. Upload edited Freesurfer outputs back to server (with safety confirmations)
-- [ ] *Future:* automated tools for HDF5 file management and compression out of the box (i.e., to limit lab inode usage on OAK storage)
+- [x] 1. **FlyWheel → Server**: Automated transfer of scanner acquisitions from FlyWheel to server
+- [x] 2. **DICOM → BIDS**: `dcm2niix` converter (converts raw DICOM to BIDS format via heudiconv)
+- [x] 3. **Prep for fMRIPrep**: Dummy scan removal + fieldmap susceptibility distortion correction setup
+- [x] 4. **QC Metadata**: Verify DICOM → NIfTI → BIDS metadata conversion
+- [x] 5. **QC Volumes**: Verify number of volumes per scan file matches expected counts
+- [x] 6. **fMRIPrep Anat-Only**: Run fMRIPrep anatomical workflows only (for manual FreeSurfer editing)
+- [x] 7. **Download FreeSurfer**: Download FreeSurfer outputs for manual surface editing
+- [x] 8. **Upload FreeSurfer**: Upload edited FreeSurfer outputs back to server (with automatic backup)
+- [x] 9. **fMRIPrep Full**: Run full fMRIPrep workflows (anatomical + functional)
+- [x] 10. **FSL GLM Setup**: Setup statistical model for FSL FEAT analysis
+- [x] 11. **FSL Level 1**: Run Level 1 GLM analysis (individual runs)
+- [x] 12. **FSL Level 2**: Run Level 2 GLM analysis (subject-level)
+- [x] 13. **FSL Level 3**: Run Level 3 GLM analysis (group-level)
+- [x] 14. **Tarball Utility**: Optimize inode usage by archiving sourcedata directories
+- [ ] *Future:* Automated HDF5 file management and compression
 
 > [!NOTE]
 > - [x] indicates workflows that have been finished and validated
@@ -46,9 +55,10 @@ As such, this repo is intended to be used as a **GitHub template** for setting u
 Full documentation is available on [ReadTheDocs](https://fmriprep-workbench.readthedocs.io/).
 
 For quick reference, see:
-- [Installation Guide](docs/installation.rst)
-- [Configuration Guide](docs/configuration.rst)
-- [Usage Guide](docs/usage.rst)
+- [Installation Guide](docs/installation.md)
+- [Configuration Guide](docs/configuration.md)
+- [Usage Guide](docs/usage.md)
+- [Workflows Guide](docs/workflows.md)
 - [Changelog](CHANGELOG.md)
 - [Release Process](RELEASING.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
@@ -69,7 +79,7 @@ This will create a new repository with all the files from this template, allowin
 - JSON metadata management
 - Quality control checks
 - FSL FEAT statistical analysis
-- Freesurfer manual editing workflows
+- FreeSurfer manual editing workflows
 
 The template provides a standardized structure and validated scripts that you can build upon, while keeping your specific study parameters and paths separate in configuration files.
 
@@ -81,7 +91,7 @@ The template provides a standardized structure and validated scripts that you ca
 - Quality control utilities
 - BIDS metadata management tools
 - FSL FEAT statistical analysis pipeline (Level 1, 2, 3 GLM)
-- Freesurfer manual editing utilities (download/upload with safety features)
+- FreeSurfer manual editing utilities (download/upload with safety features)
 - An interactive terminal user interface (TUI) launcher for triggering pipeline steps
 
 ## Getting Started
@@ -91,11 +101,12 @@ After creating your repository from this template:
 1. Clone your new repository
 2. Copy `config.template.yaml` to `config.yaml` and customize parameters
 3. Modify paths and scan parameters for your study
-4. Follow the `configuration guide` in the detailed documentation below
+4. Copy `all-subjects.template.txt` to `all-subjects.txt` and add your subject IDs
+5. Follow the [Configuration Guide](docs/configuration.md) for detailed setup instructions
 
 ---
 
-# SML fMRI Configuration Guide
+# Quick Start Guide
 
 ## Overview
 The preprocessing pipeline requires proper configuration of several parameters to handle your study's specific requirements. This guide explains how to set up the `config.yaml` file that controls the pipeline's behavior.
@@ -131,32 +142,47 @@ The preprocessing pipeline requires proper configuration of several parameters t
 
 ### manually calling upon each sidecar executable
 ```bash
-# example: running step 1 (FlyWheel download)
+# Step 1: FlyWheel download
 ./01-run.sbatch <fw_subject_id> <fw_session_id> <new_bids_subject_id>
 
-# example: running step 2 (dcm2niix BIDS conversion)
+# Step 2: dcm2niix BIDS conversion
 ./02-run.sbatch <fw_session_id> <new_bids_subject_id> [--skip-tar]
 
-# example: running step 3 (prep for fMRIPrep)
+# Step 3: Prep for fMRIPrep
 ./03-run.sbatch
 
-# example: running step 4 (QC: verify metadata)
-./toolbox/verify_nii_metadata.sh
+# Step 4: QC - verify metadata
+./04-run.sbatch
 
-# example: running step 5 (QC: verify volume counts)
-./toolbox/summarize_bold_scan_volume_counts.sh
+# Step 5: QC - verify volume counts
+./05-run.sbatch
 
-# example: running step 6 (fMRIPrep anatomical workflows only)
+# Step 6: fMRIPrep anatomical workflows only
 ./06-run.sbatch
 
-# example: running step 7 (fMRIPrep full workflows)
+# Step 7: Download FreeSurfer outputs for manual editing
+./toolbox/download_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
+
+# Step 8: Upload edited FreeSurfer outputs back to server
+./toolbox/upload_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
+
+# Step 9: fMRIPrep full workflows (anatomical + functional)
 ./07-run.sbatch
 
-# example: downloading Freesurfer outputs for manual editing
-./toolbox/download_freesurfer.sh
+# Step 10: FSL GLM - Setup new statistical model
+./10-fsl-glm/setup_glm.sh
 
-# example: uploading edited Freesurfer outputs back to server
-./toolbox/upload_freesurfer.sh
+# Step 11: FSL GLM - Run Level 1 analysis (individual runs)
+./08-run.sbatch <model-name> [--no-feat]
+
+# Step 12: FSL GLM - Run Level 2 analysis (subject-level)
+./09-run.sbatch <model-name> [--no-feat]
+
+# Step 13: FSL GLM - Run Level 3 analysis (group-level)
+./10-run.sbatch <model-name> [--no-feat]
+
+# Step 14: Tarball/Untar utility for sourcedata directories
+./toolbox/tarball_sourcedata.sh [--tar-all|--tar-subjects|--untar-all|--untar-subjects] --sourcedata-dir <dir>
 ```
 
 ## Configuration Steps
@@ -477,12 +503,12 @@ The `tarball_sourcedata.sh` script helps optimize inode usage on supercompute en
 - Archiving into a single tar file per subject drastically reduces inode consumption (e.g., a directory tree with 5000 files using 5000+ inodes becomes a single tar file using 1 inode)
 - Easy to extract subjects back when needed for reprocessing or analysis
 
-### Freesurfer Manual Editing Utilities
+### FreeSurfer Manual Editing Utilities
 
-The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing Freesurfer surface reconstructions.
+The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complete workflow for manually editing FreeSurfer surface reconstructions.
 
 **Features:**
-- Download Freesurfer outputs from remote server via rsync
+- Download FreeSurfer outputs from remote server via rsync
 - Upload edited surfaces back to server with automatic backups
 - Interactive and non-interactive modes
 - Support for individual subjects or batch downloads/uploads
@@ -492,7 +518,7 @@ The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complet
 **Usage Examples:**
 
 ```bash
-# Download Freesurfer outputs interactively
+# Download FreeSurfer outputs interactively
 ./toolbox/download_freesurfer.sh
 
 # Download specific subjects non-interactively
@@ -515,7 +541,7 @@ The `download_freesurfer.sh` and `upload_freesurfer.sh` scripts enable a complet
 
 **Complete Workflow:**
 1. Run fMRIPrep anatomical workflows only (Step 6): `./06-run.sbatch`
-2. Download Freesurfer outputs: `./toolbox/download_freesurfer.sh`
+2. Download FreeSurfer outputs: `./toolbox/download_freesurfer.sh`
 3. Edit surfaces locally using Freeview or other tools
 4. Upload edited surfaces: `./toolbox/upload_freesurfer.sh`
 5. Run full fMRIPrep workflows (Step 7): `./07-run.sbatch`

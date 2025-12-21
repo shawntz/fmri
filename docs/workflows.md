@@ -3,32 +3,48 @@
 This document provides detailed information about each preprocessing workflow
 in the fMRIPrep Workbench template.
 
-!!! note "v0.2.0 Pipeline Restructuring"
+!!! note "v0.2.0+ Pipeline Expansion"
 
-    QC steps 4 and 5 are now dedicated pipeline steps with their own directories (`04-qc-metadata` and `05-qc-volumes`), rather than toolbox-only utilities. The fMRIPrep steps have been renumbered to steps 6 and 7.
+    The pipeline has been expanded to 14 steps, including dedicated FreeSurfer editing utilities (steps 7-8), FSL FEAT statistical analysis (steps 10-13), and data management tools (step 14).
 
 ## Pipeline Overview
 
-The preprocessing pipeline is organized into seven sequential steps, each handling
-a specific aspect of the fMRI preprocessing workflow:
+The preprocessing and analysis pipeline is organized into 14 steps, covering data acquisition through statistical analysis:
 
 ```text
-Step 1     Step 2       Step 3      Step 4     Step 5      Step 6        Step 7
-FlyWheel -> dcm2niix -> Prep for -> QC Meta -> QC Vols -> fMRIPrep  -> fMRIPrep
-Download    Conversion   fMRIPrep    Verify     Check       Anat         Full
+Steps 1-5: Data Acquisition & QC
+FlyWheel -> dcm2niix -> Prep -> QC Meta -> QC Vols
+
+Steps 6-9: fMRIPrep Processing (with optional FreeSurfer editing)
+fMRIPrep Anat -> FS Download -> FS Upload -> fMRIPrep Full
+   (Step 6)       (Step 7)      (Step 8)      (Step 9)
+
+Steps 10-13: FSL FEAT Statistical Analysis
+GLM Setup -> Level 1 -> Level 2 -> Level 3
+ (Step 10)   (Step 11)  (Step 12)  (Step 13)
+
+Step 14: Data Management
+Tarball Utility
 ```
 
 ### Pipeline Steps Summary
 
-| Step | Directory | SLURM Job Name | Description |
-|------|-----------|----------------|-------------|
+| Step | Directory/Script | SLURM Job Name | Description |
+|------|------------------|----------------|-------------|
 | 1    | `01-fw2server` | `fmriprep-workbench-1` | Download scanner acquisitions from FlyWheel |
 | 2    | `02-dcm2niix` | `fmriprep-workbench-2` | Convert DICOM to NIfTI in BIDS format |
 | 3    | `03-prep-fmriprep` | `fmriprep-workbench-3` | Remove dummy scans, configure fieldmap SDC |
 | 4    | `04-qc-metadata` | `fmriprep-workbench-4` | Verify DICOM to NIfTI to BIDS metadata conversion |
 | 5    | `05-qc-volumes` | `fmriprep-workbench-5` | Verify scan volume counts match expected values |
-| 6    | `06-run-fmriprep` | `fmriprep-workbench-6` | Run fMRIPrep anatomical workflows only |
-| 7    | `07-run-fmriprep` | `fmriprep-workbench-7` | Run full fMRIPrep workflows (anatomical + functional) |
+| 6    | `06-run-fmriprep` | `fmriprep-workbench-6` | Run fMRIPrep anatomical workflows only (optional) |
+| 7    | `toolbox/download_freesurfer.sh` | N/A | Download FreeSurfer outputs for manual editing (optional) |
+| 8    | `toolbox/upload_freesurfer.sh` | N/A | Upload edited FreeSurfer outputs (optional) |
+| 9    | `09-run-fmriprep` | `fmriprep-workbench-9` | Run full fMRIPrep workflows (anatomical + functional) |
+| 10   | `10-fsl-glm/setup_glm.sh` | N/A | Setup FSL FEAT statistical model |
+| 11   | `10-fsl-glm/` (`08-run.sbatch`) | `fmriprep-workbench-11` | Run FSL Level 1 analysis (individual runs) |
+| 12   | `10-fsl-glm/` (`09-run.sbatch`) | `fmriprep-workbench-12` | Run FSL Level 2 analysis (subject-level) |
+| 13   | `10-fsl-glm/` (`10-run.sbatch`) | `fmriprep-workbench-13` | Run FSL Level 3 analysis (group-level) |
+| 14   | `toolbox/tarball_sourcedata.sh` | N/A | Optimize inode usage by archiving sourcedata |
 
 ## Workflow Details
 
@@ -215,11 +231,11 @@ pipeline:
 
     Step 6 automatically passes the `--anat-only` flag to fMRIPrep. Skip this step if you do not need manual FreeSurfer editing.
 
-### 7. fMRIPrep Complete (07-run-fmriprep)
+### 7. fMRIPrep Complete (09-run-fmriprep)
 
 **Purpose:** Run complete fMRIPrep preprocessing (anatomical + functional)
 
-**Script:** `07-run-fmriprep/run_fmriprep.sh`
+**Script:** `09-run-fmriprep/run_fmriprep.sh`
 
 **Inputs:**
 - BIDS-formatted data (anatomical and functional)

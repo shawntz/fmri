@@ -50,7 +50,7 @@ logs/
 ```
 
 #### Configuration:
-The tool uses settings from your `settings.sh` file:
+The tool uses settings from your `config.yaml` file (loaded via `load_config.sh`):
 - `EXPECTED_BOLD_VOLS` - Expected number of volumes in BOLD scans
 - `EXPECTED_BOLD_VOLS_AFTER_TRIMMING` - Expected volumes after trimming
 - `EXPECTED_FMAP_VOLS` - Expected number of volumes in fieldmap scans
@@ -104,7 +104,7 @@ python3 toolbox/summarize_diagnostics.py \
 ## Troubleshooting
 
 **Issue**: "File not found" errors
-- **Solution**: Verify that `RAW_DIR` and `TRIM_DIR` in `settings.sh` are correctly set and accessible
+- **Solution**: Verify that `directories.raw_dir` and `directories.trim_dir` in `config.yaml` are correctly set and accessible
 
 **Issue**: Module load errors
 - **Solution**: Ensure FSL and Python modules are available on your system
