@@ -39,11 +39,11 @@ Tarball Utility
 | 6    | `06-run-fmriprep` | `fmriprep-workbench-6` | Run fMRIPrep anatomical workflows only (optional) |
 | 7    | `toolbox/download_freesurfer.sh` | N/A | Download FreeSurfer outputs for manual editing (optional) |
 | 8    | `toolbox/upload_freesurfer.sh` | N/A | Upload edited FreeSurfer outputs (optional) |
-| 9    | `07-run-fmriprep` | `fmriprep-workbench-9` | Run full fMRIPrep workflows (anatomical + functional) |
-| 10   | `08-fsl-glm/setup_glm.sh` | N/A | Setup FSL FEAT statistical model |
-| 11   | `08-fsl-glm/` (`08-run.sbatch`) | `fmriprep-workbench-11` | Run FSL Level 1 analysis (individual runs) |
-| 12   | `08-fsl-glm/` (`09-run.sbatch`) | `fmriprep-workbench-12` | Run FSL Level 2 analysis (subject-level) |
-| 13   | `08-fsl-glm/` (`10-run.sbatch`) | `fmriprep-workbench-13` | Run FSL Level 3 analysis (group-level) |
+| 9    | `09-run-fmriprep` | `fmriprep-workbench-9` | Run full fMRIPrep workflows (anatomical + functional) |
+| 10   | `10-fsl-glm/setup_glm.sh` | N/A | Setup FSL FEAT statistical model |
+| 11   | `10-fsl-glm/` (`08-run.sbatch`) | `fmriprep-workbench-11` | Run FSL Level 1 analysis (individual runs) |
+| 12   | `10-fsl-glm/` (`09-run.sbatch`) | `fmriprep-workbench-12` | Run FSL Level 2 analysis (subject-level) |
+| 13   | `10-fsl-glm/` (`10-run.sbatch`) | `fmriprep-workbench-13` | Run FSL Level 3 analysis (group-level) |
 | 14   | `toolbox/tarball_sourcedata.sh` | N/A | Optimize inode usage by archiving sourcedata |
 
 ## Workflow Details
@@ -231,11 +231,11 @@ pipeline:
 
     Step 6 automatically passes the `--anat-only` flag to fMRIPrep. Skip this step if you do not need manual FreeSurfer editing.
 
-### 7. fMRIPrep Complete (07-run-fmriprep)
+### 7. fMRIPrep Complete (09-run-fmriprep)
 
 **Purpose:** Run complete fMRIPrep preprocessing (anatomical + functional)
 
-**Script:** `07-run-fmriprep/run_fmriprep.sh`
+**Script:** `09-run-fmriprep/run_fmriprep.sh`
 
 **Inputs:**
 - BIDS-formatted data (anatomical and functional)

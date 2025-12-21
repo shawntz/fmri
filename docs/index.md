@@ -71,7 +71,7 @@ cp all-subjects.template.txt all-subjects.txt
 ./toolbox/download_freesurfer.sh     # Step 7: Download FreeSurfer (optional)
 ./toolbox/upload_freesurfer.sh       # Step 8: Upload FreeSurfer (optional)
 ./07-run.sbatch                      # Step 9: fMRIPrep full workflows
-./08-fsl-glm/setup_glm.sh            # Step 10: FSL GLM setup
+./10-fsl-glm/setup_glm.sh            # Step 10: FSL GLM setup
 ./08-run.sbatch <model-name>         # Step 11: FSL Level 1
 ./09-run.sbatch <model-name>         # Step 12: FSL Level 2
 ./10-run.sbatch <model-name>         # Step 13: FSL Level 3
