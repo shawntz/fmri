@@ -123,10 +123,10 @@ def display_menu():
         ("3", "Step 3: Prep for fMRIPrep (remove dummy scans, update fmap JSON metadata, config fmap SDC)"),
         ("4", "Step 4: QC - Verify dcm -> nii -> bids metadata"),
         ("5", "Step 5: QC - Verify number of volumes per scan file"),
-        ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 7)"),
-        ("7", "Step 7: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
-        ("8", "Utilities: Download Freesurfer outputs for manual editing"),
-        ("9", "Utilities: Upload edited Freesurfer outputs back to server"),
+        ("6", "Step 6: Run fMRIPrep anatomical workflows only (if doing manual edits, otherwise skip to step 9)"),
+        ("7", "Step 7: Download Freesurfer outputs for manual editing"),
+        ("8", "Step 8: Upload edited Freesurfer outputs back to server"),
+        ("9", "Step 9: Run remaining fMRIPrep steps (full anatomical + functional workflows)"),
         ("10", "Utilities: Tarball/Untar utility for sourcedata/ BIDS directories")
     ]
 
@@ -166,15 +166,15 @@ def get_parameters(step_choice):
             "keys": [],
             "prompts": []
         },
-        "7": {  # Step 7 (fmriprep full)
+        "7": {  # Freesurfer download
             "keys": [],
             "prompts": []
         },
-        "8": {  # Freesurfer download
+        "8": {  # Freesurfer upload
             "keys": [],
             "prompts": []
         },
-        "9": {  # Freesurfer upload
+        "9": {  # Step 9 (fmriprep full)
             "keys": [],
             "prompts": []
         },
@@ -272,9 +272,9 @@ def run_script(step_choice, user_inputs):
         "4": "04-run.sbatch",
         "5": "05-run.sbatch",
         "6": "06-run.sbatch",
-        "7": "07-run.sbatch",
-        "8": "toolbox/download_freesurfer.sh",
-        "9": "toolbox/upload_freesurfer.sh",
+        "7": "toolbox/download_freesurfer.sh",
+        "8": "toolbox/upload_freesurfer.sh",
+        "9": "07-run.sbatch",
         "10": "toolbox/tarball_sourcedata.sh"
     }
 
