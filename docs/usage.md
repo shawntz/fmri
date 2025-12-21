@@ -56,7 +56,7 @@ For more control, you can manually execute each sbatch script:
 # Step 8: Upload edited FreeSurfer outputs (optional)
 ./toolbox/upload_freesurfer.sh
 
-# Step 9: fMRIPrep complete workflows
+# Step 9: fMRIPrep complete workflows (anatomical + functional)
 ./07-run.sbatch
 
 # Step 10: FSL GLM model setup
@@ -139,7 +139,7 @@ The preprocessing and analysis pipeline consists of 14 steps:
 ./04-run.sbatch  # QC metadata
 ./05-run.sbatch  # QC volumes
 
-# Step 9: Skip step 6, run full fMRIPrep directly (steps 7-8 are for FreeSurfer editing)
+# Step 9: Full fMRIPrep workflows (skipping step 6 since no manual editing needed)
 ./07-run.sbatch  # Full fMRIPrep workflows
 ```
 

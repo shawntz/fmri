@@ -38,7 +38,7 @@ The preprocessing workflow consists of 14 steps organized as follows:
 **Step 14: Data Management Utility**
 14. **toolbox/tarball_sourcedata.sh**: Tarball/untar utility for sourcedata directories
 
-Each numbered step (1-6, 9) has both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 use the `08-fsl-glm/` directory for setup and separate `XX-run.sbatch` files (08-10) for execution.
+Each numbered step that has its own directory (1-6, 9) includes both a directory (e.g., `01-fw2server/`) containing the core processing script and a corresponding `XX-run.sbatch` file in the root directory that serves as the Slurm job submission wrapper. Steps 7-8 and 14 are standalone toolbox utilities. Steps 10-13 share the `08-fsl-glm/` directory for statistical model setup; their execution is driven by three separate Slurm wrappers: `08-run.sbatch` for Step 11 (Level 1), `09-run.sbatch` for Step 12 (Level 2), and `10-run.sbatch` for Step 13 (Level 3).
 
 ### FSL GLM Statistical Analysis
 
@@ -118,10 +118,10 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 # Step 6: Run fMRIPrep anatomical workflows only (for manual edits)
 ./06-run.sbatch
 
-# Step 7: Download Freesurfer outputs for manual editing
+# Step 7: Download FreeSurfer outputs for manual editing
 ./toolbox/download_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
 
-# Step 8: Upload edited Freesurfer outputs back to server
+# Step 8: Upload edited FreeSurfer outputs back to server
 ./toolbox/upload_freesurfer.sh --server <server> --user <user> --remote-dir <dir> --subjects <list>
 
 # Step 9: Run remaining fMRIPrep steps (full anatomical + functional workflows)
@@ -149,7 +149,7 @@ This Python-based TUI provides an interactive menu for selecting pipeline steps,
 
 ### fMRIPrep Execution Details
 
-- **Step 6** (`06-run.sbatch` / `06-run-fmriprep/`): Runs fMRIPrep with `--anat-only` flag. Use this when you plan to manually edit Freesurfer surfaces before functional preprocessing.
+- **Step 6** (`06-run.sbatch` / `06-run-fmriprep/`): Runs fMRIPrep with `--anat-only` flag. Use this when you plan to manually edit FreeSurfer surfaces before functional preprocessing.
 - **Step 9** (`07-run.sbatch` / `07-run-fmriprep/`): Runs full fMRIPrep (anatomical + functional workflows). Skip step 6 if not doing manual edits.
 
 Both steps use subject lists (default: `06-subjects.txt` for step 6, `all-subjects.txt` for step 9) and respect subject modifiers.
@@ -196,14 +196,14 @@ Located in `toolbox/`, these are shared utilities used by pipeline steps and ava
 - `pull_fmriprep_reports.sh`: Download fMRIPrep HTML reports from server
 - `dir_checksum_compare.py`: Compare directories using checksums
 
-**Freesurfer Manual Editing**:
-- `download_freesurfer.sh`: Download Freesurfer outputs from remote server for manual surface editing
+**FreeSurfer Manual Editing**:
+- `download_freesurfer.sh`: Download FreeSurfer outputs from remote server for manual surface editing
   - Interactive and non-interactive modes
   - Supports downloading all subjects or specific subject lists
   - Uses rsync for efficient transfer
   - Default download location: `~/freesurfer_edits`
 
-- `upload_freesurfer.sh`: Upload edited Freesurfer outputs back to server
+- `upload_freesurfer.sh`: Upload edited FreeSurfer outputs back to server
   - Automatic timestamped backups of original surfaces before upload
   - Multiple safety confirmations to prevent accidental data loss
   - Verifies local files exist before uploading
@@ -299,9 +299,9 @@ fMRIPrep requires templateflow templates. The pipeline uses:
 - `FMRIPREP_HOST_CACHE`: fMRIPrep-specific cache (e.g., `~/.cache/fmriprep`)
 - Both are mounted into the container at runtime
 
-### Freesurfer License
+### FreeSurfer License
 
-A valid Freesurfer license file is required for fMRIPrep. Set `directories.freesurfer_license` in config.yaml to the path of your license file.
+A valid FreeSurfer license file is required for fMRIPrep. Set `directories.freesurfer_license` in config.yaml to the path of your license file.
 
 ## Common Workflows
 
@@ -317,9 +317,9 @@ A valid Freesurfer license file is required for fMRIPrep. Set `directories.frees
 1. Add subject IDs with `:force` modifier to subject list
 2. Rerun the desired step
 
-**Manual Freesurfer editing workflow**:
+**Manual FreeSurfer editing workflow**:
 1. Run step 6 (anatomical only): `./06-run.sbatch`
-2. Download Freesurfer outputs for manual editing (step 7):
+2. Download FreeSurfer outputs for manual editing (step 7):
    ```bash
    ./launch  # Select option 7
    # Or run directly:
@@ -338,10 +338,10 @@ A valid Freesurfer license file is required for fMRIPrep. Set `directories.frees
      -f surf/rh.white:edgecolor=blue \
      -f surf/rh.pial:edgecolor=red
    # Make edits to brainmask, white matter, or surfaces
-   # Rerun Freesurfer if needed after brainmask/WM edits:
+   # Rerun FreeSurfer if needed after brainmask/WM edits:
    recon-all -autorecon2-cp -autorecon3 -s sub-001 -sd ~/freesurfer_edits
    ```
-4. Upload edited Freesurfer outputs back to server (step 8, with automatic backup):
+4. Upload edited FreeSurfer outputs back to server (step 8, with automatic backup):
    ```bash
    ./launch  # Select option 8
    # Or run directly:
@@ -353,7 +353,7 @@ A valid Freesurfer license file is required for fMRIPrep. Set `directories.frees
    ```
 5. Run step 9 (full workflows) which will use edited surfaces: `./07-run.sbatch`
 
-**Important Freesurfer Editing Notes**:
+**Important FreeSurfer Editing Notes**:
 - Only edit after Step 6 (anatomical-only fMRIPrep) completes
 - Backups are automatically created on server as `{subject}.backup.{timestamp}`
 - Download location defaults to `~/freesurfer_edits/` but can be customized

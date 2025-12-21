@@ -6,7 +6,7 @@ export SKIP_SUBJECTS_PROMPT=true
 source ./load_config.sh
 
 STEP_NAME="07-run-fmriprep"
-JOB_NAME="fmriprep-workbench-7"
+JOB_NAME="fmriprep-workbench-9"
 
 # create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${STEP_NAME}
