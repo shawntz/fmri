@@ -2,7 +2,7 @@
 # @Author: Shawn Schwartz - Stanford Memory Lab
 # @Date: December 17, 2025
 # @Description: SLURM job submission wrapper for FSL FEAT Level 2 (subject-level) GLM analysis
-# @Usage: ./09-run.sbatch <model-name> [--no-feat]
+# @Usage: ./12-run.sbatch <model-name> [--no-feat]
 
 STEP_NAME="10-fsl-glm"
 JOB_NAME="fmriprep-workbench-12"
