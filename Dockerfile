@@ -49,15 +49,16 @@ RUN apt-get update && apt-get install -y \
 # to inject malicious repository configurations. This approach embeds known-good content.
 # Content for Ubuntu 22.04 (jammy) from us-ca mirror
 RUN mkdir -p /etc/apt/keyrings && \
-    # Fetch NeuroDebian GPG key from Ubuntu keyserver over HTTPS (when available)
-    # Fallback: Use gpg with retry and verification
-    (gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 || \
-     gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xA5D32F012649A5A9) && \
+    # Fetch NeuroDebian GPG key from keyserver over HKPS (HTTPS) only
+    # Removed insecure HKP fallback to prevent key compromise via MITM
+    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 && \
     gpg --batch --export 0xA5D32F012649A5A9 | gpg --dearmor -o /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
     # Embed sources list content directly (no HTTP download of sources.list file)
+    # Note: Repository URLs use HTTP as NeuroDebian mirrors don't support HTTPS.
+    # Package integrity is protected by GPG signature verification via the keyring.
     echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neurodeb.pirsquared.org data main contrib non-free" > /etc/apt/sources.list.d/neurodebian.sources.list && \
     echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neurodeb.pirsquared.org jammy main contrib non-free" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    # Install FSL - packages are now verified against our explicitly managed keyring
+    # Install FSL - packages are verified against our explicitly managed keyring
     apt-get update && \
     apt-get install -y fsl-core fsl-atlases && \
     rm -rf /var/lib/apt/lists/*
