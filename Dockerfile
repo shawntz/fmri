@@ -1,0 +1,128 @@
+# ============================================================================
+# fMRIPrep Workbench Docker Container
+# ============================================================================
+# This container provides the fMRIPrep Workbench pipeline orchestration tools
+# for fMRI preprocessing and statistical analysis workflows.
+#
+# The container includes:
+# - Python 3.11 with PyYAML for configuration management
+# - FSL for neuroimaging analysis (FEAT GLM, fslnvols)
+# - Git for version control
+# - Interactive TUI launcher
+# - All pipeline scripts and utilities
+#
+# Note: This container orchestrates pipelines that use other containers
+# (fMRIPrep, heudiconv) via Singularity/Apptainer on HPC systems.
+# ============================================================================
+
+FROM ubuntu:22.04 as base
+
+# Prevent interactive prompts during build
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set locale
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    python3.11 \
+    python3-pip \
+    python3.11-venv \
+    rsync \
+    tar \
+    gzip \
+    bash \
+    bc \
+    vim \
+    nano \
+    less \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install FSL (minimal installation for FEAT and utilities)
+# Security: Embed NeuroDebian sources list content directly to prevent MITM attacks.
+# The previous approach downloaded sources.list over insecure HTTP, allowing attackers
+# to inject malicious repository configurations. This approach embeds known-good content.
+# Content for Ubuntu 22.04 (jammy) using official neuro.debian.net domain
+RUN mkdir -p /etc/apt/keyrings && \
+    # Fetch NeuroDebian GPG key from keyserver over HKPS (HTTPS) only
+    # Removed insecure HKP fallback to prevent key compromise via MITM
+    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 && \
+    gpg --batch --export 0xA5D32F012649A5A9 | gpg --dearmor -o /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
+    # Embed sources list content directly (no HTTP download of sources.list file)
+    # Using official neuro.debian.net domain which provides automatic geographic redirection
+    # Note: Repository URLs use HTTP as NeuroDebian mirrors don't support HTTPS.
+    # Package integrity is protected by GPG signature verification via the keyring.
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian data main contrib non-free" > /etc/apt/sources.list.d/neurodebian.sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian jammy main contrib non-free" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    # Install FSL - packages are verified against our explicitly managed keyring
+    apt-get update && \
+    apt-get install -y fsl-core fsl-atlases && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure FSL environment
+ENV FSLDIR=/usr/share/fsl/5.0 \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    PATH=/usr/share/fsl/5.0/bin:$PATH \
+    LD_LIBRARY_PATH=/usr/share/fsl/5.0/lib:$LD_LIBRARY_PATH
+
+# Install Python packages
+RUN pip3 install --no-cache-dir \
+    pyyaml>=6.0 \
+    numpy \
+    pandas \
+    matplotlib
+
+# Create workbench user (non-root for security)
+ARG WORKBENCH_UID=1000
+RUN useradd -m -s /bin/bash -u ${WORKBENCH_UID} workbench && \
+    mkdir -p /opt/fmriprep-workbench && \
+    chown -R workbench:workbench /opt/fmriprep-workbench
+
+# Set working directory
+WORKDIR /opt/fmriprep-workbench
+
+# Copy pipeline files
+COPY --chown=workbench:workbench . /opt/fmriprep-workbench/
+
+# Make scripts executable
+RUN find /opt/fmriprep-workbench -type f -name "*.sh" -exec chmod +x {} \; && \
+    find /opt/fmriprep-workbench -type f -name "*.sbatch" -exec chmod +x {} \; && \
+    chmod +x /opt/fmriprep-workbench/launch && \
+    chmod +x /opt/fmriprep-workbench/toolbox/*.py 2>/dev/null || true
+
+# Create mount point directories
+RUN mkdir -p \
+    /data/config \
+    /data/subjects \
+    /data/logs \
+    /data/study \
+    /data/cache/templateflow \
+    /data/cache/fmriprep \
+    /data/containers \
+    && chown -R workbench:workbench /data
+
+# Switch to workbench user
+USER workbench
+
+# Set environment variables for container
+ENV WORKBENCH_VERSION=0.2.0 \
+    WORKBENCH_HOME=/opt/fmriprep-workbench \
+    PATH=/opt/fmriprep-workbench:$PATH
+
+# Default command
+CMD ["/bin/bash"]
+
+# Metadata labels
+LABEL maintainer="Shawn Schwartz <shawnschwartz@stanford.edu>" \
+      org.opencontainers.image.title="fMRIPrep Workbench" \
+      org.opencontainers.image.description="Pipeline orchestration toolbox for fMRI preprocessing and statistical analysis" \
+      org.opencontainers.image.version="0.2.0" \
+      org.opencontainers.image.url="https://github.com/shawntz/fmriprep-workbench" \
+      org.opencontainers.image.documentation="https://fmriprep-workbench.readthedocs.io" \
+      org.opencontainers.image.source="https://github.com/shawntz/fmriprep-workbench" \
+      org.opencontainers.image.licenses="MIT"

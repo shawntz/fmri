@@ -1,0 +1,377 @@
+#!/bin/bash
+# ============================================================================
+# fMRIPrep Workbench Docker Wrapper Script
+# ============================================================================
+# This script provides convenient commands for managing the fMRIPrep Workbench
+# Docker container.
+#
+# Usage:
+#   ./fmriprep-workbench start   - Start the container in detached mode
+#   ./fmriprep-workbench stop    - Stop the running container
+#   ./fmriprep-workbench launch  - Launch the interactive TUI
+#   ./fmriprep-workbench shell   - Open a bash shell in the container
+#   ./fmriprep-workbench logs    - View container logs
+#   ./fmriprep-workbench status  - Check container status
+#   ./fmriprep-workbench exec    - Execute a command in the container
+#   ./fmriprep-workbench pull    - Pull the latest image from Docker Hub
+#   ./fmriprep-workbench build   - Build the image locally
+#   ./fmriprep-workbench help    - Show this help message
+# ============================================================================
+
+set -e
+
+# Container configuration
+CONTAINER_NAME="fmriprep-workbench"
+IMAGE_NAME="shawnschwartz/fmriprep-workbench"
+IMAGE_TAG="latest"
+FULL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
+
+# Container startup configuration
+CONTAINER_STARTUP_TIMEOUT=30  # Maximum seconds to wait for container to start
+
+# Container readiness polling configuration
+POLL_INTERVAL=0.5  # Seconds between readiness checks
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions
+print_error() {
+    echo -e "${RED}ERROR: $1${NC}" >&2
+}
+
+print_success() {
+    echo -e "${GREEN}SUCCESS: $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}INFO: $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}WARNING: $1${NC}"
+}
+
+# Check if Docker is installed
+check_docker() {
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed or not in PATH"
+        echo "Please install Docker: https://docs.docker.com/get-docker/"
+        exit 1
+    fi
+}
+
+# Check if container is running
+is_running() {
+    docker ps --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
+}
+
+# Check if container exists (running or stopped)
+container_exists() {
+    docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
+}
+
+# Wait for container to be ready
+# Returns 0 if container becomes ready within timeout, 1 otherwise
+wait_for_container() {
+    local timeout=${1:-30}  # Default 30 seconds timeout
+    # Calculate attempts based on POLL_INTERVAL so total wait approximates timeout
+    local attempts
+    attempts=$(awk -v t="$timeout" -v i="$POLL_INTERVAL" 'BEGIN { if (i > 0) { print int(t / i) } else { print 1 } }')
+    [ "$attempts" -lt 1 ] && attempts=1
+    local count=0
+    
+    print_info "Waiting for container to be ready..."
+    
+    while [ $count -lt $attempts ]; do
+        if is_running; then
+            # Container is running, verify it's responsive by executing a test command
+            # This ensures the container is ready to accept the actual commands we'll run
+            if docker exec "${CONTAINER_NAME}" true &>/dev/null; then
+                print_success "Container is ready"
+                return 0
+            fi
+        fi
+        
+        sleep "$POLL_INTERVAL"
+        count=$((count + 1))
+    done
+    
+    print_error "Container did not become ready within ${timeout} seconds"
+    return 1
+}
+
+# Get the current directory for mounting
+get_workdir() {
+    pwd
+}
+
+# Start the container
+start_container() {
+    print_info "Starting fMRIPrep Workbench container..."
+
+    if is_running; then
+        print_warning "Container is already running"
+        return 0
+    fi
+
+    if container_exists; then
+        print_info "Starting existing container..."
+        docker start "${CONTAINER_NAME}"
+    else
+        print_info "Creating and starting new container..."
+
+        WORKDIR=$(get_workdir)
+
+        # Create necessary directories if they don't exist
+        mkdir -p "${WORKDIR}/logs"
+        mkdir -p "${HOME}/.cache/templateflow"
+        mkdir -p "${HOME}/.cache/fmriprep"
+
+        docker run -d \
+            --name "${CONTAINER_NAME}" \
+            --hostname fmriprep-workbench \
+            -v "${WORKDIR}:/opt/fmriprep-workbench/workspace:rw" \
+            -v "${WORKDIR}/config.yaml:/data/config/config.yaml:ro" \
+            -v "${WORKDIR}/all-subjects.txt:/data/subjects/all-subjects.txt:ro" \
+            -v "${WORKDIR}/logs:/data/logs:rw" \
+            -v "${HOME}/.cache/templateflow:/data/cache/templateflow:rw" \
+            -v "${HOME}/.cache/fmriprep:/data/cache/fmriprep:rw" \
+            -e "WORKBENCH_WORKSPACE=/opt/fmriprep-workbench/workspace" \
+            --user "$(id -u):$(id -g)" \
+            "${FULL_IMAGE}" \
+            sleep infinity
+    fi
+
+    # Wait for container to be ready with polling
+    local elapsed=0
+    local interval=1
+
+    print_info "Waiting for container to be ready..."
+
+    while [ "$elapsed" -lt "$CONTAINER_STARTUP_TIMEOUT" ]; do
+        if is_running; then
+            print_success "Container started successfully"
+            print_info "Container name: ${CONTAINER_NAME}"
+            print_info "Use './fmriprep-workbench launch' to start the TUI"
+            return 0
+        fi
+        sleep "$interval"
+        elapsed=$((elapsed + interval))
+    done
+
+    print_error "Failed to start container (timeout after ${CONTAINER_STARTUP_TIMEOUT}s)"
+    exit 1
+}
+
+# Stop the container
+stop_container() {
+    print_info "Stopping fMRIPrep Workbench container..."
+
+    if ! is_running; then
+        print_warning "Container is not running"
+        return 0
+    fi
+
+    docker stop "${CONTAINER_NAME}"
+    print_success "Container stopped successfully"
+}
+
+# Launch the interactive TUI
+launch_tui() {
+    if ! is_running; then
+        print_warning "Container is not running. Starting it first..."
+        start_container
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
+    fi
+
+    print_info "Launching fMRIPrep Workbench TUI..."
+    docker exec -it "${CONTAINER_NAME}" /opt/fmriprep-workbench/launch
+}
+
+# Open a bash shell
+open_shell() {
+    if ! is_running; then
+        print_warning "Container is not running. Starting it first..."
+        start_container
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
+    fi
+
+    print_info "Opening bash shell in container..."
+    docker exec -it "${CONTAINER_NAME}" /bin/bash
+}
+
+# View container logs
+view_logs() {
+    if ! container_exists; then
+        print_error "Container does not exist"
+        exit 1
+    fi
+
+    docker logs -f "${CONTAINER_NAME}"
+}
+
+# Check container status
+check_status() {
+    if is_running; then
+        print_success "Container is RUNNING"
+        docker ps --filter "name=${CONTAINER_NAME}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    elif container_exists; then
+        print_warning "Container exists but is STOPPED"
+        docker ps -a --filter "name=${CONTAINER_NAME}" --format "table {{.Names}}\t{{.Status}}"
+    else
+        print_info "Container does not exist"
+    fi
+}
+
+# Execute a command in the container
+exec_command() {
+    if ! is_running; then
+        print_error "Container is not running"
+        exit 1
+    fi
+
+    if [ $# -eq 0 ]; then
+        print_error "No command specified"
+        echo "Usage: ./fmriprep-workbench exec <command>"
+        exit 1
+    fi
+
+    docker exec -it "${CONTAINER_NAME}" "$@"
+}
+
+# Pull the latest image
+pull_image() {
+    print_info "Pulling latest image from Docker Hub..."
+    docker pull "${FULL_IMAGE}"
+    print_success "Image pulled successfully"
+}
+
+# Build the image locally
+build_image() {
+    print_info "Building Docker image locally..."
+    docker build -t "${FULL_IMAGE}" .
+    print_success "Image built successfully"
+}
+
+# Remove the container
+remove_container() {
+    if is_running; then
+        print_info "Stopping container first..."
+        stop_container
+    fi
+
+    if container_exists; then
+        print_info "Removing container..."
+        docker rm "${CONTAINER_NAME}"
+        print_success "Container removed"
+    else
+        print_warning "Container does not exist"
+    fi
+}
+
+# Show help message
+show_help() {
+    cat << EOF
+fMRIPrep Workbench - Docker Container Management
+
+Usage: ./fmriprep-workbench <command> [options]
+
+Commands:
+  start    Start the container in detached mode
+  stop     Stop the running container
+  launch   Launch the interactive TUI (starts container if needed)
+  shell    Open a bash shell in the container
+  logs     View container logs (follow mode)
+  status   Check container status
+  exec     Execute a command in the container
+           Usage: ./fmriprep-workbench exec <command>
+  pull     Pull the latest image from Docker Hub
+  build    Build the image locally from Dockerfile
+  remove   Remove the container (stops it first if running)
+  help     Show this help message
+
+Examples:
+  ./fmriprep-workbench start          # Start the container
+  ./fmriprep-workbench launch         # Launch the TUI
+  ./fmriprep-workbench exec ls -la    # List files in container
+  ./fmriprep-workbench shell          # Open interactive shell
+
+Mount Points:
+  Current directory -> /opt/fmriprep-workbench/workspace
+  config.yaml -> /data/config/config.yaml
+  all-subjects.txt -> /data/subjects/all-subjects.txt
+  logs/ -> /data/logs
+  ~/.cache/templateflow -> /data/cache/templateflow
+  ~/.cache/fmriprep -> /data/cache/fmriprep
+
+For more information, visit: https://fmriprep-workbench.readthedocs.io
+EOF
+}
+
+# Main command dispatcher
+main() {
+    check_docker
+
+    if [ $# -eq 0 ]; then
+        show_help
+        exit 0
+    fi
+
+    COMMAND=$1
+    shift
+
+    case "${COMMAND}" in
+        start)
+            start_container
+            ;;
+        stop)
+            stop_container
+            ;;
+        launch)
+            launch_tui
+            ;;
+        shell)
+            open_shell
+            ;;
+        logs)
+            view_logs
+            ;;
+        status)
+            check_status
+            ;;
+        exec)
+            exec_command "$@"
+            ;;
+        pull)
+            pull_image
+            ;;
+        build)
+            build_image
+            ;;
+        remove|rm)
+            remove_container
+            ;;
+        help|--help|-h)
+            show_help
+            ;;
+        *)
+            print_error "Unknown command: ${COMMAND}"
+            echo ""
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

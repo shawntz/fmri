@@ -52,12 +52,47 @@ Full documentation is available on [ReadTheDocs](https://fmriprep-workbench.read
 
 For quick reference, see:
 - [Installation Guide](docs/installation.md)
+- [Docker Usage Guide](docs/docker-usage.md)
 - [Configuration Guide](docs/configuration.md)
 - [Usage Guide](docs/usage.md)
 - [Workflows Guide](docs/workflows.md)
 - [Changelog](CHANGELOG.md)
 - [Release Process](RELEASING.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
+
+## 🐳 Docker Quick Start
+
+The easiest way to use fMRIPrep Workbench is via Docker:
+
+```bash
+# Pull the image
+docker pull shawnschwartz/fmriprep-workbench:latest
+
+# Clone the repository for the wrapper script
+git clone https://github.com/shawntz/fmriprep-workbench.git
+cd fmriprep-workbench
+
+# Start the container
+./fmriprep-workbench start
+
+# Launch the interactive TUI
+./fmriprep-workbench launch
+```
+
+For HPC clusters with Singularity/Apptainer:
+
+```bash
+# Download pre-built image (replace vX.Y.Z with the desired release tag)
+wget https://github.com/shawntz/fmriprep-workbench/releases/download/vX.Y.Z/fmriprep-workbench_vX.Y.Z.sif
+
+# Or convert from Docker Hub
+singularity build fmriprep-workbench.sif docker://shawnschwartz/fmriprep-workbench:latest
+
+# Run the TUI
+singularity exec --bind $(pwd):/workspace fmriprep-workbench.sif /opt/fmriprep-workbench/launch
+```
+
+See the [Docker Usage Guide](docs/docker-usage.md) for detailed instructions.
 
 ## Using this Template
 
