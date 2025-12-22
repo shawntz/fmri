@@ -8,3 +8,4 @@ __pycache__/
 # MkDocs build artifacts
 site/
 .cache/
+docs/github-secrets-setup.md
