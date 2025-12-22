@@ -5,7 +5,7 @@
 # @Usage: ./08-run.sbatch <model-name> [--no-feat]
 
 STEP_NAME="10-fsl-glm"
-JOB_NAME="fmriprep-workbench-8"
+JOB_NAME="fmriprep-workbench-11"
 
 # Source configuration
 source ./load_config.sh

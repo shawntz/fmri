@@ -299,11 +299,11 @@ def run_script(step_choice, user_inputs):
         "6": "06-run.sbatch",
         "7": "toolbox/download_freesurfer.sh",
         "8": "toolbox/upload_freesurfer.sh",
-        "9": "07-run.sbatch",
+        "9": "09-run.sbatch",
         "10": "10-fsl-glm/setup_glm.sh",
-        "11": "08-run.sbatch",
-        "12": "09-run.sbatch",
-        "13": "10-run.sbatch",
+        "11": "11-run.sbatch",
+        "12": "12-run.sbatch",
+        "13": "13-run.sbatch",
         "14": "toolbox/tarball_sourcedata.sh"
     }
 
