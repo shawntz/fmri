@@ -44,12 +44,22 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install FSL (minimal installation for FEAT and utilities)
-RUN wget -O- http://neuro.debian.net/lists/jammy.us-ca.full | \
-    tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    mkdir -p /etc/apt/keyrings && \
+# Security: Embed NeuroDebian sources list content directly to prevent MITM attacks.
+# The previous approach downloaded sources.list over insecure HTTP, allowing attackers
+# to inject malicious repository configurations. This approach embeds known-good content.
+# Content for Ubuntu 22.04 (jammy) using official neuro.debian.net domain
+RUN mkdir -p /etc/apt/keyrings && \
+    # Fetch NeuroDebian GPG key from keyserver over HKPS (HTTPS) only
+    # Removed insecure HKP fallback to prevent key compromise via MITM
     gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 && \
     gpg --batch --export 0xA5D32F012649A5A9 | gpg --dearmor -o /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
-    sed -i 's#^deb \(http://neuro.debian.net/\)#deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] \1#' /etc/apt/sources.list.d/neurodebian.sources.list && \
+    # Embed sources list content directly (no HTTP download of sources.list file)
+    # Using official neuro.debian.net domain which provides automatic geographic redirection
+    # Note: Repository URLs use HTTP as NeuroDebian mirrors don't support HTTPS.
+    # Package integrity is protected by GPG signature verification via the keyring.
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian data main contrib non-free" > /etc/apt/sources.list.d/neurodebian.sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian jammy main contrib non-free" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    # Install FSL - packages are verified against our explicitly managed keyring
     apt-get update && \
     apt-get install -y fsl-core fsl-atlases && \
     rm -rf /var/lib/apt/lists/*
