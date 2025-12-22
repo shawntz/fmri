@@ -72,30 +72,6 @@ container_exists() {
     docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
 }
 
-# Wait for container to be ready (with timeout)
-# Usage: wait_for_container [timeout_seconds]
-# If no timeout is provided, uses CONTAINER_STARTUP_TIMEOUT
-# shellcheck disable=SC2120
-wait_for_container() {
-    local timeout=${1:-$CONTAINER_STARTUP_TIMEOUT}
-    local elapsed=0
-    local interval=1
-
-    print_info "Waiting for container to be ready..."
-
-    while [ "$elapsed" -lt "$timeout" ]; do
-        if is_running; then
-            print_success "Container is ready"
-            return 0
-        fi
-        sleep "$interval"
-        elapsed=$((elapsed + interval))
-    done
-
-    print_error "Timeout waiting for container to be ready"
-    return 1
-}
-
 # Get the current directory for mounting
 get_workdir() {
     pwd
@@ -138,14 +114,25 @@ start_container() {
             sleep infinity
     fi
 
-    if is_running; then
-        print_success "Container started successfully"
-        print_info "Container name: ${CONTAINER_NAME}"
-        print_info "Use './fmriprep-workbench launch' to start the TUI"
-    else
-        print_error "Failed to start container"
-        exit 1
-    fi
+    # Wait for container to be ready with polling
+    local elapsed=0
+    local interval=1
+
+    print_info "Waiting for container to be ready..."
+
+    while [ "$elapsed" -lt "$CONTAINER_STARTUP_TIMEOUT" ]; do
+        if is_running; then
+            print_success "Container started successfully"
+            print_info "Container name: ${CONTAINER_NAME}"
+            print_info "Use './fmriprep-workbench launch' to start the TUI"
+            return 0
+        fi
+        sleep "$interval"
+        elapsed=$((elapsed + interval))
+    done
+
+    print_error "Failed to start container (timeout after ${CONTAINER_STARTUP_TIMEOUT}s)"
+    exit 1
 }
 
 # Stop the container
@@ -166,11 +153,6 @@ launch_tui() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
-        # shellcheck disable=SC2119
-        if ! wait_for_container; then
-            print_error "Container failed to start in time"
-            exit 1
-        fi
     fi
 
     print_info "Launching fMRIPrep Workbench TUI..."
@@ -182,11 +164,6 @@ open_shell() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
-        # shellcheck disable=SC2119
-        if ! wait_for_container; then
-            print_error "Container failed to start in time"
-            exit 1
-        fi
     fi
 
     print_info "Opening bash shell in container..."
