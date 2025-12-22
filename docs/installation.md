@@ -228,7 +228,7 @@ Singularity/Apptainer is designed for HPC environments and provides better integ
 Download the `.sif` file from the latest release:
 
 ```bash
-# Replace X.Y.Z with the actual version (e.g., v0.2.0)
+# Replace vX.Y.Z with the actual version (e.g., v0.2.0)
 wget https://github.com/shawntz/fmriprep-workbench/releases/download/vX.Y.Z/fmriprep-workbench_vX.Y.Z.sif
 ```
 
