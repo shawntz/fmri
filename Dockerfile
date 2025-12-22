@@ -40,12 +40,16 @@ RUN apt-get update && apt-get install -y \
     vim \
     nano \
     less \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Install FSL (minimal installation for FEAT and utilities)
 RUN wget -O- http://neuro.debian.net/lists/jammy.us-ca.full | \
     tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 && \
+    mkdir -p /etc/apt/keyrings && \
+    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 && \
+    gpg --batch --export 0xA5D32F012649A5A9 | gpg --dearmor -o /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
+    sed -i 's#^deb \(http://neuro.debian.net/\)#deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] \1#' /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-get update && \
     apt-get install -y fsl-core fsl-atlases && \
     rm -rf /var/lib/apt/lists/*
