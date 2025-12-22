@@ -172,7 +172,162 @@ If upgrading from a version that used `settings.sh`:
 
 4. Remove or archive your old `settings.sh` file.
 
+## Docker Installation (Recommended)
+
+The easiest way to use fMRIPrep Workbench is via the pre-built Docker container. This eliminates dependency management and ensures consistent environments.
+
+### Prerequisites
+
+- Docker Engine 20.10+ (for local workstations)
+- OR Singularity/Apptainer 3.0+ (for HPC clusters)
+
+### Option 1: Using Docker (Local Workstations)
+
+#### 1. Install Docker
+
+Follow the official Docker installation guide for your platform:
+- [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+- [Docker Engine for Linux](https://docs.docker.com/engine/install/)
+
+#### 2. Pull the Image
+
+```bash
+docker pull shawnschwartz/fmriprep-workbench:latest
+```
+
+#### 3. Download the Wrapper Script
+
+```bash
+# Clone the repository (or download just the wrapper script)
+git clone https://github.com/shawntz/fmriprep-workbench.git
+cd fmriprep-workbench
+
+# Make the wrapper script executable
+chmod +x fmriprep-workbench
+```
+
+#### 4. Start the Container
+
+```bash
+./fmriprep-workbench start
+```
+
+#### 5. Launch the TUI
+
+```bash
+./fmriprep-workbench launch
+```
+
+### Option 2: Using Singularity (HPC Clusters)
+
+Singularity/Apptainer is designed for HPC environments and provides better integration with job schedulers like SLURM.
+
+#### 1. Download Pre-built Singularity Image
+
+Download the `.sif` file from the latest release:
+
+```bash
+# Replace X.Y.Z with the actual version
+wget https://github.com/shawntz/fmriprep-workbench/releases/download/v0.2.0/fmriprep-workbench_v0.2.0.sif
+```
+
+#### 2. Or Convert from Docker Hub
+
+If a pre-built Singularity image isn't available:
+
+```bash
+# Using Singularity 3.x
+singularity build fmriprep-workbench_v0.2.0.sif docker://shawnschwartz/fmriprep-workbench:latest
+
+# Using Apptainer (newer Singularity)
+apptainer build fmriprep-workbench_v0.2.0.sif docker://shawnschwartz/fmriprep-workbench:latest
+```
+
+#### 3. Run the Container
+
+```bash
+# Interactive shell
+singularity shell \
+  --bind $(pwd):/workspace \
+  --bind $HOME/.cache/templateflow:/cache/templateflow \
+  --bind $HOME/.cache/fmriprep:/cache/fmriprep \
+  fmriprep-workbench_v0.2.0.sif
+
+# Execute a specific command
+singularity exec \
+  --bind $(pwd):/workspace \
+  fmriprep-workbench_v0.2.0.sif \
+  /opt/fmriprep-workbench/launch
+
+# Submit as SLURM job
+sbatch --wrap="singularity exec --bind $(pwd):/workspace fmriprep-workbench_v0.2.0.sif /opt/fmriprep-workbench/01-run.sbatch"
+```
+
+### Option 3: Using Docker Compose
+
+For more complex setups with multiple services:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+### Container Mount Points
+
+The container exposes the following mount points:
+
+| Host Path | Container Path | Purpose |
+|-----------|---------------|---------|
+| `./` (current directory) | `/opt/fmriprep-workbench/workspace` | Working directory |
+| `./config.yaml` | `/data/config/config.yaml` | Configuration file |
+| `./all-subjects.txt` | `/data/subjects/all-subjects.txt` | Subject list |
+| `./logs/` | `/data/logs` | Log files |
+| `~/.cache/templateflow` | `/data/cache/templateflow` | TemplateFlow cache |
+| `~/.cache/fmriprep` | `/data/cache/fmriprep` | fMRIPrep cache |
+
+### Wrapper Script Commands
+
+The `fmriprep-workbench` wrapper script provides convenient commands:
+
+```bash
+./fmriprep-workbench start     # Start container in background
+./fmriprep-workbench stop      # Stop the container
+./fmriprep-workbench launch    # Launch the TUI
+./fmriprep-workbench shell     # Open bash shell
+./fmriprep-workbench logs      # View container logs
+./fmriprep-workbench status    # Check container status
+./fmriprep-workbench exec <cmd># Execute command in container
+./fmriprep-workbench pull      # Pull latest image
+./fmriprep-workbench build     # Build image locally
+./fmriprep-workbench help      # Show help
+```
+
+### Building Locally
+
+To build the Docker image from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/shawntz/fmriprep-workbench.git
+cd fmriprep-workbench
+
+# Build the image
+docker build -t shawnschwartz/fmriprep-workbench:latest .
+
+# Or use the wrapper script
+./fmriprep-workbench build
+```
+
 ## Next Steps
 
 After installation, proceed to the [Configuration](configuration.md) guide to set up
 your preprocessing pipeline parameters in detail.
+
+For Docker-specific usage instructions, see [Docker Usage Guide](docker-usage.md).

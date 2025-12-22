@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  fmriprep-workbench:
+    image: shawnschwartz/fmriprep-workbench:latest
+    container_name: fmriprep-workbench
+    hostname: fmriprep-workbench
+
+    # Run as current user to maintain file permissions
+    user: "${UID:-1000}:${GID:-1000}"
+
+    # Keep container running
+    command: sleep infinity
+
+    # Interactive terminal
+    stdin_open: true
+    tty: true
+
+    # Volume mounts
+    volumes:
+      # Workspace (current directory)
+      - ./:/opt/fmriprep-workbench/workspace:rw
+
+      # Configuration files
+      - ./config.yaml:/data/config/config.yaml:ro
+      - ./all-subjects.txt:/data/subjects/all-subjects.txt:ro
+
+      # Logs directory
+      - ./logs:/data/logs:rw
+
+      # Cache directories (host home directory)
+      - ${HOME}/.cache/templateflow:/data/cache/templateflow:rw
+      - ${HOME}/.cache/fmriprep:/data/cache/fmriprep:rw
+
+      # Optional: Mount study data directories
+      # Uncomment and modify paths as needed
+      # - /path/to/your/study:/data/study:rw
+      # - /path/to/containers:/data/containers:ro
+
+    # Environment variables
+    environment:
+      - WORKBENCH_WORKSPACE=/opt/fmriprep-workbench/workspace
+      - WORKBENCH_VERSION=0.2.0
+      - FSLDIR=/usr/share/fsl/5.0
+      - FSLOUTPUTTYPE=NIFTI_GZ
+      - PATH=/usr/share/fsl/5.0/bin:/opt/fmriprep-workbench:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 16G
+        reservations:
+          cpus: '2'
+          memory: 4G
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Network mode
+    network_mode: bridge
+
+# Named volumes (optional, for persistent data)
+volumes:
+  templateflow_cache:
+  fmriprep_cache:
+
+# Networks (optional)
+networks:
+  default:
+    name: fmriprep-workbench-network

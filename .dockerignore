@@ -1,0 +1,81 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+
+# Documentation build artifacts
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# User-specific configuration files
+config.yaml
+all-subjects.txt
+scan-config.json
+
+# Logs and temporary files
+logs/
+*.log
+*.out
+*.err
+.release-ready
+
+# Test files
+tests/
+*.test
+test_*
+
+# CI/CD
+.travis.yml
+.circleci/
+
+# Documentation source (keep compiled docs only if needed)
+*.md
+!README.md
+!CLAUDE.md
+
+# Large data directories (should never be in repo)
+data/
+derivatives/
+sourcedata/
+bids/
+bids_trimmed/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Container files
+*.simg
+*.sif
+docker-compose.override.yml

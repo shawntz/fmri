@@ -27,19 +27,48 @@ workflow that handles:
 
 ## Quick Start
 
-### 1. Create Repository from Template
+### Option 1: Using Docker (Recommended)
+
+```bash
+# Pull the image
+docker pull shawnschwartz/fmriprep-workbench:latest
+
+# Clone the repository
+git clone https://github.com/shawntz/fmriprep-workbench.git
+cd fmriprep-workbench
+
+# Start the container
+./fmriprep-workbench start
+
+# Launch the interactive TUI
+./fmriprep-workbench launch
+```
+
+### Option 2: Using Singularity (HPC Clusters)
+
+```bash
+# Download or build the Singularity image
+singularity build fmriprep-workbench.sif docker://shawnschwartz/fmriprep-workbench:latest
+
+# Run the TUI
+singularity exec --bind $(pwd):/workspace fmriprep-workbench.sif /opt/fmriprep-workbench/launch
+```
+
+### Option 3: Manual Installation
+
+#### 1. Create Repository from Template
 
 Click "Use this template" on the [GitHub repository](https://github.com/shawntz/fmriprep-workbench)
 to create your own copy.
 
-### 2. Clone Your Repository
+#### 2. Clone Your Repository
 
 ```bash
 git clone https://github.com/your-username/your-repo-name.git
 cd your-repo-name
 ```
 
-### 3. Configure Settings
+#### 3. Configure Settings
 
 Copy the configuration template and customize for your study:
 
@@ -48,14 +77,14 @@ cp config.template.yaml config.yaml
 # Edit config.yaml with your study-specific parameters
 ```
 
-### 4. Set Up Subject List
+#### 4. Set Up Subject List
 
 ```bash
 cp all-subjects.template.txt all-subjects.txt
 # Add your subject IDs (one per line, just the number without "sub-" prefix)
 ```
 
-### 5. Run the Pipeline
+#### 5. Run the Pipeline
 
 ```bash
 # Interactive mode (recommended)
