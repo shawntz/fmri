@@ -88,7 +88,7 @@ wait_for_container() {
         if is_running; then
             # Container is running, verify it's responsive by executing a test command
             # This ensures the container is ready to accept the actual commands we'll run
-            if docker exec "${CONTAINER_NAME}" echo "ready" &>/dev/null; then
+            if docker exec "${CONTAINER_NAME}" true &>/dev/null; then
                 print_success "Container is ready"
                 return 0
             fi
