@@ -61,12 +61,12 @@ check_docker() {
 
 # Check if container is running
 is_running() {
-    docker ps --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -q "${CONTAINER_NAME}"
+    docker ps --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
 }
 
 # Check if container exists (running or stopped)
 container_exists() {
-    docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -q "${CONTAINER_NAME}"
+    docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
 }
 
 # Get the current directory for mounting
