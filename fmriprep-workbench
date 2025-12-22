@@ -29,6 +29,9 @@ FULL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 # Container startup configuration
 CONTAINER_STARTUP_TIMEOUT=30  # Maximum seconds to wait for container to start
 
+# Container readiness polling configuration
+POLL_INTERVAL=0.5  # Seconds between readiness checks
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -70,6 +73,36 @@ is_running() {
 # Check if container exists (running or stopped)
 container_exists() {
     docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
+}
+
+# Wait for container to be ready
+# Returns 0 if container becomes ready within timeout, 1 otherwise
+wait_for_container() {
+    local timeout=${1:-30}  # Default 30 seconds timeout
+    # Calculate attempts based on POLL_INTERVAL so total wait approximates timeout
+    local attempts
+    attempts=$(awk -v t="$timeout" -v i="$POLL_INTERVAL" 'BEGIN { if (i > 0) { print int(t / i) } else { print 1 } }')
+    [ "$attempts" -lt 1 ] && attempts=1
+    local count=0
+    
+    print_info "Waiting for container to be ready..."
+    
+    while [ $count -lt $attempts ]; do
+        if is_running; then
+            # Container is running, verify it's responsive by executing a test command
+            # This ensures the container is ready to accept the actual commands we'll run
+            if docker exec "${CONTAINER_NAME}" true &>/dev/null; then
+                print_success "Container is ready"
+                return 0
+            fi
+        fi
+        
+        sleep "$POLL_INTERVAL"
+        count=$((count + 1))
+    done
+    
+    print_error "Container did not become ready within ${timeout} seconds"
+    return 1
 }
 
 # Get the current directory for mounting
@@ -153,6 +186,10 @@ launch_tui() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
     fi
 
     print_info "Launching fMRIPrep Workbench TUI..."
@@ -164,6 +201,10 @@ open_shell() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
     fi
 
     print_info "Opening bash shell in container..."
