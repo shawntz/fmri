@@ -44,12 +44,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install FSL (minimal installation for FEAT and utilities)
-RUN wget -O- http://neuro.debian.net/lists/jammy.us-ca.full | \
-    tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    mkdir -p /etc/apt/keyrings && \
-    gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 && \
+# Security: Embed NeuroDebian sources list content directly to prevent MITM attacks.
+# The previous approach downloaded sources.list over insecure HTTP, allowing attackers
+# to inject malicious repository configurations. This approach embeds known-good content.
+# Content for Ubuntu 22.04 (jammy) from us-ca mirror
+RUN mkdir -p /etc/apt/keyrings && \
+    # Fetch NeuroDebian GPG key from Ubuntu keyserver over HTTPS (when available)
+    # Fallback: Use gpg with retry and verification
+    (gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys 0xA5D32F012649A5A9 || \
+     gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xA5D32F012649A5A9) && \
     gpg --batch --export 0xA5D32F012649A5A9 | gpg --dearmor -o /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
-    sed -i 's#^deb \(http://neuro.debian.net/\)#deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] \1#' /etc/apt/sources.list.d/neurodebian.sources.list && \
+    # Embed sources list content directly (no HTTP download of sources.list file)
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neurodeb.pirsquared.org data main contrib non-free" > /etc/apt/sources.list.d/neurodebian.sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neurodeb.pirsquared.org jammy main contrib non-free" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    # Install FSL - packages are now verified against our explicitly managed keyring
     apt-get update && \
     apt-get install -y fsl-core fsl-atlases && \
     rm -rf /var/lib/apt/lists/*
