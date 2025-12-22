@@ -68,7 +68,8 @@ RUN pip3 install --no-cache-dir \
     matplotlib
 
 # Create workbench user (non-root for security)
-RUN useradd -m -s /bin/bash -u 1000 workbench && \
+ARG WORKBENCH_UID=1000
+RUN useradd -m -s /bin/bash -u ${WORKBENCH_UID} workbench && \
     mkdir -p /opt/fmriprep-workbench && \
     chown -R workbench:workbench /opt/fmriprep-workbench
 
