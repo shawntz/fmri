@@ -26,6 +26,9 @@ IMAGE_NAME="shawnschwartz/fmriprep-workbench"
 IMAGE_TAG="latest"
 FULL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 
+# Container readiness polling configuration
+POLL_INTERVAL=0.5  # Seconds between readiness checks
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -73,7 +76,9 @@ container_exists() {
 # Returns 0 if container becomes ready within timeout, 1 otherwise
 wait_for_container() {
     local timeout=${1:-30}  # Default 30 seconds timeout
-    local attempts=$((timeout * 2))  # Check twice per second
+    # Calculate attempts based on poll interval (e.g., 30s / 0.5s = 60 attempts)
+    local attempts
+    attempts=$(awk "BEGIN {printf \"%d\", $timeout / $POLL_INTERVAL}")
     local count=0
     
     print_info "Waiting for container to be ready..."
@@ -87,7 +92,7 @@ wait_for_container() {
             fi
         fi
         
-        sleep 0.5
+        sleep "$POLL_INTERVAL"
         count=$((count + 1))
     done
     
