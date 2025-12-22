@@ -1,50 +1,52 @@
-#!/bin/bash
-# @Author: Shawn Schwartz - Stanford Memory Lab
-# @Date: December 17, 2025
-# @Description: SLURM job submission wrapper for FSL FEAT Level 2 (subject-level) GLM analysis
-# @Usage: ./09-run.sbatch <model-name> [--no-feat]
+#!/bin/sh
 
-STEP_NAME="10-fsl-glm"
-JOB_NAME="fmriprep-workbench-9"
+# Skip interactive subjects file prompt (use all-subjects.txt by default)
+export SKIP_SUBJECTS_PROMPT=true
 
-# Source configuration
 source ./load_config.sh
 
-# Get model name from command line argument
-MODEL_NAME=$1
+STEP_NAME="09-run-fmriprep"
+JOB_NAME="fmriprep-workbench-9"
 
-if [ -z "$MODEL_NAME" ]; then
-    echo "Error: Model name is required"
-    echo "Usage: $0 <model-name> [--no-feat]"
-    echo ""
-    echo "Make sure Level 1 analysis is complete before running Level 2"
-    exit 1
-fi
-
-# Check for optional --no-feat flag
-NO_FEAT_FLAG=""
-if [ "$2" = "--no-feat" ]; then
-    NO_FEAT_FLAG="--no-feat"
-    echo "Note: Running in no-feat mode - will only create FSF files"
-fi
-
-# Create log directories
+# create log dirs
 mkdir -p ${SLURM_LOG_DIR}/${STEP_NAME}
-mkdir -p ${SLURM_LOG_DIR}/fsl-glm
 
-echo "Submitting FSL FEAT Level 2 (subject-level) GLM analysis job for model: ${MODEL_NAME}"
-echo "Job name: ${JOB_NAME}"
-echo "Log directory: ${SLURM_LOG_DIR}/${STEP_NAME}"
-
-# The run_level2_glm.sh script will handle creating and submitting the job array
-bash ./${STEP_NAME}/run_level2_glm.sh "${JOB_NAME}" "${MODEL_NAME}" ${NO_FEAT_FLAG}
-
-if [ $? -eq 0 ]; then
-    echo "✓ Level 2 GLM analysis job submitted successfully"
-    echo ""
-    echo "Monitor job status with: squeue -u \$USER"
-    echo "Check logs in: ${SLURM_LOG_DIR}/fsl-glm/"
+# check if running in debug mode
+if [ "$DEBUG" = "1" ]; then
+    echo "($(date)) [INFO] Running in DEBUG mode with single subject"
+    array_opt="--array=0"
 else
-    echo "✗ Error submitting Level 2 GLM analysis job"
-    exit 1
+    echo "($(date)) [INFO] Running full array: ${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
+    array_opt="--array=${SLURM_ARRAY_SIZE}%${SLURM_ARRAY_THROTTLE}"
 fi
+
+# echo slurm job params for inline validation
+echo "($(date)) [INFO] - SLURM JOB PARAMETERS:"
+echo "  --job-name: ${JOB_NAME}"
+echo "  ${array_opt}"
+echo "  --time: ${FMRIPREP_SLURM_TIME}"
+echo "  --mem-per-cpu: ${FMRIPREP_SLURM_MEM_PER_CPU}"
+echo "  --cpus-per-task: ${FMRIPREP_SLURM_CPUS_PER_TASK}"
+echo "  --partition: ${SLURM_PARTITION}"
+echo "  --output: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out"
+echo "  --error: ${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err"
+echo "  --mail-type: BEGIN,END,FAIL"
+echo "  --mail-user: ${SLURM_EMAIL}"
+
+cmd="sbatch \
+    --job-name=${JOB_NAME} \
+    ${array_opt} \
+    --time=${FMRIPREP_SLURM_TIME} \
+    --mem-per-cpu=${FMRIPREP_SLURM_MEM_PER_CPU} \
+    --cpus-per-task=${FMRIPREP_SLURM_CPUS_PER_TASK} \
+    --partition=${SLURM_PARTITION} \
+    --output=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.out \
+    --error=${SLURM_LOG_DIR}/${STEP_NAME}/%x_%A_%a.err \
+    --mail-type=BEGIN,END,FAIL \
+    --mail-user=${SLURM_EMAIL} \
+    ./${STEP_NAME}/run_fmriprep.sh ${STEP_NAME}"
+
+# submit job
+echo "($(date)) [INFO] Submitting job with command:"
+echo "${cmd}"
+eval ${cmd}
