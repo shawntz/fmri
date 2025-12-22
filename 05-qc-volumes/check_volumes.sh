@@ -34,6 +34,9 @@ fi
 
 subject="sub-${subject_id}"
 
+# logging setup
+processed_file="${SLURM_LOG_DIR}/05-processed_subjects.txt"
+
 echo "($(date)) [INFO] =========================================="
 echo "($(date)) [INFO] Processing subject: ${subject}"
 echo "($(date)) [INFO] =========================================="
@@ -161,6 +164,6 @@ if [ "$error_count" -gt 0 ]; then
 else
   echo "($(date)) [SUCCESS] Volume check passed for ${subject}"
   echo "($(date)) [INFO] Results saved to: ${OUTPUT_DIR}"
-  echo "${subject_id}" >> ${JOB_NAME}-processed_subjects.txt
+  echo "${subject_id}" >> "${processed_file}"
   exit 0
 fi
