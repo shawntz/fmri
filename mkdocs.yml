@@ -68,7 +68,7 @@ plugins:
       author: Shawn T. Schwartz and Stanford Memory Lab
       copyright: Copyright &copy; 2025 Shawn Schwartz and Stanford Memory Lab
       cover_title: fMRIPrep Workbench
-      cover_subtitle: Version 0.2.0 Documentation
+      cover_subtitle: Version 0.3.0 Documentation
       output_path: pdf/fmriprep-workbench-documentation.pdf
       enabled_if_env: ENABLE_PDF_EXPORT
       exclude_pages:
@@ -128,6 +128,8 @@ nav:
   - Configuration: configuration.md
   - Usage: usage.md
   - Workflows: workflows.md
+  - Docker Usage: docker-usage.md
+  - GitHub Secrets Setup: github-secrets-setup.md
   - Contributing: contributing.md
   - Changelog: changelog.md
 

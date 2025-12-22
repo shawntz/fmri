@@ -7,7 +7,7 @@ This documentation covers the fMRIPrep Workbench template, a generalizable
 workflow for fMRI preprocessing that handles the full pipeline from scanner
 acquisition downloads to fMRIPrep execution.
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 
 ## Overview
 
@@ -107,19 +107,21 @@ cp all-subjects.template.txt all-subjects.txt
 ./toolbox/tarball_sourcedata.sh      # Step 14: Tarball utility
 ```
 
-## What's New in v0.2.0
+## What's New in v0.3.0
+
+**Major Features:**
+
+- 🐳 **Docker Containerization**: Complete Docker support with automated CI/CD to Docker Hub
+- 📊 **FSL FEAT Analysis**: Full statistical analysis pipeline (Level 1, 2, 3 GLM)
+- 🧠 **FreeSurfer Editing**: Download/upload utilities with automatic backups
+- 📚 **Documentation Migration**: Modern MkDocs system with dark mode and PDF export
+- 🔢 **14-Step Pipeline**: Complete end-to-end workflow from acquisition to analysis
 
 **Breaking Changes:**
 
-- Configuration migrated from `settings.sh` (Bash) to `config.yaml` (YAML)
-- QC steps now dedicated pipeline steps (04-qc-metadata, 05-qc-volumes)
-- SLURM job names changed to `fmriprep-workbench-{N}` pattern
-
-**New Features:**
-
-- YAML configuration for improved portability
-- Automatic filtering of comments and blank lines in subject lists
-- Dynamic configuration loading via `load_config.sh`
+- Directory renaming: `07-run-fmriprep` → `09-run-fmriprep`, `08-fsl-glm` → `10-fsl-glm`
+- Pipeline expanded from 7 to 14 steps
+- Documentation format changed from Sphinx to MkDocs
 
 See [Changelog](changelog.md) for full details.
 

@@ -7,6 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-12-21
+
+### 🚀 Features
+
+- **Docker Containerization**: Complete Docker support with multi-platform images (linux/amd64, linux/arm64)
+  - Dockerfile with Ubuntu 22.04, FSL, Python 3.11, and all dependencies
+  - Docker wrapper script (`fmriprep-workbench`) with commands: start, stop, launch, shell, logs, status, exec, pull, build, remove
+  - Docker Compose configuration for easy deployment
+  - Singularity/Apptainer support for HPC clusters
+  - Automated CI/CD pipeline to Docker Hub on release tags
+- **FSL FEAT Statistical Analysis Pipeline** (Steps 10-13):
+  - Complete GLM analysis workflow (Level 1, 2, 3)
+  - Interactive setup utility with model configuration
+  - Support for condition keys, contrasts, and confound regressors
+  - SLURM array job integration for parallel processing
+  - Comprehensive documentation in `10-fsl-glm/README.md`
+- **FreeSurfer Manual Editing Workflow** (Steps 7-8):
+  - Download/upload utilities for manual surface editing
+  - Automatic timestamped backups before upload
+  - Support for batch operations on multiple subjects
+  - Interactive and non-interactive modes
+  - Complete workflow documentation in `toolbox/FREESURFER_EDITING.md`
+- **14-Step Pipeline Architecture**:
+  - Expanded from 7 to 14 steps for complete end-to-end workflow
+  - Steps 1-6: Download, conversion, prep, QC
+  - Steps 7-8: FreeSurfer editing workflow
+  - Step 9: Full fMRIPrep execution
+  - Steps 10-13: FSL FEAT GLM analysis
+  - Step 14: Data management utilities
+- **Documentation System Migration**:
+  - Migrated from Sphinx (RST) to MkDocs (Markdown)
+  - Material theme with dark mode support
+  - PDF export capability
+  - Git revision dates
+  - Improved navigation and search
+  - Privacy-focused analytics with Seline
+
+### 🐛 Bug Fixes
+
+- **Subject List Processing**: Filter comments and empty lines in subject list files
+- **DICOM Conversion**:
+  - Fix multi-session handling with `--skip-tar` flag
+  - Remove unnecessary `--dcmconfig` flag
+  - Handle single-echo sequences correctly (no `_echo-1` suffix)
+  - Fix positional argument issues with heudiconv grouping strategy
+- **QC Scripts**: Write `processed_subjects.txt` to `SLURM_LOG_DIR` instead of repo root
+- **Launch Script**: Fix menu item mapping to align with correct sbatch scripts
+- **Directory Structure**: Rename directories to match 14-step workflow:
+  - `07-run-fmriprep` → `09-run-fmriprep`
+  - `08-fsl-glm` → `10-fsl-glm`
+- **File Handle Leaks**: Use context managers for all file operations in FSL GLM scripts
+- **Import Statements**: Replace wildcard imports with explicit imports
+- **Container Management**: Replace fixed sleep delays with container readiness polling
+
+### 📚 Documentation
+
+- **Docker Documentation**:
+  - Complete installation guide for Docker and Singularity
+  - Docker usage guide with container management
+  - GitHub Secrets setup guide for CI/CD
+  - HPC cluster integration examples
+  - Troubleshooting section
+- **Pipeline Documentation**:
+  - Updated all docs to reflect 14-step workflow
+  - FSL GLM pipeline comprehensive guide
+  - FreeSurfer editing workflow guide
+  - Updated configuration guide with all new parameters
+  - Usage examples for all pipeline steps
+- **Version Placeholders**: Replace hardcoded version numbers with `vX.Y.Z` placeholders
+- **Fix Documentation Parsing**: Correct include-markdown paths for CONTRIBUTING.md and CHANGELOG.md
+
+### 🔧 Maintenance
+
+- **Code Quality Improvements**:
+  - Remove unused variables and fix indentation
+  - Use context managers for all file operations
+  - Fix pre-existing bugs in FSL GLM scripts
+  - Remove orphaned code referencing undefined modules
+  - Improve error handling and logging
+- **Security Enhancements**:
+  - Use official neuro.debian.net domain instead of mirrors
+  - Eliminate insecure HTTP downloads
+  - Remove HKP keyserver fallback
+- **Release Automation**:
+  - Automated changelog generation
+  - AI-powered release process documentation
+  - GitHub Actions workflows for Docker publishing and docs deployment
+- **Configuration Management**:
+  - Move FreeSurfer script defaults to `config.yaml`
+  - Fix boolean handling in configuration
+  - Support for project config YAML in directory paths
+
+### 💥 Breaking Changes
+
+- **Directory Renaming**:
+  - Step 7 (fMRIPrep full) → Step 9 (directory: `09-run-fmriprep/`)
+  - Step 8 (FSL GLM) → Steps 10-13 (directory: `10-fsl-glm/`)
+  - **Migration**: Update any custom scripts referencing old directory names
+- **Pipeline Structure**: 14-step workflow replaces previous 7-step structure
+  - **Migration**: Review the updated pipeline documentation and adjust workflows accordingly
+- **Documentation Format**: Migration from Sphinx to MkDocs
+  - **Migration**: Documentation now built with `mkdocs build` instead of `sphinx-build`
+
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.8...v0.3.0
+
 ## [0.2.0] - 2025-12-18
 
 ### 🚀 Features
@@ -152,7 +257,7 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 - Slurm workload manager integration
 - Configurable preprocessing pipelines
 
-[Unreleased]: https://github.com/shawntz/fmriprep-workbench/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/shawntz/fmriprep-workbench/compare/v0.3.0...HEAD
 
 [0.0.1]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.0.1
 
@@ -161,3 +266,5 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 [0.1.1]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.1
 
 [0.2.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.2.0
+
+[0.3.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.3.0
