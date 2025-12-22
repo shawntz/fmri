@@ -51,11 +51,11 @@ validate_volumes() {
 # UTIL: check whether given run is the first one using its fieldmap
 is_first_run_for_fieldmap() {
   _current_run=$1
-  _current_fmap=${fmap_mapping[$_current_run]}
-  
+  _current_fmap=$(fmap_mapping "$_current_run")
+
   # search all runs to find first one that uses this fieldmap
-  for run in "${!fmap_mapping[@]}"; do
-    if [ "${fmap_mapping[$run]}" = "${_current_fmap}" ]; then
+  for run in "${run_numbers[@]}"; do
+    if [ "$(fmap_mapping "$run")" = "${_current_fmap}" ]; then
       # if found a run using this fieldmap, check if it's the current run
       if [ "$run" = "$_current_run" ]; then
         return 0  # true, this is the first run for this fieldmap
@@ -202,7 +202,7 @@ for run_bold in "${run_numbers[@]}"; do
   echo "($(date)) [INFO] Processing fieldmap for run ${run_bold}"
 
 	# look up correct fmap <-> bold mapping from config.sh
-	run_fmap=${fmap_mapping[$run_bold]}
+	run_fmap=$(fmap_mapping "$run_bold")
 
 	# first, trim dummy scans from fieldmap epi
 	fieldmap_input="${RAW_DIR}/${subject}/fmap/${subject}_run-${run_fmap}_dir-AP_epi.nii.gz"
@@ -216,7 +216,7 @@ for run_bold in "${run_numbers[@]}"; do
   # if $fmap_total_vols -ne $EXPECTED_FMAP_VOLS; then
   ##throw error
 
-  echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap ${fmap_mapping[$run_bold]})" | tee -a "${log_file}"
+  echo "($(date)) [INFO] Processing fieldmap for run ${run_bold} (first run using fieldmap $(fmap_mapping "$run_bold"))" | tee -a "${log_file}"
 
 	if is_first_run_for_fieldmap "${run_bold}"; then
 	  # validate untrimmed fieldmap volumes
@@ -285,10 +285,10 @@ done
 # (3) UPDATE FIELDMAP JSON METADATA
 #===========================================
 
-# convert fmap_mapping associative array to JSON string
+# convert fmap_mapping to JSON string
 fmap_to_json="{"
-for key in "${!fmap_mapping[@]}"; do
-  fmap_to_json+="\"$key\":\"${fmap_mapping[$key]}\","
+for key in "${run_numbers[@]}"; do
+  fmap_to_json+="\"$key\":\"$(fmap_mapping "$key")\","
 done
 # Remove the trailing comma and close the JSON object
 fmap_to_json="${fmap_to_json%,}}"
