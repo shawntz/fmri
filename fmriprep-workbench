@@ -26,6 +26,9 @@ IMAGE_NAME="shawnschwartz/fmriprep-workbench"
 IMAGE_TAG="latest"
 FULL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 
+# Container startup configuration
+CONTAINER_STARTUP_TIMEOUT=30  # Maximum seconds to wait for container to start
+
 # Container readiness polling configuration
 POLL_INTERVAL=0.5  # Seconds between readiness checks
 
@@ -144,14 +147,25 @@ start_container() {
             sleep infinity
     fi
 
-    if is_running; then
-        print_success "Container started successfully"
-        print_info "Container name: ${CONTAINER_NAME}"
-        print_info "Use './fmriprep-workbench launch' to start the TUI"
-    else
-        print_error "Failed to start container"
-        exit 1
-    fi
+    # Wait for container to be ready with polling
+    local elapsed=0
+    local interval=1
+
+    print_info "Waiting for container to be ready..."
+
+    while [ "$elapsed" -lt "$CONTAINER_STARTUP_TIMEOUT" ]; do
+        if is_running; then
+            print_success "Container started successfully"
+            print_info "Container name: ${CONTAINER_NAME}"
+            print_info "Use './fmriprep-workbench launch' to start the TUI"
+            return 0
+        fi
+        sleep "$interval"
+        elapsed=$((elapsed + interval))
+    done
+
+    print_error "Failed to start container (timeout after ${CONTAINER_STARTUP_TIMEOUT}s)"
+    exit 1
 }
 
 # Stop the container
