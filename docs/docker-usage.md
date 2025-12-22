@@ -148,17 +148,18 @@ services:
 ### Basic Usage
 
 ```bash
+# Replace vX.Y.Z with the desired fMRIPrep Workbench version
 # Interactive shell
 singularity shell \
   --bind $(pwd):/workspace \
   --bind $HOME/.cache/templateflow:/cache/templateflow \
   --bind $HOME/.cache/fmriprep:/cache/fmriprep \
-  fmriprep-workbench_v0.2.0.sif
+  fmriprep-workbench_vX.Y.Z.sif
 
 # Execute command
 singularity exec \
   --bind $(pwd):/workspace \
-  fmriprep-workbench_v0.2.0.sif \
+  fmriprep-workbench_vX.Y.Z.sif \
   /opt/fmriprep-workbench/launch
 ```
 
