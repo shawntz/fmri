@@ -44,9 +44,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install FSL (minimal installation for FEAT and utilities)
-# Use NeuroDebian package which handles repository setup automatically
-RUN wget -O- http://neuro.debian.net/lists/jammy.us-ca.libre | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkps://keyserver.ubuntu.com 0xA5D32F012649A5A9 && \
+# Add NeuroDebian repository for Ubuntu 22.04 (jammy)
+RUN mkdir -p /etc/apt/keyrings && \
+    wget -qO- http://neuro.debian.net/_static/neuro.debian.net.asc | \
+    gpg --dearmor > /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian jammy main contrib non-free" > \
+    /etc/apt/sources.list.d/neurodebian.sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian data main contrib non-free" >> \
+    /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends fsl-core fsl-atlases && \
     rm -rf /var/lib/apt/lists/*
