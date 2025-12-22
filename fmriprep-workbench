@@ -82,7 +82,7 @@ wait_for_container() {
     local interval=1
 
     print_info "Waiting for container to be ready..."
-    
+
     while [ "$elapsed" -lt "$timeout" ]; do
         if is_running; then
             print_success "Container is ready"
@@ -91,7 +91,7 @@ wait_for_container() {
         sleep "$interval"
         elapsed=$((elapsed + interval))
     done
-    
+
     print_error "Timeout waiting for container to be ready"
     return 1
 }
