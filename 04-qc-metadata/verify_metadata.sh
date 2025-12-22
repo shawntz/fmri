@@ -31,7 +31,7 @@ fi
 subject="sub-${new_subid}"
 
 # logging setup
-processed_file="${SLURM_LOG_DIR}/${JOB_NAME}-processed_subjects.txt"
+processed_file="${SLURM_LOG_DIR}/04-processed_subjects.txt"
 
 echo "($(date)) [INFO] =========================================="
 echo "($(date)) [INFO] Processing subject: ${subject}"
