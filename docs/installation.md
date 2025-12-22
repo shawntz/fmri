@@ -228,8 +228,8 @@ Singularity/Apptainer is designed for HPC environments and provides better integ
 Download the `.sif` file from the latest release:
 
 ```bash
-# Replace X.Y.Z with the actual version
-wget https://github.com/shawntz/fmriprep-workbench/releases/download/v0.2.0/fmriprep-workbench_v0.2.0.sif
+# Replace X.Y.Z with the actual version (e.g., v0.2.0)
+wget https://github.com/shawntz/fmriprep-workbench/releases/download/vX.Y.Z/fmriprep-workbench_vX.Y.Z.sif
 ```
 
 #### 2. Or Convert from Docker Hub
@@ -238,10 +238,10 @@ If a pre-built Singularity image isn't available:
 
 ```bash
 # Using Singularity 3.x
-singularity build fmriprep-workbench_v0.2.0.sif docker://shawnschwartz/fmriprep-workbench:latest
+singularity build fmriprep-workbench_vX.Y.Z.sif docker://shawnschwartz/fmriprep-workbench:latest
 
 # Using Apptainer (newer Singularity)
-apptainer build fmriprep-workbench_v0.2.0.sif docker://shawnschwartz/fmriprep-workbench:latest
+apptainer build fmriprep-workbench_vX.Y.Z.sif docker://shawnschwartz/fmriprep-workbench:latest
 ```
 
 #### 3. Run the Container
@@ -252,16 +252,16 @@ singularity shell \
   --bind $(pwd):/workspace \
   --bind $HOME/.cache/templateflow:/cache/templateflow \
   --bind $HOME/.cache/fmriprep:/cache/fmriprep \
-  fmriprep-workbench_v0.2.0.sif
+  fmriprep-workbench_vX.Y.Z.sif
 
 # Execute a specific command
 singularity exec \
   --bind $(pwd):/workspace \
-  fmriprep-workbench_v0.2.0.sif \
+  fmriprep-workbench_vX.Y.Z.sif \
   /opt/fmriprep-workbench/launch
 
 # Submit as SLURM job
-sbatch --wrap="singularity exec --bind $(pwd):/workspace fmriprep-workbench_v0.2.0.sif /opt/fmriprep-workbench/01-run.sbatch"
+sbatch --wrap="singularity exec --bind $(pwd):/workspace fmriprep-workbench_vX.Y.Z.sif /opt/fmriprep-workbench/01-run.sbatch"
 ```
 
 ### Option 3: Using Docker Compose

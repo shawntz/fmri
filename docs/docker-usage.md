@@ -183,7 +183,7 @@ export SINGULARITY_BIND="${WORKDIR}:/workspace,${HOME}/.cache/templateflow:/cach
 
 # Execute pipeline step
 singularity exec \
-  fmriprep-workbench_v0.2.0.sif \
+  fmriprep-workbench_vX.Y.Z.sif \
   /opt/fmriprep-workbench/01-run.sbatch <args>
 ```
 
@@ -195,7 +195,7 @@ Pass environment variables to Singularity:
 singularity exec \
   --env CUSTOM_VAR=value \
   --bind $(pwd):/workspace \
-  fmriprep-workbench_v0.2.0.sif \
+  fmriprep-workbench_vX.Y.Z.sif \
   /opt/fmriprep-workbench/launch
 ```
 
