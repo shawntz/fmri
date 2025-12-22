@@ -82,8 +82,8 @@ cd fmriprep-workbench
 For HPC clusters with Singularity/Apptainer:
 
 ```bash
-# Download pre-built image
-wget https://github.com/shawntz/fmriprep-workbench/releases/download/v0.2.0/fmriprep-workbench_v0.2.0.sif
+# Download pre-built image (replace vX.Y.Z with the desired release tag)
+wget https://github.com/shawntz/fmriprep-workbench/releases/download/vX.Y.Z/fmriprep-workbench_vX.Y.Z.sif
 
 # Or convert from Docker Hub
 singularity build fmriprep-workbench.sif docker://shawnschwartz/fmriprep-workbench:latest
