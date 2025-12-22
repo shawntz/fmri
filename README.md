@@ -1,4 +1,4 @@
-<h1 align="center">fMRIPrep Workbench</h1><h2 align="center">(<em>aka, the Stanford Memory Lab's fMRI Preproc/Analysis Toolbox</em>)</h2>
+<h1 align="center">fMRIPrep Workbench</h1><h3 align="center">(<em>aka, the Stanford Memory Lab's fMRI Preproc/Analysis Toolbox</em>)</h3>
 
 <p align="center">
   <a href="https://github.com/shawntz/fmri/releases"><img src="https://img.shields.io/github/v/release/shawntz/fmri?label=version" alt="Release Version"></a>
