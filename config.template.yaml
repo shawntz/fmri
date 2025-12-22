@@ -155,7 +155,20 @@ fmriprep:
   output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
 
 # ============================================================================
-# (12) MISC SETTINGS
+# (12) FREESURFER MANUAL EDITING SETTINGS
+# ============================================================================
+freesurfer_editing:
+  remote_server: ''                              # Remote server hostname (e.g., login.sherlock.stanford.edu)
+  remote_user: ''                                # Remote username (e.g., SUNet ID)
+  remote_base_dir: ''                            # Remote base directory (absolute path to BASE_DIR on server)
+  local_freesurfer_dir: '~/freesurfer_edits'     # Local directory for downloading/uploading edited FreeSurfer outputs
+  subjects_list: ''                              # Default subjects list file or comma-separated subject IDs
+  download_all: false                            # Download all subjects by default
+  upload_all: false                              # Upload all subjects by default
+  backup_originals: true                         # Create backups when uploading (highly recommended)
+
+# ============================================================================
+# (13) MISC SETTINGS
 # ============================================================================
 misc:
   debug: 0  # Debug mode (0=off, 1=on)

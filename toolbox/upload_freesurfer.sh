@@ -20,14 +20,16 @@ echo -e "${BLUE}║     Freesurfer Edited Output Upload Utility                 
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Default values
-REMOTE_SERVER=""
-REMOTE_USER=""
-REMOTE_BASE_DIR=""
-LOCAL_FREESURFER_DIR="${HOME}/freesurfer_edits"
-SUBJECTS_LIST=""
-UPLOAD_ALL=false
-BACKUP_ORIGINALS=true
+# Default values from config.yaml (fall back to hardcoded if not set)
+REMOTE_SERVER="${FREESURFER_EDITING_REMOTE_SERVER:-}"
+REMOTE_USER="${FREESURFER_EDITING_REMOTE_USER:-}"
+REMOTE_BASE_DIR="${FREESURFER_EDITING_REMOTE_BASE_DIR:-}"
+# Expand tilde in local directory path
+LOCAL_FREESURFER_DIR="${FREESURFER_EDITING_LOCAL_FREESURFER_DIR:-${HOME}/freesurfer_edits}"
+LOCAL_FREESURFER_DIR="${LOCAL_FREESURFER_DIR/#\~/$HOME}"
+SUBJECTS_LIST="${FREESURFER_EDITING_SUBJECTS_LIST:-}"
+UPLOAD_ALL="${FREESURFER_EDITING_UPLOAD_ALL:-false}"
+BACKUP_ORIGINALS="${FREESURFER_EDITING_BACKUP_ORIGINALS:-true}"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
