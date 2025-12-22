@@ -177,10 +177,14 @@ except FileNotFoundError:
     print("echo 'ERROR: config.yaml not found'", file=sys.stderr)
     sys.exit(1)
 except yaml.YAMLError as e:
-    print(f"echo 'ERROR: Failed to parse config.yaml: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR: Failed to parse config.yaml: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 except Exception as e:
-    print(f"echo 'ERROR: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 EOF
 )"
@@ -219,7 +223,9 @@ try:
         # Ensure fmap_mapping is always defined as an associative array in Bash
         print("declare -gA fmap_mapping=()")
 except Exception as e:
-    print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR loading fmap_mapping: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 EOF
 )"
