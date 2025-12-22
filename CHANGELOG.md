@@ -126,7 +126,7 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 - Conventional commits support for automatic versioning
 - ReadTheDocs configuration for documentation hosting
 
-## [0.0.1] - 2024-12-17
+## [0.0.1] - 2025-12-17
 
 ### Added
 - Initial release of SML fMRI preprocessing template
