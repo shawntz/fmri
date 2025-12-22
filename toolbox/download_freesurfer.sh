@@ -20,13 +20,15 @@ echo -e "${BLUE}║     Freesurfer Output Download Utility                      
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Default values
-REMOTE_SERVER=""
-REMOTE_USER=""
-REMOTE_BASE_DIR=""
-LOCAL_DOWNLOAD_DIR="${HOME}/freesurfer_edits"
-SUBJECTS_LIST=""
-DOWNLOAD_ALL=false
+# Default values from config.yaml (fall back to hardcoded if not set)
+REMOTE_SERVER="${FREESURFER_EDITING_REMOTE_SERVER:-}"
+REMOTE_USER="${FREESURFER_EDITING_REMOTE_USER:-}"
+REMOTE_BASE_DIR="${FREESURFER_EDITING_REMOTE_BASE_DIR:-}"
+# Expand tilde in local directory path
+LOCAL_DOWNLOAD_DIR="${FREESURFER_EDITING_LOCAL_FREESURFER_DIR:-${HOME}/freesurfer_edits}"
+LOCAL_DOWNLOAD_DIR="${LOCAL_DOWNLOAD_DIR/#\~/$HOME}"
+SUBJECTS_LIST="${FREESURFER_EDITING_SUBJECTS_LIST:-}"
+DOWNLOAD_ALL="${FREESURFER_EDITING_DOWNLOAD_ALL:-false}"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do

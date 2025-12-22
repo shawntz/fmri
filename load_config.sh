@@ -77,6 +77,11 @@ def flatten_dict(d, parent_key='', sep='_', env_vars=None):
             expanded_items = [expand_var(str(item), env_vars) for item in v]
             env_vars[new_key] = ' '.join(expanded_items)
             items.append((new_key, env_vars[new_key]))
+        elif isinstance(v, bool):
+            # Convert Python boolean to lowercase bash boolean
+            expanded_value = 'true' if v else 'false'
+            env_vars[new_key] = expanded_value
+            items.append((new_key, expanded_value))
         else:
             # Expand any variables in the value
             expanded_value = expand_var(str(v), env_vars)

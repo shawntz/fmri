@@ -244,6 +244,44 @@ fmriprep:
   output_spaces: 'MNI152NLin2009cAsym:res-2 anat fsnative fsaverage5'
 ```
 
+## FreeSurfer Manual Editing Settings
+
+Configure default values for FreeSurfer manual editing workflow (Steps 7 and 8):
+
+```yaml
+freesurfer_editing:
+  remote_server: ''                              # Remote server hostname
+  remote_user: ''                                # Remote username
+  remote_base_dir: ''                            # Remote base directory path
+  local_freesurfer_dir: '~/freesurfer_edits'     # Local directory for edits
+  subjects_list: ''                              # Default subjects list
+  download_all: false                            # Download all subjects by default
+  upload_all: false                              # Upload all subjects by default
+  backup_originals: true                         # Create backups when uploading
+```
+
+**Parameter Descriptions:**
+
+- `remote_server`: Remote server hostname (e.g., `login.sherlock.stanford.edu`)
+- `remote_user`: Remote username for SSH connection (e.g., SUNet ID)
+- `remote_base_dir`: Remote base directory containing FreeSurfer outputs (absolute path to `BASE_DIR` on server)
+- `local_freesurfer_dir`: Local directory for downloading/uploading edited FreeSurfer outputs (default: `~/freesurfer_edits`)
+- `subjects_list`: Default subjects list file or comma-separated subject IDs
+- `download_all`: Download all subjects by default when using `download_freesurfer.sh`
+- `upload_all`: Upload all subjects by default when using `upload_freesurfer.sh`
+- `backup_originals`: Create timestamped backups of original FreeSurfer outputs before uploading edits (highly recommended)
+
+!!! tip "Configuration Convenience"
+    
+    Setting these values in `config.yaml` allows you to run the FreeSurfer editing scripts
+    without specifying common parameters on the command line each time. Command-line arguments
+    always override config defaults.
+
+!!! warning "Backup Safety"
+    
+    Keep `backup_originals: true` to prevent accidental data loss. Backups are created
+    as `{subject}.backup.{timestamp}` on the server before uploading edited surfaces.
+
 ## Miscellaneous Settings
 
 ```yaml
