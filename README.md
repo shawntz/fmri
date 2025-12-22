@@ -4,6 +4,7 @@
   <a href="https://github.com/shawntz/fmri/releases"><img src="https://img.shields.io/github/v/release/shawntz/fmri?label=version" alt="Release Version"></a>
   <a href="https://github.com/shawntz/fmri/blob/main/LICENSE"><img src="https://img.shields.io/github/license/shawntz/fmri" alt="License"></a>
   <a href="https://github.com/shawntz/fmri/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-available-blue" alt="Changelog"></a>
+  <a href="https://hub.docker.com/r/shawnschwartz/fmriprep-workbench"><img src="https://img.shields.io/docker/pulls/shawnschwartz/fmriprep-workbench" alt="Docker Pulls"></a>
 </p>
 
 ```
