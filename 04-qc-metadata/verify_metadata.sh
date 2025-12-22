@@ -30,6 +30,9 @@ fi
 
 subject="sub-${new_subid}"
 
+# logging setup
+processed_file="${SLURM_LOG_DIR}/${JOB_NAME}-processed_subjects.txt"
+
 echo "($(date)) [INFO] =========================================="
 echo "($(date)) [INFO] Processing subject: ${subject}"
 echo "($(date)) [INFO] =========================================="
@@ -48,7 +51,7 @@ python3 "${SCRIPTS_DIR}/toolbox/verify_nii_metadata.py" \
 
 if [ $? -eq 0 ]; then
   echo "($(date)) [SUCCESS] Metadata verification completed for ${subject}"
-  echo "${new_subid}" >> ${JOB_NAME}-processed_subjects.txt
+  echo "${new_subid}" >> "${processed_file}"
 else
   echo "($(date)) [ERROR] Metadata verification failed for ${subject}"
   exit 1
