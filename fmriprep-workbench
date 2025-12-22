@@ -76,9 +76,9 @@ container_exists() {
 # Returns 0 if container becomes ready within timeout, 1 otherwise
 wait_for_container() {
     local timeout=${1:-30}  # Default 30 seconds timeout
-    # Calculate attempts based on POLL_INTERVAL (0.5s means 2 checks per second)
-    # Note: If POLL_INTERVAL changes, update this calculation accordingly
-    local attempts=$((timeout * 2))
+    # Calculate attempts based on POLL_INTERVAL so total wait approximates timeout
+    local attempts
+    attempts=$(awk -v t="$timeout" -v i="$POLL_INTERVAL" 'BEGIN { if (i > 0) { print int(t / i) } else { print 1 } }')
     [ "$attempts" -lt 1 ] && attempts=1
     local count=0
     
