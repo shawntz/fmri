@@ -96,14 +96,13 @@ jobs:
 
       - name: Upload Singularity image as release asset
         if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./fmriprep-workbench_${{ github.event.release.tag_name }}.sif
-          asset_name: fmriprep-workbench_${{ github.event.release.tag_name }}.sif
-          asset_content_type: application/octet-stream
+        run: |
+          set -e
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "fmriprep-workbench_${{ github.event.release.tag_name }}.sif" \
+            --clobber
 
       - name: Create container summary
         run: |
