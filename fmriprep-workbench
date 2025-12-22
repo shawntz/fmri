@@ -69,6 +69,32 @@ container_exists() {
     docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -Fxq "${CONTAINER_NAME}"
 }
 
+# Wait for container to be ready
+# Returns 0 if container becomes ready within timeout, 1 otherwise
+wait_for_container() {
+    local timeout=${1:-30}  # Default 30 seconds timeout
+    local attempts=$((timeout * 2))  # Check twice per second
+    local count=0
+    
+    print_info "Waiting for container to be ready..."
+    
+    while [ $count -lt $attempts ]; do
+        if is_running; then
+            # Container is running, verify it's responsive
+            if docker exec "${CONTAINER_NAME}" echo "ready" &>/dev/null; then
+                print_success "Container is ready"
+                return 0
+            fi
+        fi
+        
+        sleep 0.5
+        count=$((count + 1))
+    done
+    
+    print_error "Container did not become ready within ${timeout} seconds"
+    return 1
+}
+
 # Get the current directory for mounting
 get_workdir() {
     pwd
@@ -139,7 +165,10 @@ launch_tui() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
-        sleep 2
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
     fi
 
     print_info "Launching fMRIPrep Workbench TUI..."
@@ -151,7 +180,10 @@ open_shell() {
     if ! is_running; then
         print_warning "Container is not running. Starting it first..."
         start_container
-        sleep 2
+        if ! wait_for_container; then
+            print_error "Failed to start container in time"
+            exit 1
+        fi
     fi
 
     print_info "Opening bash shell in container..."
