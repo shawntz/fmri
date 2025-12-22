@@ -152,7 +152,7 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 - Slurm workload manager integration
 - Configurable preprocessing pipelines
 
-[Unreleased]: https://github.com/shawntz/fmriprep-workbench/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/shawntz/fmriprep-workbench/compare/v0.2.0...HEAD
 
 [0.0.1]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.0.1
 
