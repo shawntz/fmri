@@ -44,108 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `toolbox/summarize_bold_scan_volume_counts.sh` → `05-run.sbatch` (calls `05-qc-volumes/check_volumes.sh`)
 - **SLURM Job Names**: Job names changed from step-based (e.g., `03-prep-fmriprep`) to numbered (e.g., `fmriprep-workbench-3`)
 
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.7...v0.2.0
-
-## [0.1.7] - 2025-12-18
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.6...v0.1.7
-
-
-## [0.1.6] - 2025-12-18
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.5...v0.1.6
-
-
-## [0.1.5] - 2025-12-18
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.4...v0.1.5
-
-
-## [0.1.4] - 2025-12-18
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.3...v0.1.4
-
-
-## [0.1.3] - 2025-12-18
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.2...v0.1.3
-
-
-## [0.1.2] - 2025-12-17
-
-
-### 🚀 Features
-
-### 🐛 Bug Fixes
-
-### 📚 Documentation
-
-### 🔧 Maintenance
-
-### 💥 Breaking Changes
-- No breaking changes
-
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.1...v0.1.2
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.1.1...v0.2.0
 
 
 ## [0.1.1] - 2025-12-17
@@ -219,7 +118,7 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 ### 💥 Breaking Changes
 - No breaking changes
 
-**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.0.0...v0.1.0
+**Full Changelog**: https://github.com/shawntz/fmriprep-workbench/compare/v0.0.1...v0.1.0
 
 
 ### Added
@@ -227,7 +126,7 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 - Conventional commits support for automatic versioning
 - ReadTheDocs configuration for documentation hosting
 
-## [1.0.0] - 2024-12-17
+## [0.0.1] - 2024-12-17
 
 ### Added
 - Initial release of SML fMRI preprocessing template
@@ -253,23 +152,12 @@ Fix: Add parameter configs for diagnostic toolbox options 9 and 10
 - Slurm workload manager integration
 - Configurable preprocessing pipelines
 
-[Unreleased]: https://github.com/shawntz/fmri/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/shawntz/fmri/releases/tag/v1.0.0
+[Unreleased]: https://github.com/shawntz/fmri/compare/v0.3.0...HEAD
+
+[0.0.1]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.0.1
 
 [0.1.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.0
 
 [0.1.1]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.1
-
-[0.1.2]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.2
-
-[0.1.3]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.3
-
-[0.1.4]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.4
-
-[0.1.5]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.5
-
-[0.1.6]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.6
-
-[0.1.7]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.1.7
 
 [0.2.0]: https://github.com/shawntz/fmriprep-workbench/releases/tag/v0.2.0
