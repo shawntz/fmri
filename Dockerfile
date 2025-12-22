@@ -43,24 +43,11 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install FSL (minimal installation for FEAT and utilities)
-# Add NeuroDebian repository for Ubuntu 22.04 (jammy)
-RUN mkdir -p /etc/apt/keyrings && \
-    wget -qO- http://neuro.debian.net/_static/neuro.debian.net.asc | \
-    gpg --dearmor > /etc/apt/keyrings/neurodebian-archive-keyring.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian jammy main contrib non-free" > \
-    /etc/apt/sources.list.d/neurodebian.sources.list && \
-    echo "deb [signed-by=/etc/apt/keyrings/neurodebian-archive-keyring.gpg] http://neuro.debian.net/debian data main contrib non-free" >> \
-    /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends fsl-core fsl-atlases && \
-    rm -rf /var/lib/apt/lists/*
-
-# Configure FSL environment
-ENV FSLDIR=/usr/share/fsl/5.0 \
-    FSLOUTPUTTYPE=NIFTI_GZ \
-    PATH=/usr/share/fsl/5.0/bin:$PATH \
-    LD_LIBRARY_PATH=/usr/share/fsl/5.0/lib:$LD_LIBRARY_PATH
+# Note: FSL is not included in this container image.
+# The fMRIPrep Workbench orchestrates pipelines that run on HPC systems
+# where FSL and other neuroimaging tools should already be available.
+# For local QC scripts that use fslnvols, mount FSL from your host system
+# or install FSL separately on your execution environment.
 
 # Install Python packages
 RUN pip3 install --no-cache-dir \
