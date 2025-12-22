@@ -1,6 +1,6 @@
 # Contributing
 
-{!CONTRIBUTING.md!}
+{!../CONTRIBUTING.md!}
 
 ## Commit Message Guidelines
 
