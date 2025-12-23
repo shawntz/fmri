@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 
 # Source configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../load_config.sh"
+SKIP_SUBJECTS_PROMPT=true source "${SCRIPT_DIR}/../load_config.sh"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     Freesurfer Edited Output Upload Utility                   ║${NC}"
@@ -127,11 +127,13 @@ fi
 
 # Construct remote Freesurfer directory path
 REMOTE_FREESURFER_DIR="${REMOTE_BASE_DIR}/freesurfer"
+# Escape path for safe use in remote shell
+ESCAPED_REMOTE_FREESURFER_DIR=$(printf '%q' "$REMOTE_FREESURFER_DIR")
 
 # Check if remote directory exists
 echo ""
 echo -e "${BLUE}Checking remote Freesurfer directory...${NC}"
-if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" 'test -d "$1"' _ "$REMOTE_FREESURFER_DIR"; then
+if ! ssh "${REMOTE_USER}@${REMOTE_SERVER}" "[ -d '${ESCAPED_REMOTE_FREESURFER_DIR}' ]"; then
     echo -e "${RED}Error: Remote Freesurfer directory does not exist: ${REMOTE_FREESURFER_DIR}${NC}"
     exit 1
 fi

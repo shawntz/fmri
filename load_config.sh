@@ -25,7 +25,8 @@ if [ ! -f "${_YAML_CONFIG_FILE}" ]; then
 fi
 
 # Parse YAML and export environment variables using Python
-eval "$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
+# Store output in variable first (bash 3.2 compatible)
+_config_exports=$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
 import yaml
 import sys
 import os
@@ -177,20 +178,29 @@ except FileNotFoundError:
     print("echo 'ERROR: config.yaml not found'", file=sys.stderr)
     sys.exit(1)
 except yaml.YAMLError as e:
-    print(f"echo 'ERROR: Failed to parse config.yaml: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR: Failed to parse config.yaml: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 except Exception as e:
-    print(f"echo 'ERROR: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 EOF
-)"
+)
+
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to load configuration from ${_YAML_CONFIG_FILE}"
     return 1 2>/dev/null || exit 1
 fi
 
+# Evaluate the export statements
+eval "$_config_exports"
+
 # Parse fmap_mapping from YAML into bash associative array
-eval "$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
+# Store output in variable first (bash 3.2 compatible)
+_fmap_exports=$(_YAML_CONFIG_FILE="${_YAML_CONFIG_FILE}" python3 - <<'EOF'
 import yaml
 import os
 import sys
@@ -198,7 +208,7 @@ import sys
 def bash_single_quote(s: str) -> str:
     """
     Return a shell-safe single-quoted literal for string s.
-    Example: abc'def -> 'abc'"'"'def'
+    Example: abcQdef becomes quoted with Q escaped
     """
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
@@ -209,24 +219,34 @@ try:
 
     fmap_cfg = config.get('fmap_mapping')
     if isinstance(fmap_cfg, dict) and fmap_cfg:
-        print("declare -gA fmap_mapping=(")
+        # Generate a bash 3.2 compatible function instead of associative array
+        print("fmap_mapping() {")
+        print("    case \"$1\" in")
         for key, value in fmap_cfg.items():
             key_str = "" if key is None else str(key)
             val_str = "" if value is None else str(value)
-            print(f"    [{bash_single_quote(key_str)}]={bash_single_quote(val_str)}")
-        print(")")
+            print(f"        {bash_single_quote(key_str)}) echo {bash_single_quote(val_str)} ;;")
+        print("        *) echo \"\" ;;")
+        print("    esac")
+        print("}")
     else:
-        # Ensure fmap_mapping is always defined as an associative array in Bash
-        print("declare -gA fmap_mapping=()")
+        # Define empty function if no fmap_mapping
+        print("fmap_mapping() { echo \"\"; }")
 except Exception as e:
-    print(f"echo 'ERROR loading fmap_mapping: {e}'", file=sys.stderr)
+    # Escape single quotes for bash
+    error_msg = str(e).replace("'", "'\\''")
+    print(f"echo 'ERROR loading fmap_mapping: {error_msg}'", file=sys.stderr)
     sys.exit(1)
 EOF
-)"
+)
+
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to load fmap_mapping from ${_YAML_CONFIG_FILE}"
     return 1 2>/dev/null || exit 1
 fi
+
+# Evaluate the fmap_mapping declaration
+eval "$_fmap_exports"
 
 # Convert run_numbers from space-separated string to bash array
 if [ -n "${run_numbers}" ]; then

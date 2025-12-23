@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 
 # Source configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../load_config.sh"
+SKIP_SUBJECTS_PROMPT=true source "${SCRIPT_DIR}/../load_config.sh"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     Freesurfer Output Download Utility                        ║${NC}"
