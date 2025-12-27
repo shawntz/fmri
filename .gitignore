@@ -9,3 +9,4 @@ __pycache__/
 site/
 .cache/
 docs/github-secrets-setup.md
+*.bak
